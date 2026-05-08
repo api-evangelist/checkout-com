@@ -1,0 +1,29 @@
+aid: checkout-com
+url: https://raw.githubusercontent.com/api-evangelist/checkout-com/refs/heads/main/apis.yml
+name: Checkout.com
+x-type: company
+description: >-
+  Checkout.com is a global payment processor offering card acquiring, alternative payments, fraud, and connected accounts via a single API. Direct integrations with Visa, Mastercard, and APMs.
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+tags:
+  - Fintech
+  - Payments
+  - Cards
+  - Acquiring
+  - Cross-Border
+created: '2026-05-08'
+modified: '2026-05-08'
+specificationVersion: '0.19'
+apis: []
+common:
+  - type: Website
+    url: https://www.checkout.com/
+  - type: Plans
+    url: plans/checkout-com-plans-pricing.yml
+  - type: RateLimits
+    url: rate-limits/checkout-com-rate-limits.yml
+  - type: FinOps
+    url: finops/checkout-com-finops.yml
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com
