@@ -2,28 +2,150 @@ aid: checkout-com
 url: https://raw.githubusercontent.com/api-evangelist/checkout-com/refs/heads/main/apis.yml
 name: Checkout.com
 x-type: company
-description: >-
-  Checkout.com is a global payment processor offering card acquiring, alternative payments, fraud, and connected accounts via a single API. Direct integrations with Visa, Mastercard, and APMs.
+description: Checkout.com is a global payment processor offering card acquiring, alternative payments, fraud, and connected
+  accounts via a single API. Direct integrations with Visa, Mastercard, and APMs.
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 tags:
-  - Fintech
-  - Payments
-  - Cards
-  - Acquiring
-  - Cross-Border
+- Fintech
+- Payments
+- Cards
+- Acquiring
+- Cross-Border
 created: '2026-05-08'
 modified: '2026-05-08'
 specificationVersion: '0.19'
-apis: []
+apis:
+- name: Checkout.com Payments API
+  description: Process card and alternative payment methods with full lifecycle support including authorization, capture,
+    void, refund.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payments
+  - Cards
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Payouts API
+  description: Send payouts to cards, bank accounts and wallets.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payouts
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Payment Sessions & Flow API
+  description: Hosted Flow component and payment sessions for SCA-ready payment workflows.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Sessions
+  - Flow
+  - SCA
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Payment Links & Hosted Payments API
+  description: Generate shareable payment links and hosted payment pages.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payment Links
+  - Hosted
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Issuing API
+  description: Issue physical and virtual cards with spending controls.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Issuing
+  - Cards
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Tokenization & Instruments API
+  description: Tokenize and store payment credentials as instruments.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Tokenization
+  - Vault
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Disputes & Risk API
+  description: Manage chargebacks, disputes, AML screening and identity verification.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Disputes
+  - Fraud
+  - Risk
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Forex API
+  description: Foreign exchange rate services for multi-currency processing.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - FX
+  - Forex
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Apple Pay & Google Pay API
+  description: Provision and process payments through Apple Pay and Google Pay.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Wallets
+  - Apple Pay
+  - Google Pay
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Network Tokens API
+  description: Provision and manage network tokens for higher authorization rates.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Network Tokens
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Transfers & Balances API
+  description: Move funds between balances and entities on the platform.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Transfers
+  - Balances
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
+- name: Checkout.com Reporting & Financial Actions API
+  description: Transaction reporting, reconciliation, and financial action exports.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Reporting
+  - Reconciliation
+  properties:
+  - type: Documentation
+    url: https://api-reference.checkout.com/
 common:
-  - type: Website
-    url: https://www.checkout.com/
-  - type: Plans
-    url: plans/checkout-com-plans-pricing.yml
-  - type: RateLimits
-    url: rate-limits/checkout-com-rate-limits.yml
-  - type: FinOps
-    url: finops/checkout-com-finops.yml
+- type: Website
+  url: https://www.checkout.com/
+- type: Plans
+  url: plans/checkout-com-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/checkout-com-rate-limits.yml
+- type: FinOps
+  url: finops/checkout-com-finops.yml
 maintainers:
-  - FN: Kin Lane
-    email: kin@apievangelist.com
+- FN: Kin Lane
+  email: kin@apievangelist.com
