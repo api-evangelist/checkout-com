@@ -146,6 +146,10 @@ common:
   url: rate-limits/checkout-com-rate-limits.yml
 - type: FinOps
   url: finops/checkout-com-finops.yml
+- type: Integrations
+  url: https://www.checkout.com/partners
+integrations:
+  - name: Become a partner
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
