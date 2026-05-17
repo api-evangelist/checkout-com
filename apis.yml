@@ -1,7 +1,7 @@
 aid: checkout-com
 url: https://raw.githubusercontent.com/api-evangelist/checkout-com/refs/heads/main/apis.yml
 name: Checkout.com
-x-type: company
+kind: company
 description: Checkout.com is a global payment processor offering card acquiring, alternative payments, fraud, and connected
   accounts via a single API. Direct integrations with Visa, Mastercard, and APMs.
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
