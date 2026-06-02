@@ -1,0 +1,222 @@
+openapi: 3.1.0
+info:
+  title: Checkout.com API
+  description: |-
+    Checkout.com is a global payment processor offering card acquiring, alternative
+    payments, payouts, tokenization, customers, instruments, and notification workflows
+    via a single API. This OpenAPI is a best-effort partial spec derived from the public
+    API reference at https://api-reference.checkout.com/.
+  version: "2026-05-23"
+  contact:
+    name: Checkout.com Developer Support
+    url: https://api-reference.checkout.com/
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.checkout.com
+    description: Production
+  - url: https://api.sandbox.checkout.com
+    description: Sandbox
+security:
+  - BearerAuth: []
+tags:
+  - name: Payments
+  - name: Tokens
+  - name: Customers
+  - name: Instruments
+  - name: Workflows
+paths:
+  /payments:
+    post:
+      tags: [Payments]
+      summary: Request a payment or payout
+      operationId: requestPayment
+      responses:
+        "201":
+          description: Payment created
+    get:
+      tags: [Payments]
+      summary: Retrieve list of payments
+      operationId: listPayments
+      responses:
+        "200":
+          description: A list of payments
+  /payments/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PaymentId'
+    get:
+      tags: [Payments]
+      summary: Get payment details
+      operationId: getPayment
+      responses:
+        "200":
+          description: Payment details
+  /payments/{id}/captures:
+    parameters:
+      - $ref: '#/components/parameters/PaymentId'
+    post:
+      tags: [Payments]
+      summary: Capture a payment
+      operationId: capturePayment
+      responses:
+        "202":
+          description: Capture accepted
+  /payments/{id}/refunds:
+    parameters:
+      - $ref: '#/components/parameters/PaymentId'
+    post:
+      tags: [Payments]
+      summary: Refund a payment
+      operationId: refundPayment
+      responses:
+        "202":
+          description: Refund accepted
+  /payments/{id}/voids:
+    parameters:
+      - $ref: '#/components/parameters/PaymentId'
+    post:
+      tags: [Payments]
+      summary: Void a payment
+      operationId: voidPayment
+      responses:
+        "202":
+          description: Void accepted
+  /tokens:
+    post:
+      tags: [Tokens]
+      summary: Request a token
+      operationId: requestToken
+      responses:
+        "201":
+          description: Token created
+  /tokens/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Tokens]
+      summary: Get token metadata
+      operationId: getToken
+      responses:
+        "200":
+          description: Token metadata
+  /customers:
+    post:
+      tags: [Customers]
+      summary: Create a customer
+      operationId: createCustomer
+      responses:
+        "201":
+          description: Customer created
+  /customers/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Customers]
+      summary: Retrieve customer details
+      operationId: getCustomer
+      responses:
+        "200":
+          description: Customer details
+    patch:
+      tags: [Customers]
+      summary: Update a customer
+      operationId: updateCustomer
+      responses:
+        "200":
+          description: Customer updated
+  /instruments:
+    post:
+      tags: [Instruments]
+      summary: Create an instrument
+      operationId: createInstrument
+      responses:
+        "201":
+          description: Instrument created
+  /instruments/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Instruments]
+      summary: Get instrument details
+      operationId: getInstrument
+      responses:
+        "200":
+          description: Instrument details
+    patch:
+      tags: [Instruments]
+      summary: Update an instrument
+      operationId: updateInstrument
+      responses:
+        "200":
+          description: Instrument updated
+    delete:
+      tags: [Instruments]
+      summary: Delete an instrument
+      operationId: deleteInstrument
+      responses:
+        "204":
+          description: Instrument deleted
+  /workflows:
+    get:
+      tags: [Workflows]
+      summary: Retrieve all workflows
+      operationId: listWorkflows
+      responses:
+        "200":
+          description: A list of workflows
+    post:
+      tags: [Workflows]
+      summary: Add a workflow
+      operationId: addWorkflow
+      responses:
+        "201":
+          description: Workflow created
+  /workflows/{id}/actions:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags: [Workflows]
+      summary: Add a workflow action
+      operationId: addWorkflowAction
+      responses:
+        "201":
+          description: Workflow action added
+components:
+  parameters:
+    PaymentId:
+      name: id
+      in: path
+      required: true
+      description: The payment identifier (e.g. pay_xxx)
+      schema:
+        type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Secret API key as Bearer token (format `Bearer sk_...`).
+    OAuth2:
+      type: oauth2
+      description: OAuth 2.0 client credentials flow
+      flows:
+        clientCredentials:
+          tokenUrl: https://access.checkout.com/connect/token
+          scopes:
+            gateway: Access to gateway resources
+            vault: Access to vault resources
