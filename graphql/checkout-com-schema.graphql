@@ -1,0 +1,1243 @@
+"""
+Checkout.com GraphQL Schema
+Derived from the Checkout.com REST API covering payments, payouts, sessions,
+instruments, disputes, tokenization, issuing, forex, and reporting.
+"""
+
+# ─── Scalars ──────────────────────────────────────────────────────────────────
+
+scalar DateTime
+scalar JSON
+scalar Long
+
+# ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CARD_VERIFIED
+  VOIDED
+  PARTIALLY_CAPTURED
+  CAPTURED
+  PARTIALLY_REFUNDED
+  REFUNDED
+  DECLINED
+  CANCELED
+  EXPIRED
+  PAID
+}
+
+enum PaymentAction {
+  AUTHORIZATION
+  CAPTURE
+  REFUND
+  VOID
+  PAYOUT
+  CARD_VERIFICATION
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  AUD
+  CAD
+  CHF
+  HKD
+  JPY
+  SGD
+  AED
+  INR
+  BRL
+  MXN
+  NOK
+  SEK
+  DKK
+  PLN
+  CZK
+  HUF
+  NZD
+}
+
+enum PaymentMethodType {
+  CARD
+  TOKEN
+  NETWORK_TOKEN
+  APPLE_PAY
+  GOOGLE_PAY
+  KLARNA
+  SOFORT
+  SEPA
+  IDEAL
+  PAYPAL
+  ALIPAY
+  WECHAT_PAY
+  GIROPAY
+  BOLETO
+  OXXO
+  BANK_TRANSFER
+}
+
+enum CardScheme {
+  VISA
+  MASTERCARD
+  AMEX
+  DISCOVER
+  DINERS
+  JCB
+  UNIONPAY
+  MAESTRO
+}
+
+enum CardType {
+  CREDIT
+  DEBIT
+  PREPAID
+  CHARGE
+}
+
+enum ThreeDsVersion {
+  V1
+  V2
+}
+
+enum ThreeDsAuthResult {
+  Y
+  N
+  A
+  D
+  U
+  R
+  C
+  I
+}
+
+enum DisputeStatus {
+  EVIDENCE_REQUIRED
+  EVIDENCE_UNDER_REVIEW
+  RESOLVED
+  WON
+  LOST
+  CANCELED
+  EXPIRED
+  ACCEPTED
+}
+
+enum DisputeCategory {
+  FRAUDULENT
+  NOT_RECOGNIZED
+  CANCELED_RECURRING
+  PRODUCT_SERVICE_NOT_RECEIVED
+  NOT_AS_DESCRIBED
+  CREDIT_NOT_PROCESSED
+  GENERAL
+}
+
+enum InstrumentType {
+  CARD
+  BANK_ACCOUNT
+  SEPA
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  DECLINED
+  RETURNED
+}
+
+enum EventType {
+  PAYMENT_APPROVED
+  PAYMENT_PENDING
+  PAYMENT_DECLINED
+  PAYMENT_EXPIRED
+  PAYMENT_CANCELED
+  PAYMENT_VOIDED
+  PAYMENT_CAPTURE_PENDING
+  PAYMENT_CAPTURED
+  PAYMENT_REFUND_PENDING
+  PAYMENT_REFUNDED
+  PAYMENT_CHARGEBACK
+  DISPUTE_EVIDENCE_REQUIRED
+  DISPUTE_RESOLVED
+  PAYOUT_PAID
+  PAYOUT_DECLINED
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+}
+
+enum IssuingCardStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum IssuingCardType {
+  PHYSICAL
+  VIRTUAL
+}
+
+enum ReportFormat {
+  CSV
+  JSON
+}
+
+enum TokenType {
+  APPLEPAY
+  GOOGLEPAY
+  CARD
+  NETWORK_TOKEN
+}
+
+enum VerificationStatus {
+  APPROVED
+  DECLINED
+  PENDING
+}
+
+enum WebhookStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProcessingChannel {
+  NAS
+  ABC
+}
+
+# ─── Object Types ─────────────────────────────────────────────────────────────
+
+type Money {
+  amount: Long!
+  currency: Currency!
+}
+
+type Address {
+  addressLine1: String
+  addressLine2: String
+  city: String
+  state: String
+  zip: String
+  country: String!
+}
+
+type Phone {
+  countryCode: String
+  number: String
+}
+
+type Customer {
+  id: ID
+  email: String
+  name: String
+  phone: Phone
+  defaultId: String
+  instruments: [Instrument]
+  metadata: JSON
+}
+
+type CardSource {
+  type: String!
+  id: ID
+  billingAddress: Address
+  phone: Phone
+  expiryMonth: Int
+  expiryYear: Int
+  name: String
+  scheme: CardScheme
+  last4: String
+  fingerprint: String
+  bin: String
+  cardType: CardType
+  cardCategory: String
+  issuer: String
+  issuerCountry: String
+  productId: String
+  productType: String
+  avsCheck: String
+  cvvCheck: String
+  payouts: Boolean
+  fastFunds: String
+}
+
+type ThreeDsInfo {
+  downgraded: Boolean
+  enrolled: String
+  signatureValid: String
+  authenticationResponse: ThreeDsAuthResult
+  cryptogram: String
+  xid: String
+  version: ThreeDsVersion
+  exemption: String
+  challenged: Boolean
+  authenticationStatus: String
+  authenticationStatusReason: String
+  eci: String
+}
+
+type Risk {
+  flagged: Boolean
+  score: Float
+  recommendation: String
+}
+
+type PaymentProcessingInfo {
+  retrievalReferenceNumber: String
+  acquirerTransactionId: String
+  acquirerReferenceNumber: String
+  partnerId: String
+  processingChannel: String
+  pfac: Boolean
+  mid: String
+  aft: Boolean
+}
+
+type PaymentLink {
+  self: String
+  actions: String
+  capture: String
+  refund: String
+  void: String
+}
+
+type Payment {
+  id: ID!
+  requestedOn: DateTime
+  source: CardSource
+  amount: Long
+  currency: Currency
+  paymentType: String
+  reference: String
+  description: String
+  approved: Boolean
+  status: PaymentStatus
+  threeDs: ThreeDsInfo
+  risk: Risk
+  customer: Customer
+  billingDescriptor: BillingDescriptor
+  shipping: Shipping
+  paymentIp: String
+  metadata: JSON
+  eci: String
+  schemeId: String
+  actions: [PaymentAction]
+  processing: PaymentProcessingInfo
+  links: PaymentLink
+  expiresOn: DateTime
+  items: [LineItem]
+}
+
+type PaymentAction {
+  id: ID!
+  type: String
+  processedOn: DateTime
+  amount: Long
+  approved: Boolean
+  authCode: String
+  responseCode: String
+  responseSummary: String
+  reference: String
+  processingChannelId: String
+  links: JSON
+}
+
+type BillingDescriptor {
+  name: String
+  city: String
+  reference: String
+}
+
+type Shipping {
+  address: Address
+  phone: Phone
+}
+
+type LineItem {
+  name: String
+  quantity: Int
+  unitPrice: Long
+  taxAmount: Long
+  discountAmount: Long
+  totalAmount: Long
+  reference: String
+  commodityCode: String
+  unitOfMeasure: String
+  productUrl: String
+  imageUrl: String
+}
+
+type Payout {
+  id: ID!
+  requestedOn: DateTime
+  source: JSON
+  destination: PayoutDestination
+  amount: Long
+  currency: Currency
+  reference: String
+  status: PayoutStatus
+  customer: Customer
+  processing: PaymentProcessingInfo
+  links: JSON
+}
+
+type PayoutDestination {
+  type: String
+  id: ID
+  last4: String
+  fingerprint: String
+  scheme: CardScheme
+  cardType: CardType
+  issuer: String
+  issuerCountry: String
+  accountNumber: String
+  bankCode: String
+}
+
+type Instrument {
+  id: ID!
+  type: InstrumentType!
+  fingerprint: String
+  expiryMonth: Int
+  expiryYear: Int
+  scheme: CardScheme
+  last4: String
+  bin: String
+  cardType: CardType
+  cardCategory: String
+  issuer: String
+  issuerCountry: String
+  productId: String
+  productType: String
+  accountHolder: AccountHolder
+  customer: Customer
+  metadata: JSON
+}
+
+type AccountHolder {
+  type: String
+  firstName: String
+  lastName: String
+  company: String
+  taxId: String
+  dateOfBirth: String
+  countryOfBirth: String
+  residentialStatus: String
+  billingAddress: Address
+  phone: Phone
+  email: String
+  identifications: [Identification]
+}
+
+type Identification {
+  type: String
+  number: String
+  issuingCountry: String
+  dateOfExpiry: String
+}
+
+type Token {
+  type: TokenType!
+  token: String!
+  expiresOn: DateTime
+  expiryMonth: Int
+  expiryYear: Int
+  scheme: CardScheme
+  last4: String
+  bin: String
+  cardType: CardType
+  cardCategory: String
+  issuer: String
+  issuerCountry: String
+  productId: String
+  productType: String
+  billingAddress: Address
+  phone: Phone
+  name: String
+}
+
+type Dispute {
+  id: ID!
+  category: DisputeCategory
+  status: DisputeStatus
+  amount: Long
+  currency: Currency
+  reasonCode: String
+  reasonDescription: String
+  resolvedReason: String
+  payment: DisputePayment
+  relevantEvidence: [String]
+  evidenceRequiredBy: DateTime
+  receivedOn: DateTime
+  lastUpdate: DateTime
+  links: JSON
+}
+
+type DisputePayment {
+  id: ID!
+  amount: Long
+  currency: Currency
+  method: String
+  arn: String
+  processedOn: DateTime
+}
+
+type DisputeEvidence {
+  proofOfDeliveryOrService: String
+  invoiceOrReceipt: String
+  invoiceShowingDistinctTransactions: String
+  customerCommunication: String
+  refundOrCancellationPolicy: String
+  recurringTransactionAgreement: String
+  additionalEvidence: String
+  proofOfDeliveryOrServiceDate: String
+  proofOfDeliveryOrServiceFile: String
+  invoiceOrReceiptFile: String
+  customerCommunicationFile: String
+  refundOrCancellationPolicyFile: String
+  recurringTransactionAgreementFile: String
+  additionalEvidenceFile: String
+}
+
+type PaymentSession {
+  id: ID!
+  paymentSessionToken: String
+  paymentSessionSecret: String
+  status: SessionStatus
+  amount: Long
+  currency: Currency
+  reference: String
+  customer: Customer
+  billing: Address
+  shipping: Shipping
+  expiresOn: DateTime
+  links: JSON
+}
+
+type PaymentLink {
+  id: ID!
+  status: String
+  paymentLink: String
+  expiresOn: DateTime
+  returnUrl: String
+  amount: Long
+  currency: Currency
+  reference: String
+  customer: Customer
+  billing: BillingDescriptor
+  metadata: JSON
+  links: JSON
+}
+
+type IssuingCard {
+  id: ID!
+  displayName: String
+  type: IssuingCardType
+  status: IssuingCardStatus
+  reference: String
+  cardholderId: ID
+  lifetime: CardLifetime
+  isSingleUse: Boolean
+  hasInactiveState: Boolean
+  metadata: JSON
+  createdDate: DateTime
+  lastModifiedDate: DateTime
+}
+
+type CardLifetime {
+  unit: String
+  value: Int
+}
+
+type Cardholder {
+  id: ID!
+  type: String
+  firstName: String
+  lastName: String
+  email: String
+  phone: Phone
+  dateOfBirth: String
+  billingAddress: Address
+  residencyAddress: Address
+  reference: String
+  entityId: String
+  createdDate: DateTime
+  lastModifiedDate: DateTime
+}
+
+type NetworkToken {
+  id: ID!
+  type: String
+  token: String
+  expiryMonth: Int
+  expiryYear: Int
+  status: String
+  scheme: CardScheme
+  last4: String
+  bin: String
+  createdDate: DateTime
+}
+
+type ForexRate {
+  sourceCurrency: Currency!
+  destinationCurrency: Currency!
+  exchangeRate: Float!
+  fxTransactionAmount: Long
+  fxTransactionCurrency: Currency
+  markup: Float
+  expires: DateTime
+}
+
+type Transfer {
+  id: ID!
+  reference: String
+  type: String
+  status: String
+  amount: Long
+  currency: Currency
+  source: TransferParty
+  destination: TransferParty
+  createdOn: DateTime
+}
+
+type TransferParty {
+  entityId: String
+  amount: Long
+  balanceId: String
+}
+
+type Balance {
+  entityId: String
+  currency: Currency
+  holding: Long
+  payable: Long
+  pending: Long
+}
+
+type Webhook {
+  id: ID!
+  url: String!
+  status: WebhookStatus
+  contentType: String
+  headers: JSON
+  eventTypes: [String]
+  createdOn: DateTime
+}
+
+type WebhookEvent {
+  id: ID!
+  type: EventType
+  timestamp: DateTime
+  version: String
+  data: JSON
+}
+
+type Report {
+  id: ID!
+  createdOn: DateTime
+  from: DateTime
+  to: DateTime
+  format: ReportFormat
+  type: String
+  downloadUrl: String
+  headers: JSON
+  count: Int
+}
+
+type FinancialAction {
+  paymentId: ID
+  paymentActionId: ID
+  type: String
+  currency: Currency
+  paymentCurrency: Currency
+  entityCountry: String
+  region: String
+  midName: String
+  mid: String
+  actionDate: DateTime
+  paymentMethod: String
+  cardType: CardType
+  cardCategory: String
+  issuerCountry: String
+  merchantCategoryCode: String
+  processingChannelId: String
+  amount: Long
+  paymentFee: Long
+  schemeSettlementRate: Float
+  schemeFxFixedFee: Long
+  schemeFxPercentageFee: Float
+  grossAmount: Long
+  fxRate: Float
+  holdingCurrencyAmount: Long
+  holdingCurrency: Currency
+}
+
+type PaginatedPayments {
+  totalCount: Int
+  limit: Int
+  skip: Int
+  items: [Payment]
+}
+
+type PaginatedDisputes {
+  totalCount: Int
+  limit: Int
+  skip: Int
+  data: [Dispute]
+}
+
+type PaginatedPayouts {
+  totalCount: Int
+  limit: Int
+  skip: Int
+  items: [Payout]
+}
+
+type PaginatedInstruments {
+  totalCount: Int
+  limit: Int
+  skip: Int
+  data: [Instrument]
+}
+
+type PaginatedWebhooks {
+  totalCount: Int
+  data: [Webhook]
+}
+
+type VoidResponse {
+  actionId: ID
+  reference: String
+  links: JSON
+}
+
+type RefundResponse {
+  actionId: ID
+  reference: String
+  links: JSON
+}
+
+type CaptureResponse {
+  actionId: ID
+  reference: String
+  links: JSON
+}
+
+# ─── Input Types ──────────────────────────────────────────────────────────────
+
+input AddressInput {
+  addressLine1: String
+  addressLine2: String
+  city: String
+  state: String
+  zip: String
+  country: String!
+}
+
+input PhoneInput {
+  countryCode: String
+  number: String
+}
+
+input CustomerInput {
+  id: ID
+  email: String
+  name: String
+  phone: PhoneInput
+  metadata: JSON
+}
+
+input CardSourceInput {
+  type: String!
+  number: String
+  expiryMonth: Int
+  expiryYear: Int
+  cvv: String
+  name: String
+  billingAddress: AddressInput
+  phone: PhoneInput
+  stored: Boolean
+}
+
+input TokenSourceInput {
+  type: String!
+  token: String!
+  billingAddress: AddressInput
+  phone: PhoneInput
+}
+
+input NetworkTokenSourceInput {
+  type: String!
+  token: String!
+  expiryMonth: Int!
+  expiryYear: Int!
+  cryptogram: String!
+  eci: String
+  tokenType: String
+  billingAddress: AddressInput
+  phone: PhoneInput
+}
+
+input ThreeDsInput {
+  enabled: Boolean
+  attemptN3D: Boolean
+  challengeIndicator: String
+  exemption: String
+  allowUpgrade: Boolean
+}
+
+input BillingDescriptorInput {
+  name: String!
+  city: String!
+  reference: String
+}
+
+input ShippingInput {
+  address: AddressInput
+  phone: PhoneInput
+}
+
+input LineItemInput {
+  name: String
+  quantity: Int
+  unitPrice: Long
+  taxAmount: Long
+  discountAmount: Long
+  totalAmount: Long
+  reference: String
+  commodityCode: String
+  unitOfMeasure: String
+}
+
+input ProcessingInput {
+  orderId: String
+  taxAmount: Long
+  purchaseCountry: String
+  locale: String
+  aftOverride: Boolean
+  preferredScheme: String
+  processingChannelId: String
+}
+
+input CreatePaymentInput {
+  source: CardSourceInput
+  tokenSource: TokenSourceInput
+  networkTokenSource: NetworkTokenSourceInput
+  amount: Long!
+  currency: Currency!
+  paymentType: String
+  merchantInitiated: Boolean
+  reference: String
+  description: String
+  authorizationCode: String
+  capture: Boolean
+  captureOn: DateTime
+  customer: CustomerInput
+  billingDescriptor: BillingDescriptorInput
+  shipping: ShippingInput
+  threeDs: ThreeDsInput
+  previousPaymentId: ID
+  risk: RiskOptionsInput
+  successUrl: String
+  failureUrl: String
+  paymentIp: String
+  recipient: RecipientInput
+  processing: ProcessingInput
+  items: [LineItemInput]
+  metadata: JSON
+}
+
+input RiskOptionsInput {
+  enabled: Boolean
+  deviceSessionId: String
+  assessedRisk: String
+}
+
+input RecipientInput {
+  dateOfBirth: String
+  accountNumber: String
+  zip: String
+  firstName: String
+  lastName: String
+  accountType: String
+}
+
+input CapturePaymentInput {
+  amount: Long
+  captureType: String
+  reference: String
+  metadata: JSON
+  items: [LineItemInput]
+}
+
+input RefundPaymentInput {
+  amount: Long
+  reference: String
+  metadata: JSON
+  items: [LineItemInput]
+}
+
+input VoidPaymentInput {
+  reference: String
+  metadata: JSON
+}
+
+input CreatePayoutInput {
+  source: JSON
+  destination: JSON
+  amount: Long!
+  currency: Currency!
+  reference: String
+  billing: BillingDescriptorInput
+  sender: JSON
+  instruction: JSON
+  processing: ProcessingInput
+  metadata: JSON
+}
+
+input CreateInstrumentInput {
+  type: InstrumentType!
+  token: String
+  accountNumber: String
+  bankCode: String
+  accountHolder: AccountHolderInput
+  customer: CustomerInput
+  metadata: JSON
+}
+
+input AccountHolderInput {
+  type: String
+  firstName: String
+  lastName: String
+  company: String
+  taxId: String
+  dateOfBirth: String
+  billingAddress: AddressInput
+  phone: PhoneInput
+  email: String
+}
+
+input UpdateInstrumentInput {
+  expiryMonth: Int
+  expiryYear: Int
+  name: String
+  accountHolder: AccountHolderInput
+  customer: CustomerInput
+}
+
+input CreatePaymentSessionInput {
+  amount: Long!
+  currency: Currency!
+  reference: String
+  description: String
+  customer: CustomerInput
+  billing: AddressInput
+  shipping: ShippingInput
+  capture: Boolean
+  captureOnCompletion: Boolean
+  enabled3ds: Boolean
+  paymentMethodConfiguration: JSON
+  processingChannelId: String
+  returnUrl: String
+  locale: String
+  items: [LineItemInput]
+  metadata: JSON
+}
+
+input CreatePaymentLinkInput {
+  amount: Long!
+  currency: Currency!
+  reference: String
+  description: String
+  displayName: String
+  customer: CustomerInput
+  shipping: ShippingInput
+  billing: BillingDescriptorInput
+  products: [LineItemInput]
+  metadata: JSON
+  returnUrl: String
+  locale: String
+  paymentType: String
+  billing3ds: Boolean
+  expiresIn: Int
+  allowedPaymentMethods: [PaymentMethodType]
+  processingChannelId: String
+}
+
+input SubmitDisputeEvidenceInput {
+  proofOfDeliveryOrService: String
+  invoiceOrReceipt: String
+  customerCommunication: String
+  refundOrCancellationPolicy: String
+  recurringTransactionAgreement: String
+  additionalEvidence: String
+}
+
+input CreateWebhookInput {
+  url: String!
+  headers: JSON
+  eventTypes: [String]!
+  contentType: String
+  active: Boolean
+}
+
+input UpdateWebhookInput {
+  url: String
+  headers: JSON
+  eventTypes: [String]
+  contentType: String
+  active: Boolean
+}
+
+input ForexRateInput {
+  sourceCurrency: Currency!
+  destinationCurrency: Currency!
+  amount: Long
+  paymentSourceType: String
+  processingChannelId: String
+}
+
+input CreateTransferInput {
+  reference: String
+  type: String!
+  source: TransferPartyInput!
+  destination: TransferPartyInput!
+}
+
+input TransferPartyInput {
+  entityId: String!
+  amount: Long!
+}
+
+input ReportInput {
+  from: DateTime!
+  to: DateTime!
+  format: ReportFormat!
+  type: String!
+  account: String
+}
+
+input CreateTokenInput {
+  type: TokenType!
+  number: String
+  expiryMonth: Int
+  expiryYear: Int
+  cvv: String
+  name: String
+  billingAddress: AddressInput
+  phone: PhoneInput
+  tokenData: String
+  signature: String
+  protocolVersion: String
+  signedMessage: String
+}
+
+input CreateCardholderInput {
+  type: String!
+  firstName: String!
+  lastName: String!
+  email: String
+  phone: PhoneInput
+  dateOfBirth: String
+  billingAddress: AddressInput
+  residencyAddress: AddressInput
+  reference: String
+  entityId: String
+  metadata: JSON
+}
+
+input CreateIssuingCardInput {
+  type: IssuingCardType!
+  cardholderId: ID!
+  lifetime: CardLifetimeInput
+  reference: String
+  displayName: String
+  isSingleUse: Boolean
+  metadata: JSON
+}
+
+input CardLifetimeInput {
+  unit: String!
+  value: Int!
+}
+
+input PaymentFiltersInput {
+  reference: String
+  from: DateTime
+  to: DateTime
+  status: PaymentStatus
+  limit: Int
+  skip: Int
+}
+
+input DisputeFiltersInput {
+  from: DateTime
+  to: DateTime
+  id: String
+  statuses: [DisputeStatus]
+  paymentId: String
+  paymentReference: String
+  paymentArn: String
+  paymentMcc: String
+  limit: Int
+  skip: Int
+}
+
+# ─── Query Root ───────────────────────────────────────────────────────────────
+
+type Query {
+  "Get a payment by ID"
+  payment(id: ID!): Payment
+
+  "List payments with optional filters"
+  payments(filters: PaymentFiltersInput): PaginatedPayments
+
+  "Get payment actions for a payment"
+  paymentActions(paymentId: ID!): [PaymentAction]
+
+  "Get a payout by ID"
+  payout(id: ID!): Payout
+
+  "List payouts"
+  payouts(limit: Int, skip: Int): PaginatedPayouts
+
+  "Get an instrument by ID"
+  instrument(id: ID!): Instrument
+
+  "List instruments for a customer"
+  instruments(customerId: ID!): PaginatedInstruments
+
+  "Get a customer by ID"
+  customer(id: ID!): Customer
+
+  "Get a dispute by ID"
+  dispute(id: ID!): Dispute
+
+  "List disputes with optional filters"
+  disputes(filters: DisputeFiltersInput): PaginatedDisputes
+
+  "Get dispute evidence for a dispute"
+  disputeEvidence(disputeId: ID!): DisputeEvidence
+
+  "Get a payment session by ID"
+  paymentSession(id: ID!): PaymentSession
+
+  "Get a payment link by ID"
+  paymentLink(id: ID!): PaymentLink
+
+  "Get a webhook by ID"
+  webhook(id: ID!): Webhook
+
+  "List webhooks"
+  webhooks: PaginatedWebhooks
+
+  "Get a webhook event by ID"
+  webhookEvent(id: ID!): WebhookEvent
+
+  "Get a network token by ID"
+  networkToken(id: ID!): NetworkToken
+
+  "Get a forex rate"
+  forexRate(input: ForexRateInput!): ForexRate
+
+  "Get a transfer by ID"
+  transfer(id: ID!): Transfer
+
+  "Get balances for an entity"
+  balances(entityId: String!, currency: Currency): [Balance]
+
+  "Get a report by ID"
+  report(id: ID!): Report
+
+  "List reports"
+  reports(from: DateTime, to: DateTime, limit: Int): [Report]
+
+  "List financial actions"
+  financialActions(from: DateTime!, to: DateTime!, paymentId: ID, actionId: ID, limit: Int, skip: Int): [FinancialAction]
+
+  "Get an issuing cardholder by ID"
+  cardholder(id: ID!): Cardholder
+
+  "List cardholders"
+  cardholders(limit: Int, skip: Int): [Cardholder]
+
+  "Get an issuing card by ID"
+  issuingCard(id: ID!): IssuingCard
+
+  "List issuing cards for a cardholder"
+  issuingCards(cardholderId: ID, limit: Int, skip: Int): [IssuingCard]
+}
+
+# ─── Mutation Root ────────────────────────────────────────────────────────────
+
+type Mutation {
+  "Request a payment or card verification"
+  createPayment(input: CreatePaymentInput!): Payment
+
+  "Capture an authorized payment"
+  capturePayment(id: ID!, input: CapturePaymentInput): CaptureResponse
+
+  "Refund a captured payment"
+  refundPayment(id: ID!, input: RefundPaymentInput): RefundResponse
+
+  "Void an authorized payment"
+  voidPayment(id: ID!, input: VoidPaymentInput): VoidResponse
+
+  "Request a payout"
+  createPayout(input: CreatePayoutInput!): Payout
+
+  "Store a payment instrument"
+  createInstrument(input: CreateInstrumentInput!): Instrument
+
+  "Update a stored instrument"
+  updateInstrument(id: ID!, input: UpdateInstrumentInput!): Instrument
+
+  "Delete a stored instrument"
+  deleteInstrument(id: ID!): Boolean
+
+  "Create a payment session"
+  createPaymentSession(input: CreatePaymentSessionInput!): PaymentSession
+
+  "Create a payment link"
+  createPaymentLink(input: CreatePaymentLinkInput!): PaymentLink
+
+  "Submit evidence for a dispute"
+  submitDisputeEvidence(id: ID!, input: SubmitDisputeEvidenceInput!): Boolean
+
+  "Accept a dispute"
+  acceptDispute(id: ID!): Boolean
+
+  "Tokenize a card or wallet"
+  createToken(input: CreateTokenInput!): Token
+
+  "Register a webhook"
+  createWebhook(input: CreateWebhookInput!): Webhook
+
+  "Update a webhook"
+  updateWebhook(id: ID!, input: UpdateWebhookInput!): Webhook
+
+  "Remove a webhook"
+  deleteWebhook(id: ID!): Boolean
+
+  "Create a transfer between entities"
+  createTransfer(input: CreateTransferInput!): Transfer
+
+  "Request a report"
+  createReport(input: ReportInput!): Report
+
+  "Create an issuing cardholder"
+  createCardholder(input: CreateCardholderInput!): Cardholder
+
+  "Issue a new card"
+  createIssuingCard(input: CreateIssuingCardInput!): IssuingCard
+
+  "Update an issuing card status"
+  updateIssuingCardStatus(id: ID!, status: IssuingCardStatus!): IssuingCard
+
+  "Revoke an issuing card"
+  revokeIssuingCard(id: ID!): Boolean
+}
