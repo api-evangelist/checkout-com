@@ -1,0 +1,335 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Checkout.com API",
+    "version": "2026-05-23"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Payments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Retrieve list of payments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/payments"
+          },
+          "docs": "Retrieve list of payments"
+        },
+        {
+          "info": {
+            "name": "Request a payment or payout",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/payments"
+          },
+          "docs": "Request a payment or payout"
+        },
+        {
+          "info": {
+            "name": "Get payment details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/payments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The payment identifier (e.g. pay_xxx)"
+              }
+            ]
+          },
+          "docs": "Get payment details"
+        },
+        {
+          "info": {
+            "name": "Capture a payment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/payments/:id/captures",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The payment identifier (e.g. pay_xxx)"
+              }
+            ]
+          },
+          "docs": "Capture a payment"
+        },
+        {
+          "info": {
+            "name": "Refund a payment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/payments/:id/refunds",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The payment identifier (e.g. pay_xxx)"
+              }
+            ]
+          },
+          "docs": "Refund a payment"
+        },
+        {
+          "info": {
+            "name": "Void a payment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/payments/:id/voids",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The payment identifier (e.g. pay_xxx)"
+              }
+            ]
+          },
+          "docs": "Void a payment"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Tokens",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Request a token",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/tokens"
+          },
+          "docs": "Request a token"
+        },
+        {
+          "info": {
+            "name": "Get token metadata",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/tokens/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Get token metadata"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Customers",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create a customer",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/customers"
+          },
+          "docs": "Create a customer"
+        },
+        {
+          "info": {
+            "name": "Retrieve customer details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/customers/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Retrieve customer details"
+        },
+        {
+          "info": {
+            "name": "Update a customer",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.checkout.com/customers/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Update a customer"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Instruments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create an instrument",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/instruments"
+          },
+          "docs": "Create an instrument"
+        },
+        {
+          "info": {
+            "name": "Get instrument details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/instruments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Get instrument details"
+        },
+        {
+          "info": {
+            "name": "Update an instrument",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.checkout.com/instruments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Update an instrument"
+        },
+        {
+          "info": {
+            "name": "Delete an instrument",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.checkout.com/instruments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Delete an instrument"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Workflows",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Retrieve all workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/workflows"
+          },
+          "docs": "Retrieve all workflows"
+        },
+        {
+          "info": {
+            "name": "Add a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/workflows"
+          },
+          "docs": "Add a workflow"
+        },
+        {
+          "info": {
+            "name": "Add a workflow action",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/workflows/:id/actions",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Add a workflow action"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
