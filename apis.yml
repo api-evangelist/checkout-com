@@ -5,7 +5,7 @@ kind: company
 description: Checkout.com is a global payment processor offering card acquiring, alternative
   payments, fraud, and connected accounts via a single API. Direct integrations with
   Visa, Mastercard, and APMs.
-image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 tags:
 - Fintech
 - Payments
