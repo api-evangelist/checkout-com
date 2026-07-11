@@ -141,6 +141,12 @@ apis:
   - type: Documentation
     url: https://api-reference.checkout.com/
 common:
+- type: VulnerabilityDisclosure
+  url: security/checkout-com-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/checkout-com-domain-security.yml
+- type: Authentication
+  url: authentication/checkout-com-authentication.yml
 - type: OAuthScopes
   url: scopes/checkout-com-scopes.yml
 - type: GitHubOrganization

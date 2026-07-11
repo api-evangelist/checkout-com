@@ -1,0 +1,25 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/checkout-com-openapi.yml
+summary:
+  types:
+  - http
+  - oauth2
+  oauth2_flows:
+  - clientCredentials
+schemes:
+- name: BearerAuth
+  type: http
+  scheme: bearer
+  description: Secret API key as Bearer token (format `Bearer sk_...`).
+  sources:
+  - openapi/checkout-com-openapi.yml
+- name: OAuth2
+  type: oauth2
+  flows:
+  - flow: clientCredentials
+    tokenUrl: https://access.checkout.com/connect/token
+    scopes: 2
+  description: OAuth 2.0 client credentials flow
+  sources:
+  - openapi/checkout-com-openapi.yml
