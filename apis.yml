@@ -141,6 +141,8 @@ apis:
   - type: Documentation
     url: https://api-reference.checkout.com/
 common:
+- type: OAuthScopes
+  url: scopes/checkout-com-scopes.yml
 - type: GitHubOrganization
   url: https://github.com/checkout
 - type: LinkedIn
@@ -155,6 +157,8 @@ common:
   url: finops/checkout-com-finops.yml
 - type: Integrations
   url: https://www.checkout.com/partners
+- type: Blog
+  url: https://www.checkout.com/blog/rss.xml
 integrations:
 - name: Become a partner
 maintainers:

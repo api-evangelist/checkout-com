@@ -1,0 +1,23 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/checkout-com-openapi.yml
+schemes:
+- name: OAuth2
+  source: openapi/checkout-com-openapi.yml
+  flows:
+  - flow: clientCredentials
+    tokenUrl: https://access.checkout.com/connect/token
+  description: OAuth 2.0 client credentials flow
+scopes:
+- scope: gateway
+  description: Access to gateway resources
+  flows:
+  - clientCredentials
+  sources:
+  - openapi/checkout-com-openapi.yml
+- scope: vault
+  description: Access to vault resources
+  flows:
+  - clientCredentials
+  sources:
+  - openapi/checkout-com-openapi.yml
