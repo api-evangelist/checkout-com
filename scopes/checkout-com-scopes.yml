@@ -1,23 +1,43 @@
-generated: '2026-07-11'
-method: derived
-source: openapi/checkout-com-openapi.yml
+generated: '2026-07-14'
+method: searched
+source: https://www.checkout.com/docs/developer-resources/api/manage-api-keys/oauth-2-0-client-credentials
+docs: https://www.checkout.com/docs/developer-resources/api/manage-api-keys/oauth-2-0-client-credentials
+description: >-
+  Checkout.com's OAuth 2.0 client-credentials scopes. Server-to-server clients
+  POST access_key_id:access_key_secret (HTTP Basic) with grant_type=client_credentials
+  to the /connect/token endpoint and receive a JWT Bearer access token. Tokens
+  expire after four hours and should be cached and reused. Scopes may be omitted
+  (the default scopes assigned to the access key apply) and any requested scopes
+  must be a subset of those assigned to the key. Upgrades the earlier derived
+  file with the searched token flow and the fx scope observed in the docs' token
+  response example.
 schemes:
-- name: OAuth2
-  source: openapi/checkout-com-openapi.yml
-  flows:
-  - flow: clientCredentials
-    tokenUrl: https://access.checkout.com/connect/token
-  description: OAuth 2.0 client credentials flow
+  - name: OAuth2
+    type: oauth2
+    source: openapi/checkout-com-openapi.yml
+    flows:
+      - flow: clientCredentials
+        tokenUrl: https://access.checkout.com/connect/token
+        sandboxTokenUrl: https://{prefix}.access.sandbox.checkout.com/connect/token
+    grant_types: [client_credentials]
+    token_type: Bearer (JWT)
+    token_ttl_hours: 4
+    description: OAuth 2.0 client-credentials flow for server-to-server authentication.
 scopes:
-- scope: gateway
-  description: Access to gateway resources
-  flows:
-  - clientCredentials
-  sources:
-  - openapi/checkout-com-openapi.yml
-- scope: vault
-  description: Access to vault resources
-  flows:
-  - clientCredentials
-  sources:
-  - openapi/checkout-com-openapi.yml
+  - scope: gateway
+    description: Access to all Gateway resources (payments and payment actions).
+    flows: [clientCredentials]
+    sources: [openapi/checkout-com-openapi.yml, docs]
+  - scope: vault
+    description: Access to all Vault resources (tokenization and stored instruments).
+    flows: [clientCredentials]
+    sources: [openapi/checkout-com-openapi.yml, docs]
+  - scope: fx
+    description: Access to Forex (FX) rate resources; observed in the token response example ("scope":"fx gateway vault").
+    flows: [clientCredentials]
+    sources: [docs]
+notes: >-
+  The docs indicate more granular sub-scopes (e.g. gateway:payment,
+  vault:instruments) can be assigned to an access key, but the granular scope
+  table is not rendered in the static docs and is therefore not enumerated here
+  to avoid fabrication. Assign least-privilege scopes when creating an access key.

@@ -149,6 +149,18 @@ common:
   url: authentication/checkout-com-authentication.yml
 - type: OAuthScopes
   url: scopes/checkout-com-scopes.yml
+- type: Sandbox
+  url: sandbox/checkout-com-sandbox.yml
+- type: Conventions
+  url: conventions/checkout-com-conventions.yml
+- type: DeclineCodes
+  url: errors/checkout-com-decline-codes.yml
+- type: Components
+  url: components/checkout-com-components.yml
+- type: DataModel
+  url: data-model/checkout-com-data-model.yml
+- type: TrustCenter
+  url: security/checkout-com-trust-center.yml
 - type: GitHubOrganization
   url: https://github.com/checkout
 - type: LinkedIn

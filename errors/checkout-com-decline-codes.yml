@@ -1,0 +1,283 @@
+generated: '2026-07-14'
+method: searched
+source: https://www.checkout.com/docs/developer-resources/codes/api-response-codes
+description: >-
+  Checkout.com's payment response-code taxonomy — the five-digit response_code
+  the API returns on a payment, payout, or refund. Distinct from API-level HTTP
+  errors: on a successful 2xx that is nonetheless declined, the payment body
+  carries approved:false, status:"Declined", and this response_code (e.g.
+  "20051"). Codes are grouped by range: 10xxx approved, 20xxx soft declines
+  (retry may succeed), 30xxx hard declines (issuer/cardholder must fix first),
+  4xxxx risk responses (from Fraud Detection risk strategies), 50xxx payout and
+  refund declines. Captured verbatim from the API response codes reference.
+docs:
+  - https://www.checkout.com/docs/developer-resources/codes/api-response-codes
+  - https://www.checkout.com/docs/developer-resources/codes/error-codes
+  - https://www.checkout.com/docs/developer-resources/codes/issuing-decline-codes
+envelope_field: response_code   # on the payment/payout/refund body when approved == false
+ranges:
+  - {range: 10xxx, type: approved, description: The payment request was successful.}
+  - {range: 20xxx, type: soft decline, description: Declined, though subsequent attempts may succeed.}
+  - {range: 30xxx, type: hard decline, description: Declined; most require the issuer or cardholder to fix an issue before retry.}
+  - {range: 4xxxx, type: risk response, description: The request raised a risk response; response_code and status depend on your Fraud Detection risk strategy action.}
+  - {range: 50xxx, type: payout/refund decline, description: Checkout.com declined the payout or refund request.}
+most_common:
+  - {code: '20005', meaning: Declined - Do not honour, note: The most common bank authorization decline; the issuer gives no further detail and Checkout.com cannot override it.}
+decline_codes:
+  - {code: "10000", meaning: "Approved"}
+  - {code: "10008", meaning: "Approved - Honor with ID (Debit Cards)"}
+  - {code: "10010", meaning: "Partial Value Approved", action: "This is returned for partial authorizations"}
+  - {code: "10011", meaning: "Approved – VIP (not used)"}
+  - {code: "10076", meaning: "Approved (Country Club)"}
+  - {code: "10077", meaning: "Approved (Local Banks)"}
+  - {code: "10081", meaning: "Approved (Approved Commercial)"}
+  - {code: "10100", meaning: "Flagged as a potentially risky transaction"}
+  - {code: "10200", meaning: "Deferred capture"}
+  - {code: "20001", meaning: "Refer to card issuer", action: "Your bank declined the payment. Try a different card or contact your bank for further support. Contact card issuer"}
+  - {code: "20002", meaning: "Refer to card issuer - Special conditions", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "20003", meaning: "Invalid merchant or service provider", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "20004", meaning: "Card should be captured"}
+  - {code: "20005", meaning: "Declined - Do not honour", action: "Your bank declined the payment. Try a different card or contact your bank for further support. See Recommendation codes for more i"}
+  - {code: "20006", meaning: "Error / Invalid request parameters"}
+  - {code: "20009", meaning: "Request in progress"}
+  - {code: "20012", meaning: "Invalid transaction", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "20013", meaning: "Invalid value/amount", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "20014", meaning: "Invalid account number (no such number)", action: "The payment failed. Check the card details and try again with the same or another card"}
+  - {code: "20015", meaning: "Transaction cannot be processed through debit network", action: "Route your transaction to the card's signature network"}
+  - {code: "20016", meaning: "Card not initialised"}
+  - {code: "20017", meaning: "Customer cancellation"}
+  - {code: "20018", meaning: "Customer dispute"}
+  - {code: "20019", meaning: "Re-enter transaction Transaction has expired"}
+  - {code: "20020", meaning: "Invalid response"}
+  - {code: "20021", meaning: "No action taken (unable to back out prior transaction)"}
+  - {code: "20022", meaning: "Suspected malfunction"}
+  - {code: "20023", meaning: "Unacceptable transaction fee"}
+  - {code: "20024", meaning: "File update not supported by the receiver"}
+  - {code: "20025", meaning: "Unable to locate record on file Account number is missing from the inquiry"}
+  - {code: "20026", meaning: "Duplicate file update record"}
+  - {code: "20027", meaning: "File update field edit error"}
+  - {code: "20028", meaning: "File is temporarily unavailable"}
+  - {code: "20029", meaning: "File update not successful"}
+  - {code: "20030", meaning: "Format error", action: "The payment failed due to a technical issue. Either try again with the same card, or use a different card. MADA transactions may r"}
+  - {code: "20031", meaning: "Bank not supported by Switch"}
+  - {code: "20032", meaning: "Completed partially"}
+  - {code: "20033", meaning: "Previous scheme transaction ID invalid"}
+  - {code: "20038", meaning: "Allowable PIN tries exceeded"}
+  - {code: "20039", meaning: "No credit account"}
+  - {code: "20040", meaning: "Requested function not supported"}
+  - {code: "20042", meaning: "No universal value/amount"}
+  - {code: "20044", meaning: "No investment account"}
+  - {code: "20045", meaning: "The Issuer does not support fallback transactions of hybrid-card"}
+  - {code: "20046", meaning: "Bank decline", action: "Your bank declined the payment. Try a different card or contact your bank for further support. See also Recommendation codes"}
+  - {code: "20051", meaning: "Insufficient funds", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "20052", meaning: "No current (checking) account"}
+  - {code: "20053", meaning: "No savings account"}
+  - {code: "20054", meaning: "Expired card"}
+  - {code: "20055", meaning: "Incorrect PIN PIN validation not possible"}
+  - {code: "20056", meaning: "No card record"}
+  - {code: "20057", meaning: "Transaction not permitted to cardholder", action: "Your bank declined the payment. Try a different card or contact your bank for further support. For payouts, this indicates that th"}
+  - {code: "20058", meaning: "Transaction not permitted to terminal"}
+  - {code: "20059", meaning: "Suspected fraud", action: "Your bank declined the payment. Try a different card or contact your bank for further support. See also Recommendation codes"}
+  - {code: "2005C", meaning: "Transaction not supported / blocked by issuer"}
+  - {code: "20060", meaning: "Card acceptor contact acquirer"}
+  - {code: "20061", meaning: "Activity amount limit exceeded", action: "The defined amount was exceeded for the account or card. For recommended actions, see Recommendation codes . For payouts, this ind"}
+  - {code: "20062", meaning: "Restricted card", action: "Your bank declined the payment. Try a different card or contact your bank for further support. See also Recommendation codes"}
+  - {code: "20063", meaning: "Security violation"}
+  - {code: "20064", meaning: "Original value incorrect", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "20065", meaning: "Exceeds Withdrawal Frequency Limit", action: "Your bank declined the payment. Try a different card or contact your bank for further support. For payouts, this indicates the pay"}
+  - {code: "20066", meaning: "Card acceptor call acquirer security"}
+  - {code: "20067", meaning: "Hard capture - Pick up card at ATM"}
+  - {code: "20068", meaning: "Response received too late / Timeout", action: "The payment failed due to a technical issue. Try again with the same card, or use a different card. Internal error"}
+  - {code: "2006P", meaning: "Cardholder ID verification failed", action: "The cardholder could not be identified from their ID documentation as part of Know Your Customer (KYC) checks. The cardholder must"}
+  - {code: "20070", meaning: "PIN required"}
+  - {code: "20072", meaning: "Account not yet activated"}
+  - {code: "20075", meaning: "Allowable PIN-entry tries exceeded", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "20078", meaning: "Blocked at first use - transaction from new or replacement card that is not properly unblo", action: "Your bank declined the payment. Try a different card or contact your bank for further support. See also Recommendation codes"}
+  - {code: "20081", meaning: "Card is local use only"}
+  - {code: "20082", meaning: "No security model PIN cryptographic error found (error found by VIC security module during"}
+  - {code: "20083", meaning: "No accounts"}
+  - {code: "20084", meaning: "No PBF"}
+  - {code: "20085", meaning: "PBF update error"}
+  - {code: "20086", meaning: "ATM malfunction Invalid authorization type"}
+  - {code: "20087", meaning: "Bad track data (invalid CVV and/or expiry date)", action: "The payment failed. Check the card details and try again with the same or another card"}
+  - {code: "20088", meaning: "Unable to dispense/process"}
+  - {code: "20089", meaning: "Administration error"}
+  - {code: "20090", meaning: "Cut-off in progress"}
+  - {code: "20091", meaning: "Issuer unavailable or switch is inoperative", action: "The payment failed due to a technical issue. Try again with the same card, or use a different card. For payouts, this indicates th"}
+  - {code: "20092", meaning: "Destination cannot be found for routing"}
+  - {code: "20093", meaning: "Transaction cannot be completed; violation of law", action: "Your bank declined the payment. Try a different card or contact your bank for further support. See also Recommendation codes"}
+  - {code: "20094", meaning: "Duplicate transmission / invoice"}
+  - {code: "20095", meaning: "Reconcile error"}
+  - {code: "20096", meaning: "System malfunction", action: "The payment failed due to a technical issue. Try again with the same card, or use a different card"}
+  - {code: "20097", meaning: "Reconciliation totals reset"}
+  - {code: "20098", meaning: "MAC error"}
+  - {code: "20099", meaning: "Other / Unidentified responses", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "2009G", meaning: "Blocked by cardholder / contact cardholder"}
+  - {code: "200A4", meaning: "Transaction with defect, contact issuer", action: "The requests were not received"}
+  - {code: "200A5", meaning: "The original transactions are rejected"}
+  - {code: "200A6", meaning: "UnionPay forwarded the original request, but did not receive a response from the issuer"}
+  - {code: "200E0", meaning: "Unauthorised access"}
+  - {code: "200E2", meaning: "Signature verification failure"}
+  - {code: "200E3", meaning: "System busy", action: "Try again later"}
+  - {code: "200N0", meaning: "Force STIP"}
+  - {code: "200N7", meaning: "Decline for CVV2 failure"}
+  - {code: "200P1", meaning: "Over daily limit"}
+  - {code: "200P9", meaning: "Limit exceeded. Enter a lesser value"}
+  - {code: "200R1", meaning: "Issuer initiated a stop payment (revocation order) for this authorization", action: "The cardholder canceled the subscription"}
+  - {code: "200R3", meaning: "Issuer initiated a stop payment (revocation order) for all authorizations", action: "The cardholder canceled all subscriptions"}
+  - {code: "200S4", meaning: "PTLF full"}
+  - {code: "200T2", meaning: "Invalid transaction date"}
+  - {code: "200T3", meaning: "Card not supported"}
+  - {code: "200T5", meaning: "CAF status = 0 or 9"}
+  - {code: "20100", meaning: "Invalid expiry date format", action: "The payment failed due to invalid expiry date. Try again, providing the correct value"}
+  - {code: "20101", meaning: "No Account / No Customer (Token is incorrect or invalid)"}
+  - {code: "20102", meaning: "Invalid merchant / wallet ID", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "20103", meaning: "Card type / payment method not supported", action: "Your bank declined the payment. Try again with a different card or contact your bank for further support"}
+  - {code: "20104", meaning: "Gateway reject - Invalid transaction", action: "The payment failed due to a technical issue. Try again with the same card, or use a different card"}
+  - {code: "20105", meaning: "Gateway reject - Violation", action: "The payment failed due to a technical issue. Try again with the same card, or use a different card"}
+  - {code: "20106", meaning: "Unsupported currency"}
+  - {code: "20107", meaning: "Billing address is missing"}
+  - {code: "20108", meaning: "Declined - Updated cardholder available"}
+  - {code: "20109", meaning: "Transaction already reversed (voided)", action: "Previous message located for a repeat or reversal, but repeat or reversal data is inconsistent with the original message Capture i"}
+  - {code: "20110", meaning: "Authorization completed"}
+  - {code: "20111", meaning: "Transaction already reversed", action: "The payment reversal has already been processed"}
+  - {code: "20112", meaning: "Merchant not Mastercard SecureCode enabled", action: "The payment failed due to a technical issue. Request support and provide the payment reference number"}
+  - {code: "20113", meaning: "Invalid property"}
+  - {code: "20114", meaning: "Token is incorrect"}
+  - {code: "20115", meaning: "Missing / Invalid lifetime"}
+  - {code: "20116", meaning: "Invalid encoding"}
+  - {code: "20117", meaning: "Invalid API version", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "20118", meaning: "Transaction pending", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "20119", meaning: "Invalid batch data and/or batch data is missing", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "20120", meaning: "Invalid customer/user", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "20121", meaning: "Transaction limit for merchant/terminal exceeded"}
+  - {code: "20122", meaning: "Mastercard installments not supported"}
+  - {code: "20123", meaning: "Missing basic data: zip, addr, member", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "20124", meaning: "Missing CVV value, required for ecommerce transaction"}
+  - {code: "20150", meaning: "Card not 3D Secure (3DS) enabled"}
+  - {code: "20151", meaning: "Cardholder failed 3DS authentication"}
+  - {code: "20152", meaning: "Initial 3DS transaction not completed within 15 minutes", action: "The payment expired due to inactivity. Try again with the same card, or use a different card"}
+  - {code: "20153", meaning: "3DS system malfunction", action: "The payment failed due to a technical issue. Try again with the same card, or use a different card"}
+  - {code: "20154", meaning: "3DS authentication required", action: "The payment was declined due to 3D Secure authentication (3DS). Try again with the same card, or use a different card"}
+  - {code: "20155", meaning: "3DS authentication service provided invalid authentication result"}
+  - {code: "20156", meaning: "Requested function not supported by the acquirer"}
+  - {code: "20157", meaning: "Invalid merchant configurations - Contact Support Request support"}
+  - {code: "20158", meaning: "Refund validity period has expired"}
+  - {code: "20159", meaning: "ACS Malfunction", action: "The payment failed due to a technical issue with the ACS used to perform 3DS authentication. If the issue persists, request suppor"}
+  - {code: "20179", meaning: "Lifecycle", action: "The transaction uses invalid card data. For recommended actions, see Recommendation codes"}
+  - {code: "20182", meaning: "Policy", action: "The transaction does not comply with card policies. For recommended actions, see Recommendation codes"}
+  - {code: "20183", meaning: "Security", action: "The transaction is suspected to be fraudulent. For recommended actions, see Recommendation codes"}
+  - {code: "20193", meaning: "Invalid country code"}
+  - {code: "20197", meaning: "The ATM/POS terminal number has not been registered"}
+  - {code: "20199", meaning: "Mandate approval pending"}
+  - {code: "30004", meaning: "Pick up card (No fraud)", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30007", meaning: "Pick up card - Special conditions", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30015", meaning: "No such issuer", action: "The payment was declined due to incorrect details. Try again with updated details. For payouts, this indicates that the recipient"}
+  - {code: "30016", meaning: "Issuer does not allow online gambling payout", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30017", meaning: "Issuer does not allow original credit transaction", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30018", meaning: "Issuer does not allow money transfer payout", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30019", meaning: "Issuer does not allow non-money transfer payout", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30020", meaning: "Invalid amount", action: "The payment failed due to a technical issue. If the issue persists, request support"}
+  - {code: "30021", meaning: "Total amount limit reached", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30022", meaning: "Total transaction count limit reached", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30033", meaning: "Expired card - Pick up", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30034", meaning: "Suspected fraud - Pick up", action: "Your bank declined the payment. Contact your bank for further support. For payouts, this indicates that the issuer declined the pa"}
+  - {code: "30035", meaning: "Contact acquirer - Pick up", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30036", meaning: "Restricted card - Pick up", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30037", meaning: "Call acquirer security - Pick up", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30038", meaning: "Allowable PIN tries exceeded - Pick up", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30041", meaning: "Lost card - Pick up", action: "Your bank declined the payment. Try a different card or contact your bank for further support"}
+  - {code: "30043", meaning: "Stolen card - Pick up", action: "The cardholder’s bank declined the payment because the card has been reported stolen. For a one-off transaction, do not retry the"}
+  - {code: "30044", meaning: "Transaction rejected - AMLD5", action: "The transaction was initiated from an anonymous, non-reloadable prepaid card and for an amount greater than 50 EUR. Due to the AML"}
+  - {code: "30045", meaning: "Invalid payout fund transfer type", action: "The fund transfer type is not allowed in your configuration"}
+  - {code: "30046", meaning: "Closed account", action: "Your bank declined the payment. Contact your bank for further support"}
+  - {code: "30401", meaning: "Capture amount greater than allowed", action: "The payment failed because the capture amount exceeds the overcapture limit"}
+  - {code: "30402", meaning: "Overcapture not allowed for partial capture Overcapture is not allowed when partial captur"}
+  - {code: "30403", meaning: "Overcapture not allowed for partial authorization Overcapture is not allowed when partial"}
+  - {code: "30404", meaning: "Sub-merchant ID missing", action: "The payment failed because the sub-merchant ID field is required in the request"}
+  - {code: "30405", meaning: "Invalid order description format", action: "The payment failed because the billing descriptor name contained special characters that are not supported by the acquirer's forma"}
+  - {code: "41101", meaning: "Risk Blocked Transaction", action: "The transaction was declined due to a client-level risk rule"}
+  - {code: "41201", meaning: "Decline list - Card number", action: "The transaction was declined due to a client-level decline list . For more information: Sign in to the Dashboard . Go to Payments"}
+  - {code: "41202", meaning: "Decline list - BIN", action: "The transaction was declined because the associated BIN is on a client-level decline list"}
+  - {code: "41203", meaning: "Decline list - Email address", action: "The transaction was declined because the associated email address is on a client-level decline list"}
+  - {code: "41204", meaning: "Decline list - Phone", action: "The transaction was declined because the associated phone number is on a client-level decline list"}
+  - {code: "41205", meaning: "Decline list - Payment IP", action: "The transaction was declined because the associated payment IP is on a client-level decline list"}
+  - {code: "41206", meaning: "Decline list - Email domain", action: "The transaction was declined because the associated email domain is on a client-level decline list"}
+  - {code: "41301", meaning: "Fraud score exceeds threshold", action: "The transaction was declined because it has a high risk score . Entity-level response codes"}
+  - {code: "42101", meaning: "Risk Blocked Transaction", action: "The transaction was declined due to an entity-level risk rule . For more information: Sign in to the Dashboard . Go to Payments >"}
+  - {code: "42201", meaning: "Decline list - Card number", action: "The transaction was declined due to an entity-level decline list"}
+  - {code: "42202", meaning: "Decline list - BIN", action: "The transaction was declined because the associated BIN is on an entity-level decline list"}
+  - {code: "42203", meaning: "Decline list - Email address", action: "The transaction was declined because the associated email address is on an entity-level decline list"}
+  - {code: "42204", meaning: "Decline list - Phone", action: "The transaction was declined because the associated phone number is on an entity-level decline list"}
+  - {code: "42205", meaning: "Decline list - Payment IP", action: "The transaction was declined because the associated payment IP is on an entity-level decline list"}
+  - {code: "42206", meaning: "Decline list - Email domain", action: "The transaction was declined because the associated email domain is on a client-level decline list"}
+  - {code: "42301", meaning: "Fraud score exceeds threshold", action: "The transaction was declined because it has a high risk score. Checkout.com-level response codes"}
+  - {code: "43101", meaning: "Potential fraud risk", action: "The transaction was declined because it has a high risk score"}
+  - {code: "43102", meaning: "Risk blocked transaction – {Rule group name}", action: "The transaction was declined for one of the following reasons: A Checkout.com decline rule A fraud-specific model where the {rule"}
+  - {code: "43201", meaning: "Decline list - Card number", action: "The transaction was declined because the associated card number is on Checkout.com's decline list"}
+  - {code: "43202", meaning: "Decline list - BIN", action: "The transaction was declined because the associated BIN is on Checkout.com's decline list"}
+  - {code: "43203", meaning: "Decline list - Email address", action: "The transaction was declined because the associated email address on Checkout.com's decline list"}
+  - {code: "43204", meaning: "Decline list - Phone", action: "The transaction was declined because the associated phone number is on Checkout.com's decline list"}
+  - {code: "43205", meaning: "Decline list - Payment IP", action: "The transaction was declined because the associated payment IP is on Checkout.com's decline list"}
+  - {code: "43206", meaning: "Decline list - Email domain", action: "The transaction was declined because the associated email domain is on Checkout.com's decline list"}
+  - {code: "43301", meaning: "Fraud score exceeds threshold", action: "The transaction was declined because it has a high risk score"}
+  - {code: "43401", meaning: "3DS authentication required", action: "The transaction was declined because additional authentication is required to process it. Retry the transaction with 3D Secure"}
+  - {code: "50001", meaning: "Compliance error"}
+  - {code: "50002", meaning: "Sanction screening failure", action: "There was a sanctions screening hit or data corruption"}
+  - {code: "50003", meaning: "Balance reservation insufficient funds", action: "The sub-account has an insufficient Available balance. This response code also applies to refunds"}
+  - {code: "50005", meaning: "Barred Beneficiary Error"}
+  - {code: "50020", meaning: "Recipient error"}
+  - {code: "50021", meaning: "Invalid recipient error"}
+  - {code: "50022", meaning: "Unsupported recipient error"}
+  - {code: "50023", meaning: "Recipient limit error"}
+  - {code: "50025", meaning: "Invalid Recipient Account Error"}
+  - {code: "50026", meaning: "Recipient Account Not Found"}
+  - {code: "50027", meaning: "Recipient Bank Error"}
+  - {code: "50030", meaning: "Invalid Recipient Details Error"}
+  - {code: "50070", meaning: "Sender error"}
+  - {code: "50100", meaning: "Instruction error"}
+  - {code: "50101", meaning: "Instruction amount limit error"}
+  - {code: "50102", meaning: "Instruction amount limit sender error"}
+  - {code: "50103", meaning: "Instruction amount limit recipient error"}
+  - {code: "50104", meaning: "Velocity limit"}
+  - {code: "50105", meaning: "Velocity limit sender error"}
+  - {code: "50106", meaning: "Velocity limit recipient limit error"}
+  - {code: "50150", meaning: "Processing error"}
+  - {code: "50180", meaning: "Validation error"}
+  - {code: "50200", meaning: "Configuration error"}
+  - {code: "50240", meaning: "Cancellation error"}
+  - {code: "50260", meaning: "Returned error"}
+  - {code: "50280", meaning: "Insufficient funds"}
+  - {code: "50399", meaning: "Unmapped response"}
+  - {code: "50401", meaning: "Bank details invalid"}
+  - {code: "50402", meaning: "Account not found"}
+  - {code: "50403", meaning: "Account inactive"}
+  - {code: "50404", meaning: "Account dormant"}
+  - {code: "50405", meaning: "Account number invalid"}
+  - {code: "50406", meaning: "Branch not found"}
+  - {code: "50407", meaning: "Branch code invalid"}
+  - {code: "50408", meaning: "Branch code required"}
+  - {code: "50409", meaning: "Bank code invalid"}
+  - {code: "50410", meaning: "Bank code required"}
+  - {code: "50441", meaning: "Account type required"}
+  - {code: "50451", meaning: "Account holder details invalid"}
+  - {code: "50452", meaning: "Account holder identification number required"}
+  - {code: "50453", meaning: "Account holder type not supported"}
+  - {code: "50454", meaning: "Account holder type not allowed"}
+  - {code: "50466", meaning: "Account closed"}
+  - {code: "50471", meaning: "Account blocked"}
+  - {code: "50481", meaning: "Invalid debtor account type"}
+  - {code: "50490", meaning: "Duplicate Payment"}
+  - {code: "50491", meaning: "Account holder billing address details incorrect"}
+  - {code: "50492", meaning: "Account holder billing address details required"}
+  - {code: "50494", meaning: "Account holder billing address can not be PO box"}
+  - {code: "50499", meaning: "Payout Returned"}
+  - {code: "50501", meaning: "Unsupported characters"}
+  - {code: "50511", meaning: "Invalid amount"}
+  - {code: "50512", meaning: "Minimum amount not met"}
+  - {code: "50513", meaning: "Exceeded transaction value"}
+  - {code: "50514", meaning: "Exceeded daily limit"}
+  - {code: "50515", meaning: "Exceeded weekly limit"}
+  - {code: "50517", meaning: "Exceeded monthly limit"}
+  - {code: "50531", meaning: "Recalled"}
+  - {code: "50599", meaning: "Unknown reason"}

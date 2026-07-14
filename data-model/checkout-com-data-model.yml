@@ -1,0 +1,38 @@
+generated: '2026-07-14'
+method: derived
+source: >-
+  Derived from the entities and operations in openapi/checkout-com-openapi.yml
+  (payments, tokens, customers, instruments, workflows) and the Checkout.com API
+  reference at api-reference.checkout.com. id_prefix values are captured from the
+  docs' object examples where confidently observed (pay_, act_) and marked where
+  inferred from the API reference. Captures the core entity-relationship graph
+  of the payments domain.
+docs: https://api-reference.checkout.com/
+notation: >-
+  relationships use has_one / has_many / belongs_to with the reference field
+  name (via); direction is from the entity that owns the reference.
+
+entities:
+  - {name: Payment, id_prefix: pay_, domain: payments, description: A card or alternative-payment charge/payout request with full lifecycle (authorize, capture, void, refund).}
+  - {name: PaymentAction, id_prefix: act_, domain: payments, description: An action against a payment (authorization, capture, void, refund) recorded under the payment.}
+  - {name: PaymentContext, domain: payments, description: A pre-created context for APMs/SCA that a payment is initiated from.}
+  - {name: Token, id_prefix: tok_, domain: tokenization, description: A single-use token representing card details captured client-side by Frames/Flow.}
+  - {name: Instrument, id_prefix: src_, domain: vault, description: A stored, reusable payment credential (source) in the Vault.}
+  - {name: Customer, id_prefix: cus_, domain: core, description: A customer that owns instruments and can be referenced on payments.}
+  - {name: Workflow, domain: platform, description: An event-driven automation with conditions and actions (e.g. webhooks) run against payment events.}
+  - {name: Dispute, domain: disputes, description: A chargeback/dispute raised against a payment.}
+  - {name: Payout, id_prefix: pay_, domain: payouts, description: A push payment to a card, bank account, or wallet.}
+
+relationships:
+  - {from: Payment, to: PaymentAction, kind: has_many, via: payment}
+  - {from: Payment, to: Token, kind: belongs_to, via: source.token}
+  - {from: Payment, to: Instrument, kind: belongs_to, via: source.id}
+  - {from: Payment, to: Customer, kind: belongs_to, via: customer}
+  - {from: Payment, to: PaymentContext, kind: belongs_to, via: payment_context_id}
+  - {from: Instrument, to: Customer, kind: belongs_to, via: customer}
+  - {from: Customer, to: Instrument, kind: has_many, via: customer}
+  - {from: Token, to: Instrument, kind: has_one, via: token}
+  - {from: Dispute, to: Payment, kind: belongs_to, via: payment_id}
+  - {from: Workflow, to: Payment, kind: has_many, via: events}
+
+interchange_hubs: [Payment, Customer, Instrument]

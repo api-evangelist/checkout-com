@@ -1,0 +1,116 @@
+generated: '2026-07-14'
+method: searched
+source: https://www.checkout.com/docs/developer-resources/testing/test-cards
+description: >-
+  Checkout.com's sandbox / test-data surface — the test cards and magic values a
+  developer uses to exercise the Payments API end-to-end without moving real
+  money. Captured verbatim from the Checkout.com testing docs. Checkout.com
+  separates test and live by environment host (api.sandbox.checkout.com vs
+  api.checkout.com) and by key/prefix, not by a key literal like sk_test_. Each
+  test card is bound to the API response_code it produces; set the card (and in
+  some cases the amount) to simulate approvals, soft/hard declines, and 3DS
+  outcomes. The sandbox stores payments for 30 days.
+docs:
+  - https://www.checkout.com/docs/developer-resources/testing/test-cards
+  - https://www.checkout.com/docs/developer-resources/testing/payments-testing
+  - https://www.checkout.com/docs/developer-resources/testing
+  - https://www.checkout.com/docs/developer-resources/codes/api-response-codes
+
+modes:
+  - name: sandbox
+    host: https://api.sandbox.checkout.com
+    access_host: https://{prefix}.access.sandbox.checkout.com
+    notes: >-
+      Isolated test environment. Payments are stored for 30 days; a test payment
+      flow must be completed within 30 days of creation. Never use real card
+      details in the sandbox.
+  - name: production
+    host: https://api.checkout.com
+    access_host: https://access.checkout.com
+
+card_conventions:
+  cvv: Any valid 3-digit CVV for Visa/Mastercard, or 4-digit for American Express.
+  expiry: Any future date, in the format MM/YY or MM/YYYY.
+  note: All cards on the test-cards page are also valid as network tokens.
+  response_field: >-
+    On a successful 2xx HTTP response the body carries a response_code field
+    (e.g. "10000" approved, "20051" insufficient funds). See
+    errors/checkout-com-decline-codes.yml.
+
+# Default test cards — simulate a payment by card + response_code (verbatim).
+default_cards:
+  - {type: credit, number: '4000020000000000', response_code: '10000', country: US}
+  - {type: credit, number: '4242424242424242', response_code: '10000', country: GB}
+  - {type: credit, number: '4242424242424242', response_code: '20051', country: GB, note: Set the payment amount to 101 to trigger the decline.}
+  - {type: credit, number: '4273149019799094', response_code: '10000', country: TR, note: For card verifications only; Capture and Void actions are declined for this card.}
+  - {type: credit, number: '4539467987109256', response_code: '20005', country: ES}
+  - {type: credit, number: '4024007181869214', response_code: '20005', country: US}
+  - {type: credit, number: '4916301720257093', response_code: '20020', country: US}
+  - {type: credit, number: '4485899805156040', response_code: '200R1', country: US}
+  - {type: debit,  number: '4659105569051157', response_code: '10000', country: GB}
+  - {type: debit,  number: '4095254802642505', response_code: '20068', country: US}
+  - {type: prepaid, number: '4000148147058142', response_code: '20020'}
+  - {type: credit, number: '5436031030606378', response_code: '10000', country: MU, scheme: mastercard}
+  - {type: credit, number: '5585076576791786', response_code: '20005', country: HU, scheme: mastercard}
+  - {type: debit,  number: '5305484748800098', response_code: '10000', country: DE, scheme: mastercard}
+  - {type: credit, number: '345678901234564', response_code: '10000', country: ES, scheme: amex}
+  - {type: credit, number: '341829238058580', response_code: '20005', country: US, scheme: amex}
+  - {type: debit,  number: '4010061700000021', response_code: '10000', country: FR, scheme: cartes-bancaires}
+  - {type: credit, number: '6011111111111117', response_code: '10000', country: US, scheme: discover}
+  - {type: credit, number: '6011111111111118', response_code: '20005', country: US, scheme: discover}
+  - {type: credit, number: '6011201559638046790', response_code: '20005', country: US, scheme: discover}
+  - {type: credit, number: '6445979375892355607', response_code: '10000', country: US, scheme: discover}
+  - {type: credit, number: '36160940933914', response_code: '10000', country: KR, scheme: diners}
+  - {type: credit, number: '36160912071610', response_code: '20005', country: KR, scheme: diners}
+  - {type: credit, number: '3530111333300000', response_code: '10000', country: JP, scheme: jcb}
+  - {type: credit, number: '3582069482684995', response_code: '10000', country: JP, scheme: jcb}
+  - {type: credit, number: '3528257085901927', response_code: '20005', country: JP, scheme: jcb}
+  - {type: credit, number: '3566027046765007', response_code: '10000', country: JP, scheme: jcb}
+
+# Cards bound to specific decline/response codes (a representative subset; full taxonomy in errors/checkout-com-decline-codes.yml).
+response_code_cards:
+  - {response_code: 2005C, meaning: Transaction not supported / blocked by issuer, number: '4276038578596818', country: US}
+  - {response_code: 2009G, meaning: Blocked by cardholder / contact cardholder, number: '4152812521833588', country: US}
+  - {response_code: 200N7, meaning: Decline for CVV2 failure, number: '4734868958733862', country: US}
+  - {response_code: 200R3, meaning: Issuer initiated a stop payment (revocation order) for all authorizations, number: '4567361325981788', country: GB}
+  - {response_code: '20001', meaning: Refer to card issuer, number: '4111111111111129', country: US}
+  - {response_code: '20012', meaning: Invalid transaction, number: '4024007103573027', country: US}
+  - {response_code: '20014', meaning: Invalid card number, number: '4485381577182090', country: US}
+  - {response_code: '20051', meaning: Insufficient funds, number: '4544249167673670', country: GB}
+  - {response_code: '20059', meaning: Suspected fraud, number: '4897453568485113', country: US}
+  - {response_code: '20062', meaning: Restricted card, number: '4818924250131070', country: GB}
+  - {response_code: '20063', meaning: Security violation, number: '4556253752712245', country: US}
+  - {response_code: '20154', meaning: 3DS authentication required, number: '4500622868341387', country: CA}
+  - {response_code: '30015', meaning: No such issuer, number: '4024007162185267', country: US}
+  - {response_code: '30041', meaning: Lost card - pick up, number: '4941202060999329', country: GB}
+  - {response_code: '30043', meaning: Stolen card - pick up, number: '4539253655711767', country: IE}
+
+three_d_secure:
+  simulator_password: Checkout1!
+  note: >-
+    When a 3DS test authentication is challenged and you are redirected to the
+    3DS simulator page, enter the password Checkout1!. Redirect/challenge flows
+    only work via API/frontend integration.
+  cards:
+    - {scenario: 3DS2 frictionless — Authentication successful, scheme: amex, number: '345678901234564', country: ES}
+    - {scenario: 3DS2 frictionless — Authentication successful, scheme: mastercard, number: '5137210000000018', country: FR}
+    - {scenario: 3DS2 frictionless — Authentication successful, scheme: visa, number: '4010056200000018', country: FR}
+    - {scenario: 3DS2 frictionless — Authentication successful, scheme: unionpay, number: '6224120000000094', country: CN}
+    - {scenario: 3DS2 frictionless — Authentication successful, scheme: visa, number: '4485040371536584', country: US}
+    - {scenario: Not authenticated, scheme: amex, number: '371064645462927', country: US}
+    - {scenario: Not authenticated, scheme: mastercard, number: '5132562600000029', country: FR}
+    - {scenario: Not authenticated, scheme: visa, number: '4022050100000000', country: FR}
+    - {scenario: Authentication could not be performed, scheme: mastercard, number: '5132562600000011', country: FR}
+    - {scenario: Authentication could not be performed, scheme: visa, number: '4022050100000018', country: FR}
+    - {scenario: Attempted authentication, scheme: mastercard, number: '5132562600000029', country: FR}
+    - {scenario: Attempted authentication, scheme: visa, number: '4022050100000026', country: FR}
+    - {scenario: Authentication rejected, scheme: mastercard, number: '5596061690670931', country: IN}
+    - {scenario: Authentication rejected, scheme: visa, number: '4275765574319271', country: JP}
+    - {scenario: Card not enrolled, scheme: amex, number: '378282246310005', country: US}
+    - {scenario: Card not enrolled, scheme: visa, number: '4485899805156040', country: US}
+
+card_issuing:
+  docs: https://www.checkout.com/docs/card-issuing/simulate-issuing-transactions
+  note: >-
+    Card Issuing provides a separate transaction simulator to test authorizations,
+    clearings, and reversals against issued cards in the sandbox.

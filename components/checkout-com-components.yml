@@ -1,0 +1,62 @@
+generated: '2026-07-14'
+method: searched
+source: https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website/get-started-with-flow
+description: >-
+  Checkout.com's client-side, embeddable payment UI components — the drop-in and
+  hosted surfaces that render payment UX in the browser or mobile app, distinct
+  from the server-side SDK client libraries in packages/. Grouped by family:
+  Flow (the current CheckoutWebComponents drop-in), Frames (the legacy tokenized
+  card fields, deprecating 2026-06-30), Risk.js (device data collection), and
+  Checkout.com-hosted surfaces (Hosted Payments Page, Payment Links). Card data
+  is tokenized directly to Checkout.com so it never touches your server.
+docs:
+  - https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website/get-started-with-flow
+  - https://www.checkout.com/docs/developer-resources/sdks/frames-sdks/frames-reference
+  - https://www.checkout.com/docs/payments/accept-payments/upgrade-to-flow-from-frames
+
+libraries:
+  - {name: CheckoutWebComponents, purpose: Loads Flow and mounts payment components in the browser from a payment session.}
+  - {name: frames.js, purpose: Legacy Frames library that renders tokenized card input fields (deprecating 2026-06-30).}
+  - {name: "@checkout.com/frames-react", purpose: React wrapper of Frames, repo github.com/checkout/frames-react (legacy).}
+  - {name: Risk.js, purpose: Client-side device-data collection feeding Checkout.com Fraud Detection risk strategies.}
+
+families:
+  flow:
+    description: >-
+      Flow is Checkout.com's current pre-built, customizable payment UI. You
+      create a payment session, pass it to CheckoutWebComponents, build a flow
+      object, and mount it with flow.mount(). It dynamically renders all payment
+      methods available for that session (20+ methods including Apple Pay, Google
+      Pay, PayPal, Klarna, and regional methods such as Alipay, KNET, Tamara) and
+      has built-in fraud detection via Risk.js.
+    components:
+      - {name: Flow, description: Single drop-in component that dynamically lists all payment methods available for the payment session.}
+      - {name: Payment method components, description: Individual method surfaces (cards, wallets, APMs) rendered from the flow object.}
+    docs: https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website/get-started-with-flow
+
+  frames:
+    description: >-
+      Frames is the legacy client-side library that renders PCI-friendly card
+      input fields (card number, expiry, CVV) that tokenize directly to
+      Checkout.com. Deprecating on 2026-06-30 — new integrations should use Flow.
+    status: deprecated (end of life 2026-06-30)
+    components:
+      - {name: Card Frame, description: Single combined card input that returns a card token.}
+      - {name: Multi-frame (split fields), description: Separate cardNumber / expiryDate / cvv input frames for custom layouts.}
+    docs: https://www.checkout.com/docs/developer-resources/sdks/frames-sdks/frames-reference
+
+  hosted_prebuilt:
+    description: Checkout.com-hosted or single-embed surfaces requiring minimal integration code.
+    components:
+      - {name: Hosted Payments Page, description: A Checkout.com-hosted payment page you redirect customers to; keeps you out of card-data PCI scope.}
+      - {name: Payment Links, description: Shareable URL that opens a hosted payment page; also a first-class Payment Links API object.}
+
+  mobile:
+    description: Native mobile equivalents shipped in the Checkout.com mobile SDKs (also catalogued as SDKs).
+    components:
+      - {name: Frames for mobile, platforms: [iOS, Android], description: Tokenized card input for native apps.}
+      - {name: 3DS SDK, platforms: [iOS, Android], description: Native 3D Secure authentication experience.}
+      - {name: Risk SDK, platforms: [iOS, Android], description: Collects device data for risk strategies.}
+      - {name: Identities SDK, platforms: [iOS, Android], description: Redirects applicants to identity verification attempts.}
+      - {name: Card Issuing SDK, platforms: [iOS, Android], description: Manage issued cards in-app (PIN, controls, sensitive data).}
+    docs: https://www.checkout.com/docs/developer-resources/sdks

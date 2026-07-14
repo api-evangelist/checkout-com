@@ -1,0 +1,108 @@
+generated: '2026-07-14'
+method: searched
+source: >-
+  https://www.checkout.com/docs/developer-resources/api — the cross-cutting
+  request/response conventions that apply across Checkout.com endpoints, captured
+  from the developer-resources docs (API basics, Idempotency, API changes) and
+  the API reference at api-reference.checkout.com.
+description: >-
+  How the Checkout.com REST API behaves across operations: authentication style,
+  idempotency, request tracing, versioning/change policy, the response envelope,
+  and rate-limit signaling. These are the developer-experience / runtime-
+  semantics conventions that the OpenAPI does not fully express.
+
+base_url: https://api.checkout.com
+sandbox_url: https://api.sandbox.checkout.com
+api_style: REST over HTTPS, JSON request and response bodies, standard HTTP status codes
+
+authentication:
+  scheme: 'Bearer token in the Authorization header — "Authorization: Bearer {SecretApiKey}".'
+  key_types:
+    - Secret API key (sk_...) — server-side, full access.
+    - Public API key (pk_...) — client-side tokenization (Frames/Flow), limited scope.
+    - OAuth 2.0 client-credentials access token (JWT Bearer) — server-to-server, scoped (fx/gateway/vault).
+  oauth:
+    token_endpoint: https://access.checkout.com/connect/token
+    grant: client_credentials
+    token_ttl_hours: 4
+    detail: scopes/checkout-com-scopes.yml
+  docs: https://www.checkout.com/docs/developer-resources/api/manage-api-keys
+  detail: authentication/checkout-com-authentication.yml
+
+idempotency:
+  supported: true
+  mechanism: Cko-Idempotency-Key request header
+  applies_to:
+    - /payment-contexts
+    - /payments
+    - /payments/{id}/authorizations
+    - /payments/{id}/cancellations
+    - /payments/{id}/captures
+    - /payments/{id}/refunds
+    - /payments/{id}/voids
+    - /transfers
+  key_format: A unique key per request; V4 UUIDs are strongly recommended.
+  retention: >-
+    Keys are cached when the request returns a 2xx response and expire after 24
+    hours by default (sandbox and production). A repeat with the same key returns
+    the same HTTP status code and response body as the original.
+  failure_behavior: >-
+    If the original request returns a 4xx or 5xx, no idempotent result is saved
+    and the payment is reattempted on retry.
+  docs: https://www.checkout.com/docs/developer-resources/api/idempotency
+
+request_tracing:
+  request_id_header: Cko-Request-Id
+  description: >-
+    Every API response carries a unique Cko-Request-Id (a UUID) used to identify
+    and troubleshoot a specific call with Checkout.com support and in the
+    Dashboard API logs.
+  api_logs: https://www.checkout.com/docs/developer-resources/api/api-logs
+
+pagination:
+  style: not a single global convention
+  note: >-
+    Checkout.com does not document one universal pagination scheme across all
+    resources; list/search endpoints (e.g. payments search, disputes, reporting)
+    define their own limit/skip or search-body parameters. Consult the specific
+    endpoint in the API reference.
+
+versioning:
+  scheme: rolling / backward-compatible (no per-request API version header)
+  policy: >-
+    Checkout.com evolves the API in place and treats a defined set of changes as
+    backward-compatible rather than cutting dated versions. Backward-compatible
+    changes include: new optional request fields/parameters; new response fields;
+    new optional request headers; new response headers; increasing string field
+    length; changing/removing identifier prefixes; new webhook event types (opt-in);
+    new fields in webhook schemas. Unavoidable breaking changes are communicated in
+    advance.
+  docs: https://www.checkout.com/docs/developer-resources/api/api-changes
+  reference_version: 3.0.0 (API reference document version at api-reference.checkout.com)
+
+error_envelope:
+  http: Standard HTTP status codes; 422 for validation failures.
+  validation_shape: '{ "request_id", "error_type", "error_codes": [ ... ] }'
+  payment_decline: >-
+    On a successful 2xx that is nonetheless declined, the payment body carries
+    approved:false, status:"Declined", and a response_code field (e.g. "20051").
+  detail: errors/checkout-com-decline-codes.yml
+  docs: https://www.checkout.com/docs/developer-resources/codes
+
+rate_limits:
+  signal_status: 429
+  detail: rate-limits/checkout-com-rate-limits.yml
+  docs: https://www.checkout.com/docs/developer-resources/api/api-rate-limits
+
+webhooks:
+  model: Event notifications; opt-in subscription per event type.
+  note: New webhook event types are additive and must be explicitly subscribed to.
+  docs: https://www.checkout.com/docs/developer-resources/event-notifications
+
+other_conventions:
+  - name: Test vs live separation
+    detail: Separated by environment host (api.sandbox.checkout.com vs api.checkout.com); see sandbox/checkout-com-sandbox.yml.
+  - name: Amounts
+    detail: Integer minor units (e.g. cents); the amount is expressed in the currency's smallest unit.
+  - name: Identifiers
+    detail: Prefixed resource ids (pay_, act_, tok_, cus_, src_, ins_); prefixes may change and are documented as non-breaking.
