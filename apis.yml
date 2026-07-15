@@ -141,6 +141,8 @@ apis:
   - type: Documentation
     url: https://api-reference.checkout.com/
 common:
+- type: AgenticAccess
+  url: agentic-access/checkout-com-agentic-access.yml
 - type: VulnerabilityDisclosure
   url: security/checkout-com-vulnerability-disclosure.yml
 - type: DomainSecurity
