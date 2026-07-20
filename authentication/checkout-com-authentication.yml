@@ -11,7 +11,7 @@ schemes:
 - name: BearerAuth
   type: http
   scheme: bearer
-  description: Secret API key as Bearer token (format `Bearer sk_...`).
+  description: Secret API key as Bearer token (format `Bearer [example key]`).
   sources:
   - openapi/checkout-com-openapi.yml
 - name: OAuth2
