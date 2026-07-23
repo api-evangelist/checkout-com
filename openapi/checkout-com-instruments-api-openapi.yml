@@ -1,0 +1,81 @@
+openapi: 3.1.0
+info:
+  title: Checkout.com Customers Instruments API
+  description: 'Checkout.com is a global payment processor offering card acquiring, alternative
+
+    payments, payouts, tokenization, customers, instruments, and notification workflows
+
+    via a single API. This OpenAPI is a best-effort partial spec derived from the public
+
+    API reference at https://api-reference.checkout.com/.'
+  version: '2026-05-23'
+  contact:
+    name: Checkout.com Developer Support
+    url: https://api-reference.checkout.com/
+  license:
+    name: Proprietary
+servers:
+- url: https://api.checkout.com
+  description: Production
+- url: https://api.sandbox.checkout.com
+  description: Sandbox
+security:
+- BearerAuth: []
+tags:
+- name: Instruments
+paths:
+  /instruments:
+    post:
+      tags:
+      - Instruments
+      summary: Create an instrument
+      operationId: createInstrument
+      responses:
+        '201':
+          description: Instrument created
+  /instruments/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    get:
+      tags:
+      - Instruments
+      summary: Get instrument details
+      operationId: getInstrument
+      responses:
+        '200':
+          description: Instrument details
+    patch:
+      tags:
+      - Instruments
+      summary: Update an instrument
+      operationId: updateInstrument
+      responses:
+        '200':
+          description: Instrument updated
+    delete:
+      tags:
+      - Instruments
+      summary: Delete an instrument
+      operationId: deleteInstrument
+      responses:
+        '204':
+          description: Instrument deleted
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Secret API key as Bearer token (format `Bearer sk_...`).
+    OAuth2:
+      type: oauth2
+      description: OAuth 2.0 client credentials flow
+      flows:
+        clientCredentials:
+          tokenUrl: https://access.checkout.com/connect/token
+          scopes:
+            gateway: Access to gateway resources
+            vault: Access to vault resources

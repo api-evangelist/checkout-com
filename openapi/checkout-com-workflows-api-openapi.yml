@@ -1,0 +1,73 @@
+openapi: 3.1.0
+info:
+  title: Checkout.com Customers Workflows API
+  description: 'Checkout.com is a global payment processor offering card acquiring, alternative
+
+    payments, payouts, tokenization, customers, instruments, and notification workflows
+
+    via a single API. This OpenAPI is a best-effort partial spec derived from the public
+
+    API reference at https://api-reference.checkout.com/.'
+  version: '2026-05-23'
+  contact:
+    name: Checkout.com Developer Support
+    url: https://api-reference.checkout.com/
+  license:
+    name: Proprietary
+servers:
+- url: https://api.checkout.com
+  description: Production
+- url: https://api.sandbox.checkout.com
+  description: Sandbox
+security:
+- BearerAuth: []
+tags:
+- name: Workflows
+paths:
+  /workflows:
+    get:
+      tags:
+      - Workflows
+      summary: Retrieve all workflows
+      operationId: listWorkflows
+      responses:
+        '200':
+          description: A list of workflows
+    post:
+      tags:
+      - Workflows
+      summary: Add a workflow
+      operationId: addWorkflow
+      responses:
+        '201':
+          description: Workflow created
+  /workflows/{id}/actions:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      tags:
+      - Workflows
+      summary: Add a workflow action
+      operationId: addWorkflowAction
+      responses:
+        '201':
+          description: Workflow action added
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Secret API key as Bearer token (format `Bearer sk_...`).
+    OAuth2:
+      type: oauth2
+      description: OAuth 2.0 client credentials flow
+      flows:
+        clientCredentials:
+          tokenUrl: https://access.checkout.com/connect/token
+          scopes:
+            gateway: Access to gateway resources
+            vault: Access to vault resources
