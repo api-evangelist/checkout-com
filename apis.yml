@@ -5,7 +5,20 @@ kind: company
 description: Checkout.com is a global payment processor offering card acquiring, alternative
   payments, fraud, and connected accounts via a single API. Direct integrations with
   Visa, Mastercard, and APMs.
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/checkout-com.png
 tags:
 - Fintech
 - Payments
@@ -17,8 +30,9 @@ modified: '2026-05-08'
 specificationVersion: '0.19'
 apis:
 - name: Checkout.com Payments API
-  description: Process card and alternative payment methods with full lifecycle support
-    including authorization, capture, void, refund.
+  description: >-
+    Process card and alternative payment methods with full lifecycle support including authorization,
+    capture, void, refund.
   humanURL: https://api-reference.checkout.com/
   baseURL: https://api.checkout.com
   tags:
@@ -140,6 +154,56 @@ apis:
   properties:
   - type: Documentation
     url: https://api-reference.checkout.com/
+- aid: checkout-com:checkout-com-customers-api
+  name: Checkout.com Customers API
+  description: The Customers API from Checkout.com — 2 operation(s) for customers.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Customers
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-customers-api-openapi.yml
+- aid: checkout-com:checkout-com-instruments-api
+  name: Checkout.com Instruments API
+  description: The Instruments API from Checkout.com — 2 operation(s) for instruments.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Instruments
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-instruments-api-openapi.yml
+- aid: checkout-com:checkout-com-payments-api
+  name: Checkout.com Payments API
+  description: The Payments API from Checkout.com — 5 operation(s) for payments.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payments
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-payments-api-openapi.yml
+- aid: checkout-com:checkout-com-tokens-api
+  name: Checkout.com Tokens API
+  description: The Tokens API from Checkout.com — 2 operation(s) for tokens.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Tokens
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-tokens-api-openapi.yml
+- aid: checkout-com:checkout-com-workflows-api
+  name: Checkout.com Workflows API
+  description: The Workflows API from Checkout.com — 2 operation(s) for workflows.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Workflows
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-workflows-api-openapi.yml
 common:
 - type: AgenticAccess
   url: agentic-access/checkout-com-agentic-access.yml
