@@ -1,0 +1,22 @@
+{
+  "provider": "checkout-com",
+  "sources": [
+    "checkout-com-customers-api-openapi.yml",
+    "checkout-com-instruments-api-openapi.yml",
+    "checkout-com-payments-api-openapi.yml",
+    "checkout-com-tokens-api-openapi.yml",
+    "checkout-com-workflows-api-openapi.yml"
+  ],
+  "outputs": [
+    "checkout-com-customers-api-openapi.yml",
+    "checkout-com-instruments-api-openapi.yml",
+    "checkout-com-payments-api-openapi.yml",
+    "checkout-com-tokens-api-openapi.yml",
+    "checkout-com-workflows-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
