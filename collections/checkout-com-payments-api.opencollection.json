@@ -1,0 +1,122 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Checkout.com Customers Payments API",
+    "version": "2026-05-23"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Payments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Retrieve list of payments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/payments"
+          },
+          "docs": "Retrieve list of payments"
+        },
+        {
+          "info": {
+            "name": "Request a payment or payout",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/payments"
+          },
+          "docs": "Request a payment or payout"
+        },
+        {
+          "info": {
+            "name": "Get payment details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/payments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The payment identifier (e.g. pay_xxx)"
+              }
+            ]
+          },
+          "docs": "Get payment details"
+        },
+        {
+          "info": {
+            "name": "Capture a payment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/payments/:id/captures",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The payment identifier (e.g. pay_xxx)"
+              }
+            ]
+          },
+          "docs": "Capture a payment"
+        },
+        {
+          "info": {
+            "name": "Refund a payment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/payments/:id/refunds",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The payment identifier (e.g. pay_xxx)"
+              }
+            ]
+          },
+          "docs": "Refund a payment"
+        },
+        {
+          "info": {
+            "name": "Void a payment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/payments/:id/voids",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The payment identifier (e.g. pay_xxx)"
+              }
+            ]
+          },
+          "docs": "Void a payment"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

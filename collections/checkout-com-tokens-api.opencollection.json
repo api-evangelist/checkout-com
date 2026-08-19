@@ -1,0 +1,53 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Checkout.com Customers Tokens API",
+    "version": "2026-05-23"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Tokens",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Request a token",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/tokens"
+          },
+          "docs": "Request a token"
+        },
+        {
+          "info": {
+            "name": "Get token metadata",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/tokens/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Get token metadata"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

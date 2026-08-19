@@ -1,0 +1,64 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Checkout.com Customers Workflows API",
+    "version": "2026-05-23"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Workflows",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Retrieve all workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/workflows"
+          },
+          "docs": "Retrieve all workflows"
+        },
+        {
+          "info": {
+            "name": "Add a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/workflows"
+          },
+          "docs": "Add a workflow"
+        },
+        {
+          "info": {
+            "name": "Add a workflow action",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/workflows/:id/actions",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Add a workflow action"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

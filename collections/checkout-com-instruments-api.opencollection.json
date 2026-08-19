@@ -1,0 +1,89 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Checkout.com Customers Instruments API",
+    "version": "2026-05-23"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Instruments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create an instrument",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.checkout.com/instruments"
+          },
+          "docs": "Create an instrument"
+        },
+        {
+          "info": {
+            "name": "Get instrument details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.checkout.com/instruments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Get instrument details"
+        },
+        {
+          "info": {
+            "name": "Update an instrument",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.checkout.com/instruments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Update an instrument"
+        },
+        {
+          "info": {
+            "name": "Delete an instrument",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.checkout.com/instruments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Delete an instrument"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
