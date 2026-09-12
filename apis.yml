@@ -38,7 +38,7 @@ tags:
 - Acquiring
 - Cross-Border
 created: '2026-05-08'
-modified: '2026-05-08'
+modified: '2026-09-06'
 specificationVersion: '0.23'
 apis:
 - name: Checkout.com Payments API
@@ -255,6 +255,9 @@ common:
   url: https://www.checkout.com/partners
 - type: Blog
   url: https://www.checkout.com/blog/rss.xml
+- name: MCP Documentation
+  url: https://www.checkout.com/docs/developer-resources/checkout-com-mcp-server
+  type: MCPDocumentation
 integrations:
 - name: Become a partner
 maintainers:
