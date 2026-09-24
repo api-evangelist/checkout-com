@@ -37,6 +37,7 @@ tags:
 - Cards
 - Acquiring
 - Cross-Border
+- Agentic Commerce
 created: '2026-05-08'
 modified: '2026-09-06'
 specificationVersion: '0.23'
@@ -53,8 +54,6 @@ apis:
   properties:
   - type: Documentation
     url: https://api-reference.checkout.com/
-  - url: graphql/checkout-com-graphql.md
-    type: GraphQL
 - name: Checkout.com Payouts API
   description: Send payouts to cards, bank accounts and wallets.
   humanURL: https://api-reference.checkout.com/
@@ -110,6 +109,10 @@ apis:
   humanURL: https://api-reference.checkout.com/
   baseURL: https://api.checkout.com
   tags:
+  - Disputes
+  - Fraud
+  - Risk Management
+  tags_raw:
   - Disputes
   - Fraud
   - Risk
