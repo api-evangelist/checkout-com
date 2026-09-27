@@ -110,7 +110,7 @@ apis:
   baseURL: https://api.checkout.com
   tags:
   - Disputes
-  - Fraud
+  - Fraud Prevention
   - Risk Management
   tags_raw:
   - Disputes
