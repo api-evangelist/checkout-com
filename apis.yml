@@ -71,6 +71,10 @@ apis:
   tags:
   - Sessions
   - Flow
+  - Software Composition Analysis
+  tags_raw:
+  - Sessions
+  - Flow
   - SCA
   properties:
   - type: Documentation
@@ -125,6 +129,8 @@ apis:
   humanURL: https://api-reference.checkout.com/
   baseURL: https://api.checkout.com
   tags:
+  - Foreign Exchange
+  tags_raw:
   - FX
   - Forex
   properties:
