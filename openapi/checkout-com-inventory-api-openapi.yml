@@ -1,0 +1,2283 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Inventory API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Inventory
+  description: 'Beta
+
+
+    Manage stock levels for each product variant (e.g. size or color) and temporarily hold stock while an AI agent completes a checkout. Each hold can later be confirmed or cancelled, and automatically expires on its own if left unresolved. This prevents overselling, even when multiple agents are buying at the same time.
+
+    Holds work the same way regardless of which agentic commerce protocol is used.
+
+
+    Requires the `agentic:inventory` scope. To onboard your AI platform, contact us.'
+paths:
+  /inventory/{variant_id}:
+    get:
+      tags:
+      - Inventory
+      summary: Get stock levels
+      description: 'Returns the current stock levels and sellable availability for a single variant.
+
+
+        `available` is clamped to zero: `max(0, on_hand − reserved − safety_stock)` — this is the value
+
+        an availability feed should publish.
+
+
+        Requires the `agentic:inventory` scope. The merchant is resolved from the token claims; a variant
+
+        owned by another merchant returns `404`.'
+      operationId: getInventoryLevels
+      parameters:
+      - name: variant_id
+        in: path
+        description: The merchant-provided identifier for the variant.
+        required: true
+        schema:
+          maxLength: 128
+          type: string
+        example: var_123
+      - name: expand
+        in: query
+        description: 'Set `expand=product` to embed an additional `product` field alongside the stock fields, containing the variant''s product knowledge (merchandising details such as title, description, and images). Setting this parameter does not change how `available` or the other stock fields are calculated. If product knowledge has not been set for the variant, the `product` field is omitted.
+
+          '
+        schema:
+          enum:
+          - product
+          type: string
+        example: product
+      responses:
+        '200':
+          description: The current stock levels for the variant.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryLevels'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: The variant does not exist, or is owned by another merchant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+    put:
+      tags:
+      - Inventory
+      summary: Set stock levels
+      description: 'Sets the absolute stock levels for a variant (Managed mode and corrections). The call is an
+
+        upsert: it returns `201` when the inventory item is created and `200` when an existing item is
+
+        updated. Availability is recomputed and a `set` entry is written to the ledger. Active
+
+        reservations are never disturbed.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: setInventoryLevels
+      parameters:
+      - name: variant_id
+        in: path
+        description: The merchant-provided identifier for the variant.
+        required: true
+        schema:
+          maxLength: 128
+          type: string
+        example: var_123
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventorySetLevelsRequest'
+        required: true
+      responses:
+        '200':
+          description: The variant already existed and its levels were updated.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryLevels'
+        '201':
+          description: The inventory item was created.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryLevels'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '422':
+          description: Request validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/{variant_id}/product:
+    get:
+      tags:
+      - Inventory
+      summary: Get product knowledge
+      description: 'Beta
+
+
+        Returns the product knowledge for a single variant.
+
+
+        Requires the `agentic:inventory` scope. The merchant is resolved from the token claims; a variant
+
+        owned by another merchant, or one with no product knowledge set, returns `404`.'
+      operationId: getInventoryProduct
+      parameters:
+      - name: variant_id
+        in: path
+        description: The merchant-provided identifier for the variant.
+        required: true
+        schema:
+          maxLength: 128
+          type: string
+        example: var_123
+      responses:
+        '200':
+          description: The product knowledge for the variant.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryProductKnowledge'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: 'No product knowledge exists for the variant, or the variant is owned by another
+
+            merchant.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+    put:
+      tags:
+      - Inventory
+      summary: Set product knowledge
+      description: 'Beta
+
+
+        Sets the product knowledge for a variant. The call is an upsert: it returns `201` when the
+
+        product knowledge is created and `200` when it is updated.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: setInventoryProduct
+      parameters:
+      - name: variant_id
+        in: path
+        description: The merchant-provided identifier for the variant.
+        required: true
+        schema:
+          maxLength: 128
+          type: string
+        example: var_123
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventorySetProductRequest'
+        required: true
+      responses:
+        '200':
+          description: The variant already had product knowledge, and it was updated.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryProductKnowledge'
+        '201':
+          description: The product knowledge was created for the variant.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryProductKnowledge'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '422':
+          description: Request validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+    delete:
+      tags:
+      - Inventory
+      summary: Delete product knowledge
+      description: 'Beta
+
+
+        Deletes the product knowledge for a variant. Stock levels and reservations for the variant are
+
+        unaffected.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: deleteInventoryProduct
+      parameters:
+      - name: variant_id
+        in: path
+        description: The merchant-provided identifier for the variant.
+        required: true
+        schema:
+          maxLength: 128
+          type: string
+        example: var_123
+      responses:
+        '204':
+          description: The product knowledge existed and was deleted.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: 'No product knowledge exists for the variant, or the variant is owned by another
+
+            merchant.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/adjustments:
+    post:
+      tags:
+      - Inventory
+      summary: Adjust stock
+      description: 'Applies a relative delta to a variant''s physical stock (`on_hand`) with a mandatory reason (for example, damaged or found stock).
+
+        The call fails if the delta drives the physical stock below zero. An `adjust` entry is written to the ledger.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: adjustInventory
+      parameters:
+      - $ref: '#/components/parameters/ckoIdempotencyKey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryAdjustmentRequest'
+        required: true
+      responses:
+        '200':
+          description: Idempotent replay of an earlier adjustment made with the same key.
+          headers:
+            Cache-Control:
+              description: Present on an idempotent replay to indicate the response is the cached original result.
+              schema:
+                type: string
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryLevels'
+        '201':
+          description: The adjustment was applied.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryLevels'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: The variant does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '409':
+          description: The adjustment drives the physical stock below zero.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '422':
+          description: Request validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/ingestions:
+    post:
+      tags:
+      - Inventory
+      summary: Submit a batch ingestion
+      description: 'Submits a batch of up to 500 items, covering stock, product knowledge, or both, for
+
+        asynchronous processing, and returns `202 Accepted` with an ingestion job to poll. Processing is non-atomic: Good items apply even if some are rejected, and the per-item outcome is available at
+
+        `/inventory/ingestions/{id}/results`.
+
+
+        Ingestion sets the baseline stock and never overrides an active reservation, so it can never cause an oversell.
+
+
+        Include a Cko-Idempotency-Key header to make a retried submit safe: a repeat with the same key returns the original job instead of creating a duplicate batch.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: createInventoryIngestion
+      parameters:
+      - $ref: '#/components/parameters/ckoIdempotencyKey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryIngestionRequest'
+        required: true
+      responses:
+        '202':
+          description: The batch was accepted for processing, or the original job on an idempotent replay.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryIngestion'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '409':
+          description: The `Cko-Idempotency-Key` was reused with a different request body (`idempotency_key_reuse`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '413':
+          description: The batch exceeds the maximum number of items (`payload_too_large`). Nothing is applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '422':
+          description: Request validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: 'Rate limit exceeded, or the merchant already has the maximum number of ingestion jobs in
+
+            flight (`too_many_concurrent_ingestions`).
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/ingestions/{id}:
+    get:
+      tags:
+      - Inventory
+      summary: Get an ingestion job
+      description: 'Returns an ingestion job and its current state and counts. Poll this until `state` is either:
+
+        - `completed`
+
+        - `completed_with_errors`, or
+
+        - `failed`
+
+
+        Then read the per-item report at `/inventory/ingestions/{id}/results`.
+
+
+        Requires the `agentic:inventory` scope. A job owned by another merchant returns `404`.'
+      operationId: getInventoryIngestion
+      parameters:
+      - name: id
+        in: path
+        description: The ingestion identifier.
+        required: true
+        schema:
+          type: string
+        example: ing_01hzy8q2m4n6p8r0s2t4v6w8x0
+      responses:
+        '200':
+          description: The ingestion job.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryIngestion'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: The ingestion does not exist, or is owned by another merchant (`ingestion_not_found`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/ingestions/{id}/results:
+    get:
+      tags:
+      - Inventory
+      summary: Get an ingestion job's results
+      description: 'Returns the per-item results report for a terminal ingestion job. By default only the rejected
+
+        rows are listed, so you can fix and re-submit them; pass `include=all` to list every row.
+
+        Returns `409 results_not_ready` until the job is terminal.
+
+
+        Requires the `agentic:inventory` scope. A job owned by another merchant returns `404`.'
+      operationId: getInventoryIngestionResults
+      parameters:
+      - name: id
+        in: path
+        description: The ingestion identifier.
+        required: true
+        schema:
+          type: string
+        example: ing_01hzy8q2m4n6p8r0s2t4v6w8x0
+      - name: include
+        in: query
+        description: Set to `all` to include accepted items as well as rejected ones. Defaults to rejected only.
+        schema:
+          enum:
+          - all
+          type: string
+        example: all
+      responses:
+        '200':
+          description: The per-item results report.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryIngestionResults'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: The ingestion does not exist, or is owned by another merchant (`ingestion_not_found`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '409':
+          description: The job has not reached a terminal state yet (`results_not_ready`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/ingestions/{id}/start:
+    post:
+      tags:
+      - Inventory
+      summary: Start processing an uploaded file
+      description: 'Begins processing a CSV file that was uploaded to the presigned `upload_url`. Validates and
+
+        parses the file, then queues it, moving the job out of `awaiting_upload`. Poll the job for
+
+        status and read the per-item report as for a JSON batch.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: startInventoryIngestion
+      parameters:
+      - name: id
+        in: path
+        description: The ingestion identifier.
+        required: true
+        schema:
+          type: string
+        example: ing_01hzy93x5b7d9f1h3k5m7p9r1t
+      responses:
+        '202':
+          description: The uploaded file was accepted and queued for processing.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryIngestion'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: The ingestion does not exist, or is owned by another merchant (`ingestion_not_found`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '409':
+          description: 'The job is not awaiting an upload, or the file has not been uploaded yet
+
+            (`invalid_state`, `upload_not_found`).
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '413':
+          description: The uploaded file exceeds the size or row limit (`payload_too_large`). Nothing is applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '422':
+          description: The uploaded file could not be read (`invalid_file`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/ingestions/uploads:
+    post:
+      tags:
+      - Inventory
+      summary: Create a CSV upload slot
+      description: 'Creates an upload slot for a CSV ingestion by generating a short-lived, `PUT`-only presigned
+
+        URL.
+
+        Returns `202 Accepted` with a job in the `awaiting_upload` state carrying an `upload_url` and a `start` link.
+
+
+        Upload the file directly to `upload_url` (it never transits the API), then call the `start` operation to begin processing.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: createInventoryIngestionUpload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryIngestionUploadRequest'
+      responses:
+        '202':
+          description: The upload slot was created. Upload the file to `upload_url`, then call `start`.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryIngestion'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '422':
+          description: Request validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: 'Rate limit exceeded, or the merchant already has the maximum number of ingestion jobs in
+
+            flight (`too_many_concurrent_ingestions`).
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/reservations:
+    post:
+      tags:
+      - Inventory
+      summary: Create a reservation
+      description: 'Creates an atomic hold across multiple variants, with a time-to-live (TTL). All items in the hold are reserved together, or none are, so a reservation can never oversell.
+
+
+        The hold is protocol-neutral: it is bound to an `owner_type` and `owner_reference` supplied by the calling protocol adapter, for example a UCP session or an ACP checkout.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: createInventoryReservation
+      parameters:
+      - $ref: '#/components/parameters/ckoIdempotencyKey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryReservationRequest'
+        required: true
+      responses:
+        '200':
+          description: Idempotent replay of an earlier reservation made with the same key.
+          headers:
+            Cache-Control:
+              description: Present on an idempotent replay to indicate the response is the cached original reservation.
+              schema:
+                type: string
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryReservation'
+        '201':
+          description: The reservation was created and the stock is held.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryReservation'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: One of the requested variants does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '409':
+          description: Not enough stock to hold one of the variants or the idempotency key was reused with a different request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '422':
+          description: Request validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/reservations/{id}:
+    get:
+      tags:
+      - Inventory
+      summary: Get a reservation
+      description: 'Returns a reservation in any state. A reservation with a `held` status past its `expires_at` is reported as `expired`.
+
+        The `_links` field returns the operations valid for the reservation''s current state.
+
+
+        Requires the `agentic:inventory` scope. A reservation owned by another merchant returns `404`.'
+      operationId: getInventoryReservation
+      parameters:
+      - name: id
+        in: path
+        description: The reservation identifier.
+        required: true
+        schema:
+          type: string
+        example: rsv_tkoi5db4hryu5cei5vwoabr7we
+      responses:
+        '200':
+          description: The reservation.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryReservation'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: The reservation does not exist, or is owned by another merchant (`reservation_not_found`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/reservations/{id}/commit:
+    post:
+      tags:
+      - Inventory
+      summary: Commit a reservation
+      description: 'Converts a hold into a sale on order completion. In one atomic transaction, for each held item, `on_hand` (physical stock) and `reserved` are decremented.
+
+        The reservation moves to `committed`, and `commit` entries are written to the ledger.
+
+
+        The transaction is conditioned on the reservation still having a `held` status and not being past its `expires_at`, so a late commit can never land on an expired hold.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: commitInventoryReservation
+      parameters:
+      - name: id
+        in: path
+        description: The reservation identifier.
+        required: true
+        schema:
+          type: string
+        example: rsv_tkoi5db4hryu5cei5vwoabr7we
+      responses:
+        '200':
+          description: The reservation was committed (or is already committed).
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryReservation'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: The reservation does not exist, or is owned by another merchant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '409':
+          description: The reservation expired or was released. You must create a new reservation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+  /inventory/reservations/{id}/release:
+    post:
+      tags:
+      - Inventory
+      summary: Release a reservation
+      description: 'Releases a hold when a checkout is cancelled or abandoned. In one atomic transaction, for each held item `reserved` is decremented and `available` is restored.
+
+        The reservation moves to `released`, and `release` entries are written to the ledger.
+
+
+        Requires the `agentic:inventory` scope.'
+      operationId: releaseInventoryReservation
+      parameters:
+      - name: id
+        in: path
+        description: The reservation identifier.
+        required: true
+        schema:
+          type: string
+        example: rsv_tkoi5db4hryu5cei5vwoabr7we
+      responses:
+        '200':
+          description: 'The reservation was released (or is already released, or had already expired — in which case
+
+            `state` reads `expired`).
+
+            '
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryReservation'
+        '401':
+          description: Missing or invalid token.
+        '403':
+          description: The token does not carry the `agentic:inventory` scope.
+        '404':
+          description: The reservation does not exist, or is owned by another merchant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '409':
+          description: The reservation was already committed and cannot be released; use an adjustment to return stock for a completed sale.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryErrorResponse'
+        '429':
+          description: Rate limit exceeded.
+      security:
+      - OAuth:
+        - agentic:inventory
+components:
+  schemas:
+    InventoryIngestionFailureReason:
+      type: object
+      properties:
+        code:
+          type: string
+          description: A machine-readable failure code.
+          example: file_unreadable
+        message:
+          type: string
+          description: A human-readable explanation of the failure.
+          example: The uploaded file could not be read as CSV.
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        Why an ingestion job failed as a whole. Present only when `state` is `failed`. A merchant-owned
+
+        code (for example `file_unreadable`) can be acted on directly; a Checkout-owned code
+
+        (`internal_error`, `processing_timeout`) is alerted on our side and a re-submit is idempotency-safe.
+
+        '
+    InventoryIngestionItemResult:
+      type: object
+      properties:
+        index:
+          type: integer
+          description: The zero-based position of the item in the submitted batch or file.
+          example: 1
+        variant_id:
+          type: string
+          description: The variant identifier the item targeted.
+          example: var_123
+        status:
+          enum:
+          - accepted
+          - rejected
+          type: string
+          description: Whether the item was applied or rejected.
+          example: rejected
+        error_codes:
+          type: array
+          items:
+            type: string
+          description: The collection of one or more machine-readable rejection codes, in the `[subject]_[error]` form. Empty for an accepted item.
+          example:
+          - on_hand_negative
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The outcome for a single item in the batch.
+
+        '
+    InventoryIngestionRequest:
+      required:
+      - items
+      type: object
+      properties:
+        mode:
+          enum:
+          - upsert
+          type: string
+          description: The update semantics for the batch. Only `upsert` is available in this version.
+          default: upsert
+          example: upsert
+        items:
+          maxItems: 500
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryIngestionItem'
+          description: The list of items to apply. Up to 500 items per batch.
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The body of a JSON batch submit. Processing is asynchronous and non-atomic: good items apply
+
+        even if some are rejected.
+
+        '
+    InventoryMoney:
+      required:
+      - amount
+      - currency
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: 'The amount in the <a href="https://www.checkout.com/docs/resources/calculating-the-amount" target="_blank">minor currency unit</a>.
+
+            '
+          example: 1999
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The three-letter <a href="https://www.checkout.com/docs/resources/codes/currency-codes" target="_blank">ISO 4217 currency code</a>.
+          example: USD
+      description: A monetary amount in the currency's minor units.
+    InventoryHalLink:
+      type: object
+      properties:
+        href:
+          type: string
+          description: Absolute URI of the linked resource.
+          example: https://api.checkout.com/inventory/var_123
+        actions:
+          type: array
+          items:
+            type: string
+          description: The HTTP methods supported on the linked resource.
+          example:
+          - GET
+        types:
+          type: array
+          items:
+            type: string
+          description: The media types supported on the linked resource.
+          example:
+          - application/json
+      description: A HAL link describing a related operation on the resource.
+    InventorySetLevelsRequest:
+      required:
+      - on_hand
+      type: object
+      properties:
+        on_hand:
+          minimum: 0
+          type: integer
+          description: The absolute physical stock to set for the variant.
+          example: 25
+        safety_stock:
+          minimum: 0
+          type: integer
+          description: 'The buffer quantity to withhold from sale. Defaults to `0` when the item is
+
+            created and is left unchanged on update if omitted.
+
+            '
+          example: 2
+        reason:
+          maxLength: 256
+          type: string
+          description: 'An optional free-text reason recorded in the ledger. Must not contain personal data.
+
+            '
+          example: stock take 2026-07
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The request body for setting absolute stock levels on a variant.
+
+        '
+    InventoryIngestionUploadRequest:
+      type: object
+      properties:
+        mode:
+          enum:
+          - upsert
+          type: string
+          description: The update semantics for the upload. Only `upsert` is available in this version.
+          default: upsert
+          example: upsert
+        format:
+          enum:
+          - csv
+          type: string
+          description: The uploaded file format. Only `csv` is available in this version.
+          default: csv
+          example: csv
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The body of a CSV upload-slot request. The response returns a presigned `upload_url` to `PUT`
+
+        the file to and a `start` link to begin processing.
+
+        '
+    InventoryReservationItem:
+      required:
+      - variant_id
+      - quantity
+      type: object
+      properties:
+        variant_id:
+          maxLength: 128
+          type: string
+          description: The identifier of the variant to hold. The variant must already exist.
+          example: var_123
+        quantity:
+          minimum: 1
+          type: integer
+          description: The quantity to hold for this variant.
+          example: 2
+      description: A single variant and quantity within a reservation.
+    InventoryLevels:
+      type: object
+      properties:
+        variant_id:
+          type: string
+          description: The merchant-provided identifier for the variant.
+          example: var_123
+        on_hand:
+          type: integer
+          description: Physical stock known to Checkout.com.
+          example: 10
+        reserved:
+          type: integer
+          description: The sum of all currently active holds against this variant.
+          example: 2
+        safety_stock:
+          type: integer
+          description: A buffer quantity withheld from sale.
+          example: 1
+        available:
+          type: integer
+          description: 'The sellable quantity, clamped to zero: `max(0, on_hand − reserved − safety_stock)`.
+
+            This is the value an availability feed should publish.
+
+            '
+          example: 7
+        state:
+          enum:
+          - in_stock
+          - limited
+          - out_of_stock
+          type: string
+          description: A derived availability state for the variant.
+          example: in_stock
+        source:
+          enum:
+          - managed
+          - sync
+          type: string
+          description: How the levels are maintained. Always `managed` in the current version.
+          example: managed
+        created_on:
+          type: string
+          description: The date and time the inventory item was created.
+          format: date-time
+          example: '2026-07-01T09:15:00.0000000+00:00'
+        modified_on:
+          type: string
+          description: The date and time the inventory item was last modified.
+          format: date-time
+          example: '2026-07-13T14:02:11.0000000+00:00'
+        product:
+          allOf:
+          - $ref: '#/components/schemas/InventoryProductKnowledge'
+          description: 'The variant''s product knowledge, embedded when `expand=product` is passed on the request and
+
+            product knowledge exists for the variant. Omitted otherwise.
+
+            '
+        _links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/InventoryHalLink'
+            set:
+              $ref: '#/components/schemas/InventoryHalLink'
+          description: Links to related operations on the variant.
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The current stock levels and sellable availability for a single variant.
+
+        '
+    InventoryAdjustmentRequest:
+      required:
+      - variant_id
+      - delta
+      - reason
+      type: object
+      properties:
+        variant_id:
+          maxLength: 128
+          type: string
+          description: The identifier of the variant to adjust. The variant must already exist.
+          example: var_123
+        delta:
+          type: integer
+          description: 'The signed change to apply to `on_hand`. Must be non-zero. A negative delta that
+
+            would drive `on_hand` below zero is rejected with `409 conflict`.
+
+            '
+          example: -3
+        reason:
+          maxLength: 256
+          minLength: 1
+          type: string
+          description: 'A required free-text reason recorded in the ledger (for example, damage or found stock).
+
+            Must not contain personal data.
+
+            '
+          example: damaged in warehouse
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The request body for applying a relative adjustment to a variant''s on-hand stock.
+
+        '
+    InventoryReservation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The reservation identifier, in the `rsv_{base32-encoded GUID}` format.
+          example: rsv_tkoi5db4hryu5cei5vwoabr7we
+        state:
+          enum:
+          - held
+          - committed
+          - released
+          - expired
+          type: string
+          description: 'The current state of the hold. A `held` reservation past its `expires_at` is reported
+
+            as `expired`. Transitions out of `held` are terminal.
+
+            '
+          example: held
+        owner_type:
+          type: string
+          description: Echo of the owning caller kind.
+          example: ucp_session
+        owner_reference:
+          type: string
+          description: Echo of the owning session or checkout reference.
+          example: cs_8f42
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryReservationItem'
+          description: The variants and quantities held by this reservation.
+        expires_at:
+          type: string
+          description: The server-authoritative time at which the hold expires.
+          format: date-time
+          example: '2026-07-14T08:47:00.0000000+00:00'
+        created_on:
+          type: string
+          description: The date and time the reservation was created.
+          format: date-time
+          example: '2026-07-14T08:32:00.0000000+00:00'
+        _links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/InventoryHalLink'
+            commit:
+              $ref: '#/components/schemas/InventoryHalLink'
+            release:
+              $ref: '#/components/schemas/InventoryHalLink'
+          description: 'Links to the operations valid for the reservation''s current state. A `held` reservation
+
+            exposes `self`, `commit` and `release`; a terminal reservation exposes `self` only.
+
+            '
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        A stock hold and its current lifecycle state.
+
+        '
+    InventoryErrorResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: The identifier of the request, for support and correlation.
+          example: req_7f3c9a12b8d54e6f
+        error_type:
+          type: string
+          description: A high-level classification of the error.
+          example: conflict
+        error_codes:
+          type: array
+          items:
+            type: string
+          description: One or more machine-readable error codes, in the `[subject]_[error]` form.
+          example:
+          - insufficient_stock
+        variant_id:
+          type: string
+          description: The first variant that failed the request (present on `insufficient_stock`).
+          example: var_123
+        available:
+          type: integer
+          description: The current sellable availability of the failing variant (present on `insufficient_stock`).
+          example: 1
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The error envelope returned by the inventory endpoints. On an `insufficient_stock` conflict it
+
+        also names the first failing variant and its current availability.
+
+        '
+    InventorySetProductRequest:
+      required:
+      - title
+      - description
+      - product_url
+      - image_url
+      type: object
+      properties:
+        title:
+          maxLength: 512
+          type: string
+          description: The product's display title.
+          example: Classic leather belt, brown
+        description:
+          maxLength: 4000
+          type: string
+          description: The product's display description.
+          example: A full-grain leather belt with a brushed nickel buckle.
+        product_url:
+          maxLength: 2048
+          type: string
+          description: The canonical URL for the product page.
+          example: https://merchant.example.com/products/classic-leather-belt-brown
+        image_url:
+          maxLength: 2048
+          type: string
+          description: The URL of the primary product image.
+          example: https://merchant.example.com/images/belt-brown-main.jpg
+        additional_image_urls:
+          type: array
+          items:
+            type: string
+          description: Additional product image URLs, beyond `image_url`.
+          example:
+          - https://merchant.example.com/images/belt-brown-alt1.jpg
+        video_url:
+          type: string
+          description: The URL of a product video.
+          example: https://merchant.example.com/videos/belt-brown.mp4
+        model_3d_url:
+          type: string
+          description: The URL of a 3D model of the product.
+          example: https://merchant.example.com/models/belt-brown.glb
+        sku:
+          maxLength: 128
+          type: string
+          description: The merchant's stock-keeping unit for the product.
+          example: BELT-BRN-001
+        gtin:
+          type: string
+          description: The product's Global Trade Item Number (UPC, EAN, ISBN, or JAN).
+          example: 00012345678905
+        mpn:
+          type: string
+          description: The product's Manufacturer Part Number.
+          example: MPN-4471
+        brand:
+          type: string
+          description: The product's brand name.
+          example: Acme Leathercraft
+        category:
+          type: string
+          description: The merchant's category for the product.
+          example: Apparel & Accessories > Belts
+        price:
+          allOf:
+          - $ref: '#/components/schemas/InventoryMoney'
+          description: 'The product''s regular price. When provided together with `sale_price`, `sale_price` must
+
+            use the same currency and be less than or equal to `price`.
+
+            '
+        sale_price:
+          allOf:
+          - $ref: '#/components/schemas/InventoryMoney'
+          description: 'The product''s discounted price. Must share `price`''s currency and be less than or equal
+
+            to `price`.
+
+            '
+        sale_price_starts_at:
+          type: string
+          description: The date and time from which `sale_price` applies. Paired with `sale_price`.
+          format: date-time
+          example: '2026-08-01T00:00:00.0000000+00:00'
+        sale_price_ends_at:
+          type: string
+          description: The date and time after which `sale_price` no longer applies. Paired with `sale_price`.
+          format: date-time
+          example: '2026-08-31T23:59:59.0000000+00:00'
+        group_id:
+          type: string
+          description: 'The identifier shared by all variants of the same product (for example, the same belt in
+
+            different sizes). When set, `color` and `size` are both required.
+
+            '
+          example: grp_belt_classic
+        group_title:
+          type: string
+          description: A display title for the variant group.
+          example: Classic leather belt
+        color:
+          type: string
+          description: The variant's color. Required when `group_id` is set.
+          example: Brown
+        size:
+          type: string
+          description: The variant's size. Required when `group_id` is set.
+          example: M
+        size_system:
+          type: string
+          description: The sizing system that `size` is expressed in.
+          example: US
+        gender:
+          type: string
+          description: The target gender for the product.
+          example: unisex
+        condition:
+          enum:
+          - new
+          - used
+          - refurbished
+          type: string
+          description: 'The product''s condition, as an exact lowercase match of one of the enum values.
+
+            Defaults to `new` when omitted.
+
+            '
+          example: new
+        material:
+          type: string
+          description: The product's primary material.
+          example: Full-grain leather
+        age_group:
+          type: string
+          description: The target age group for the product.
+          example: adult
+        length:
+          type: number
+          description: 'The product''s length. `length`, `width`, `height` and `dimension_unit` must be provided
+
+            together, or not at all.
+
+            '
+          example: 110
+        width:
+          type: number
+          description: 'The product''s width. `length`, `width`, `height` and `dimension_unit` must be provided
+
+            together, or not at all.
+
+            '
+          example: 3.5
+        height:
+          type: number
+          description: 'The product''s height. `length`, `width`, `height` and `dimension_unit` must be provided
+
+            together, or not at all.
+
+            '
+          example: 0.5
+        dimension_unit:
+          type: string
+          description: 'The unit that `length`, `width` and `height` are expressed in. Required when any of
+
+            `length`, `width` or `height` is set.
+
+            '
+          example: cm
+        weight:
+          type: number
+          description: The product's weight. Must be provided together with `weight_unit`, or not at all.
+          example: 0.2
+        weight_unit:
+          type: string
+          description: The unit that `weight` is expressed in. Required when `weight` is set.
+          example: kg
+        expiration_date:
+          type: string
+          description: The date and time after which the product should no longer be offered.
+          format: date-time
+          example: '2027-01-01T00:00:00.0000000+00:00'
+        harmonized_system_code:
+          type: string
+          description: The product's Harmonized System (HS) code, for customs purposes.
+          example: '4203.30'
+        country_of_origin:
+          type: string
+          description: The two-letter ISO 3166-1 alpha-2 country of origin.
+          example: IT
+        seller_name:
+          type: string
+          description: The name of the seller of record, when different from the merchant.
+          example: Acme Leathercraft Ltd
+        seller_url:
+          type: string
+          description: The URL of the seller of record.
+          example: https://acme-leathercraft.example.com
+        seller_privacy_policy:
+          type: string
+          description: The URL of the seller's privacy policy.
+          example: https://acme-leathercraft.example.com/privacy
+        seller_tos:
+          type: string
+          description: The URL of the seller's terms of service.
+          example: https://acme-leathercraft.example.com/terms
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The request body for setting the product knowledge for a variant. The call is an upsert.
+
+        '
+    InventoryIngestionCounts:
+      type: object
+      properties:
+        received:
+          type: integer
+          description: The number of items received in the batch or parsed from the file.
+          example: 500
+        accepted:
+          type: integer
+          description: The number of items applied successfully so far.
+          example: 498
+        rejected:
+          type: integer
+          description: The number of items rejected so far, each recorded in the results report.
+          example: 2
+        pending:
+          type: integer
+          description: The number of items still to be processed. `0` once the job is terminal.
+          example: 0
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The running item tally for an ingestion job. `pending` reaches `0` when the job is terminal.
+
+        '
+    InventoryProductKnowledge:
+      required:
+      - variant_id
+      - title
+      - description
+      - product_url
+      - image_url
+      - condition
+      - created_on
+      - modified_on
+      - _links
+      type: object
+      properties:
+        variant_id:
+          type: string
+          description: The merchant-provided identifier for the variant.
+          example: var_123
+        title:
+          type: string
+          description: The product's display title.
+          example: Classic leather belt, brown
+        description:
+          type: string
+          description: The product's display description.
+          example: A full-grain leather belt with a brushed nickel buckle.
+        product_url:
+          type: string
+          description: The canonical URL for the product page.
+          example: https://merchant.example.com/products/classic-leather-belt-brown
+        image_url:
+          type: string
+          description: The URL of the primary product image.
+          example: https://merchant.example.com/images/belt-brown-main.jpg
+        additional_image_urls:
+          type: array
+          items:
+            type: string
+          description: Additional product image URLs, beyond `image_url`.
+          example:
+          - https://merchant.example.com/images/belt-brown-alt1.jpg
+        video_url:
+          type: string
+          description: The URL of a product video.
+          example: https://merchant.example.com/videos/belt-brown.mp4
+        model_3d_url:
+          type: string
+          description: The URL of a 3D model of the product.
+          example: https://merchant.example.com/models/belt-brown.glb
+        sku:
+          type: string
+          description: The merchant's stock-keeping unit for the product.
+          example: BELT-BRN-001
+        gtin:
+          type: string
+          description: The product's Global Trade Item Number (UPC, EAN, ISBN, or JAN).
+          example: 00012345678905
+        mpn:
+          type: string
+          description: The product's Manufacturer Part Number.
+          example: MPN-4471
+        brand:
+          type: string
+          description: The product's brand name.
+          example: Acme Leathercraft
+        category:
+          type: string
+          description: The merchant's category for the product.
+          example: Apparel & Accessories > Belts
+        price:
+          $ref: '#/components/schemas/InventoryMoney'
+        sale_price:
+          $ref: '#/components/schemas/InventoryMoney'
+        sale_price_starts_at:
+          type: string
+          description: The date and time from which `sale_price` applies. Paired with `sale_price`.
+          format: date-time
+          example: '2026-08-01T00:00:00.0000000+00:00'
+        sale_price_ends_at:
+          type: string
+          description: The date and time after which `sale_price` no longer applies. Paired with `sale_price`.
+          format: date-time
+          example: '2026-08-31T23:59:59.0000000+00:00'
+        group_id:
+          type: string
+          description: 'The identifier shared by all variants of the same product (for example, the same belt in
+
+            different sizes). When set, `color` and `size` are both required.
+
+            '
+          example: grp_belt_classic
+        group_title:
+          type: string
+          description: A display title for the variant group.
+          example: Classic leather belt
+        color:
+          type: string
+          description: The variant's color. Required when `group_id` is set.
+          example: Brown
+        size:
+          type: string
+          description: The variant's size. Required when `group_id` is set.
+          example: M
+        size_system:
+          type: string
+          description: The sizing system that `size` is expressed in.
+          example: US
+        gender:
+          type: string
+          description: The target gender for the product.
+          example: unisex
+        condition:
+          enum:
+          - new
+          - used
+          - refurbished
+          type: string
+          description: The product's condition. Always present; defaults to `new` when not provided.
+          example: new
+        material:
+          type: string
+          description: The product's primary material.
+          example: Full-grain leather
+        age_group:
+          type: string
+          description: The target age group for the product.
+          example: adult
+        length:
+          type: number
+          description: The product's length. Provided together with `width`, `height` and `dimension_unit`, or not at all.
+          example: 110
+        width:
+          type: number
+          description: The product's width. Provided together with `length`, `height` and `dimension_unit`, or not at all.
+          example: 3.5
+        height:
+          type: number
+          description: The product's height. Provided together with `length`, `width` and `dimension_unit`, or not at all.
+          example: 0.5
+        dimension_unit:
+          type: string
+          description: The unit that `length`, `width` and `height` are expressed in.
+          example: cm
+        weight:
+          type: number
+          description: The product's weight. Provided together with `weight_unit`, or not at all.
+          example: 0.2
+        weight_unit:
+          type: string
+          description: The unit that `weight` is expressed in.
+          example: kg
+        expiration_date:
+          type: string
+          description: The date and time after which the product should no longer be offered.
+          format: date-time
+          example: '2027-01-01T00:00:00.0000000+00:00'
+        harmonized_system_code:
+          type: string
+          description: The product's Harmonized System (HS) code, for customs purposes.
+          example: '4203.30'
+        country_of_origin:
+          type: string
+          description: The two-letter ISO 3166-1 alpha-2 country of origin.
+          example: IT
+        seller_name:
+          type: string
+          description: The name of the seller of record, when different from the merchant.
+          example: Acme Leathercraft Ltd
+        seller_url:
+          type: string
+          description: The URL of the seller of record.
+          example: https://acme-leathercraft.example.com
+        seller_privacy_policy:
+          type: string
+          description: The URL of the seller's privacy policy.
+          example: https://acme-leathercraft.example.com/privacy
+        seller_tos:
+          type: string
+          description: The URL of the seller's terms of service.
+          example: https://acme-leathercraft.example.com/terms
+        created_on:
+          type: string
+          description: The date and time the product knowledge was created.
+          format: date-time
+          example: '2026-08-01T09:15:00.0000000+00:00'
+        modified_on:
+          type: string
+          description: The date and time the product knowledge was last modified.
+          format: date-time
+          example: '2026-08-13T14:02:11.0000000+00:00'
+        _links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/InventoryHalLink'
+            set:
+              $ref: '#/components/schemas/InventoryHalLink'
+            delete:
+              $ref: '#/components/schemas/InventoryHalLink'
+          description: Links to related operations on the variant's product knowledge.
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The product knowledge for a single variant: the merchandising fields an AI agent needs to
+
+        present, compare and recommend a product, independent of stock and pricing operations.
+
+
+        Optional fields are omitted from the response entirely when not set.
+
+        '
+    InventoryReservationRequest:
+      required:
+      - owner_type
+      - owner_reference
+      - items
+      type: object
+      properties:
+        owner_type:
+          maxLength: 64
+          type: string
+          description: The kind of caller that owns the hold.
+          example: ucp_session
+        owner_reference:
+          maxLength: 256
+          type: string
+          description: An opaque reference to the owning session or checkout.
+          example: cs_8f42
+        items:
+          maxItems: 45
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryReservationItem'
+          description: The variants and quantities to hold. `variant_id`s must be unique within the request.
+        ttl_seconds:
+          maximum: 3600
+          minimum: 60
+          type: integer
+          description: How long the hold remains valid before it auto-expires. Defaults to `900`.
+          example: 900
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The request body for creating an atomic multi-variant hold. All items are reserved together
+
+        or none are. The hold is protocol-neutral: it is bound to an `owner_type` / `owner_reference`
+
+        supplied by the calling protocol adapter (for example, a UCP session or an ACP checkout).
+
+        '
+    InventoryIngestionItem:
+      required:
+      - variant_id
+      type: object
+      anyOf:
+      - required:
+        - stock
+      - required:
+        - product
+      properties:
+        variant_id:
+          maxLength: 128
+          type: string
+          description: The merchant's variant identifier, unique within the merchant.
+          example: var_123
+        stock:
+          $ref: '#/components/schemas/InventorySetLevelsRequest'
+        product:
+          $ref: '#/components/schemas/InventorySetProductRequest'
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        One item in a JSON batch. Provide:
+
+        - `stock` to set stock
+
+        - `product` to set product knowledge, or
+
+        - both.
+
+
+        At least one of the two must be present.
+
+        '
+    InventoryIngestion:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ingestion identifier, in the `ing_{base32-encoded GUID}` format.
+          example: ing_01hzy8q2m4n6p8r0s2t4v6w8x0
+        state:
+          enum:
+          - awaiting_upload
+          - accepted
+          - processing
+          - completed
+          - completed_with_errors
+          - failed
+          type: string
+          description: 'The current state of the job. `awaiting_upload` is only used by the CSV flow, between
+
+            requesting an upload slot and starting processing. `completed`, `completed_with_errors`
+
+            and `failed` are terminal.
+
+            '
+          example: accepted
+        mode:
+          enum:
+          - upsert
+          type: string
+          description: The update semantics for the batch. Only `upsert` is available in this version.
+          example: upsert
+        counts:
+          $ref: '#/components/schemas/InventoryIngestionCounts'
+        failure_reason:
+          allOf:
+          - $ref: '#/components/schemas/InventoryIngestionFailureReason'
+          description: Present only when `state` is `failed`.
+        upload_url:
+          type: string
+          description: 'A short-lived, `PUT`-only presigned URL to upload the CSV file to. Present only on the
+
+            response to a CSV upload-slot request.
+
+            '
+          example: https://inventory-ingestions.s3.eu-west-1.amazonaws.com/ingestions/mer_1/ing_.../payload.csv?X-Amz-Signature=...
+        created_on:
+          type: string
+          description: The date and time the job was created.
+          format: date-time
+          example: '2026-09-24T15:04:05.0000000+00:00'
+        modified_on:
+          type: string
+          description: The date and time the job was last updated.
+          format: date-time
+          example: '2026-09-24T15:04:11.0000000+00:00'
+        _links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/InventoryHalLink'
+            results:
+              $ref: '#/components/schemas/InventoryHalLink'
+            start:
+              $ref: '#/components/schemas/InventoryHalLink'
+          description: 'Links to the operations valid for the job''s current state. An `awaiting_upload` job also
+
+            exposes `start`.
+
+            '
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        An asynchronous batch-ingestion job and its current state. Poll it until `state` is terminal,
+
+        then read the per-item report at `/inventory/ingestions/{id}/results`.
+
+        '
+    InventoryIngestionResults:
+      type: object
+      properties:
+        ingestion_id:
+          type: string
+          description: The ingestion identifier the report belongs to.
+          example: ing_01hzy8q2m4n6p8r0s2t4v6w8x0
+        counts:
+          $ref: '#/components/schemas/InventoryIngestionCounts'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryIngestionItemResult'
+          description: The list of per-item outcomes.
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The per-item results report for a terminal ingestion job. By default `items` lists only the
+
+        rejected rows; request `?include=all` to list every row.
+
+        '
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
+  parameters:
+    ckoIdempotencyKey:
+      name: Cko-Idempotency-Key
+      in: header
+      description: An optional idempotency key for safely retrying payment requests
+      schema:
+        type: string
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

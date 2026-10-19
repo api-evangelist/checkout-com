@@ -1,0 +1,824 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Card metadata API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Card metadata
+paths:
+  /metadata/card:
+    post:
+      tags:
+      - Card metadata
+      summary: Get card metadata
+      description: 'Beta
+
+
+        Returns a single metadata record for the card specified by the Primary Account Number (PAN), Bank Identification Number (BIN), token, or instrument supplied.'
+      operationId: requestCardMetadata
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardMetadataRequest'
+            examples:
+              card:
+                value:
+                  source:
+                    type: card
+                    number: 4539467987109256
+                  format: basic
+              bin:
+                value:
+                  source:
+                    type: bin
+                    bin: 424242
+                  format: card_payouts
+              token:
+                value:
+                  source:
+                    type: token
+                    token: tok_ubfj2q76miwundwlk72vxt2i7q
+                  format: basic
+              id:
+                value:
+                  source:
+                    type: id
+                    id: src_e7hqezhxdfeetnyfdv3ayu6yru
+                  format: card_payouts
+      responses:
+        '200':
+          description: Metadata for the card number, BIN, token, or instrument ID provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardMetadataResponse'
+              examples:
+                basic:
+                  value:
+                    bin: 45434720
+                    scheme: visa
+                    local_schemes:
+                    - cartes_bancaires
+                    card_type: CREDIT
+                    card_category: CONSUMER
+                    currency: MUR
+                    issuer: STATE BANK OF MAURITIUS
+                    issuer_country: MU
+                    issuer_country_name: Mauritius
+                    is_combo_card: false
+                    product_id: F
+                    product_type: Visa Classic
+                    subproduct_id: VA
+                    regulated_indicator: false
+                    is_reloadable_prepaid: false
+                    anonymous_prepaid_description: Anonymous prepaid program and not AMLD5 compliant
+                card_payouts:
+                  value:
+                    bin: 45434720
+                    scheme: visa
+                    local_schemes:
+                    - cartes_bancaires
+                    card_type: CREDIT
+                    card_category: CONSUMER
+                    currency: MUR
+                    issuer: STATE BANK OF MAURITIUS
+                    issuer_country: MU
+                    issuer_country_name: Mauritius
+                    product_id: F
+                    product_type: Visa Classic
+                    subproduct_id: VA
+                    regulated_indicator: false
+                    is_reloadable_prepaid: false
+                    anonymous_prepaid_description: Anonymous prepaid program and not AMLD5 compliant
+                    card_payouts:
+                      domestic_non_money_transfer: not_supported
+                      cross_border_non_money_transfer: standard
+                      domestic_gambling: fast_funds
+                      cross_border_gambling: unknown
+                      domestic_money_transfer: unknown
+                      cross_border_money_transfer: not_supported
+        '401':
+          description: Unauthorized
+        '404':
+          description: Card Metadata not found
+        '415':
+          description: Unsupported Media Type
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal Server Error
+        '502':
+          description: Bad Gateway
+        '504':
+          description: Gateway Timeout
+      security:
+      - OAuth:
+        - vault:card-metadata
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/metadata\"\n\t\"github.com/checkout/checkout-sdk-go/metadata/sessions\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.VaultCardMetadata}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nrequest := metadata.CardMetadataRequest{\n\tSource: sources.NewRequestCardSource(\"card_number\"),\n\tFormat: metadata.Basic,\n}\n\nresponse, err := api.Metadata.RequestCardMetadata(request)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+components:
+  schemas:
+    CardMetadataResponse:
+      required:
+      - bin
+      - scheme
+      type: object
+      properties:
+        bin:
+          maxLength: 11
+          minLength: 6
+          pattern: ^[0-9]{6}$|^[0-9]{8}$|^[0-9]{11}$
+          type: string
+          description: The issuer's Bank Identification Number (BIN). Supports 6, 8, or 11 digit BINs.
+          example: '45434720'
+        scheme:
+          type: string
+          description: The global card scheme. For example, `"american_express"`, `"cartes_bancaires"`, `"diners_club_international"`, `"discover"`, `"eftpos"`, `"jcb"`, `"mastercard"`, or `"visa"`.
+          example: visa
+        scheme_local:
+          enum:
+          - cartes_bancaires
+          - mada
+          - omannet
+          type: string
+          description: 'Replaced by `local_schemes`.
+
+            The local card scheme, if the card is co-branded.
+
+            '
+          example: cartes_bancaires
+          deprecated: true
+        local_schemes:
+          type: array
+          items:
+            enum:
+            - accel
+            - cartes_bancaires
+            - eftpos
+            - mada
+            - nyce
+            - omannet
+            - pulse
+            - shazam
+            - star
+            - upi
+            - paypak
+            - maestro
+            type: string
+          description: The local card scheme or schemes, if the card is co-branded.
+          example:
+          - cartes_bancaires
+          - upi
+        card_type:
+          enum:
+          - CREDIT
+          - DEBIT
+          - PREPAID
+          - CHARGE
+          - DEFERRED DEBIT
+          - NETWORK TOKEN
+          type: string
+          description: The card type
+          example: CREDIT
+        card_category:
+          enum:
+          - CONSUMER
+          - COMMERCIAL
+          type: string
+          description: The card category
+          example: CONSUMER
+        currency:
+          type: string
+          description: The card billing currency, as a three-letter ISO-4217 <a href="https://www.checkout.com/docs/developer-resources/testing/codes/currency-codes" target="blank">currency code</a>.
+          example: MUR
+        issuer:
+          type: string
+          description: The card issuer
+          example: STATE BANK OF MAURITIUS
+        issuer_country:
+          type: string
+          description: The card issuer's country, as an ISO-2 code
+          example: MU
+        issuer_country_name:
+          type: string
+          description: The card issuer's country
+          example: Mauritius
+        is_combo_card:
+          type: boolean
+          description: Indicates whether the card is a combo credit and debit card. Applicable to Visa and Mastercard.
+          example: true
+        product_id:
+          type: string
+          description: The card issuer or scheme's product identifier
+          example: CLASSIC
+        product_type:
+          type: string
+          description: The card issuer or scheme's product type
+          example: F
+        subproduct_id:
+          type: string
+          description: The card issuer or scheme's sub-product identifier
+          example: VA
+        regulated_indicator:
+          type: boolean
+          description: Specifies whether the card is assigned to an interchange regulated BIN range
+          example: true
+        regulated_type:
+          enum:
+          - base_regulated
+          - fraud_protected_regulated
+          type: string
+          description: The type of the interchange regulated card BIN range
+          example: base_regulated
+        is_reloadable_prepaid:
+          type: boolean
+          description: Indicates whether the prepaid bank identification number (BIN) is reloadable.
+          example: true
+        anonymous_prepaid_description:
+          enum:
+          - Anonymous prepaid program and not AMLD5 compliant
+          - Anonymous prepaid program and AMLD5 compliant
+          - Not prepaid or non-anonymous prepaid program/default
+          type: string
+          description: The description of the prepaid BIN, specifying if it's an anonymous prepaid card.
+          example: Anonymous prepaid program and not AMLD5 compliant
+        card_payouts:
+          type: object
+          properties:
+            domestic_non_money_transfer:
+              enum:
+              - not_supported
+              - standard
+              - fast_funds
+              - unknown
+              type: string
+              description: Describes whether the card is eligible for domestic non-money transfer transactions
+              example: not_supported
+            cross_border_non_money_transfer:
+              enum:
+              - not_supported
+              - standard
+              - fast_funds
+              - unknown
+              type: string
+              description: Describes whether the card is eligible for cross-border non-money transfer transactions
+              example: standard
+            domestic_gambling:
+              enum:
+              - not_supported
+              - standard
+              - fast_funds
+              - unknown
+              type: string
+              description: Describes whether the card is eligible for domestic gambling transactions
+              example: fast_funds
+            cross_border_gambling:
+              enum:
+              - not_supported
+              - standard
+              - fast_funds
+              - unknown
+              type: string
+              description: Describes whether the card is eligible for cross-border gambling transactions
+              example: unknown
+            domestic_money_transfer:
+              enum:
+              - not_supported
+              - standard
+              - fast_funds
+              - unknown
+              type: string
+              description: Describes whether the card is eligible for domestic money transfer transactions
+              example: not_supported
+            cross_border_money_transfer:
+              enum:
+              - not_supported
+              - standard
+              - fast_funds
+              - unknown
+              type: string
+              description: Describes whether the card is eligible for cross-border money transfer transactions
+              example: not_supported
+          description: A card payouts block exists in the response if the format in the request is  "card_payouts".
+        scheme_metadata:
+          type: object
+          properties:
+            accel:
+              type: array
+              items:
+                $ref: '#/components/schemas/PinlessDebitSchemeMetadata'
+            pulse:
+              type: array
+              items:
+                $ref: '#/components/schemas/PinlessDebitSchemeMetadata'
+            nyce:
+              type: array
+              items:
+                $ref: '#/components/schemas/PinlessDebitSchemeMetadata'
+            shazam:
+              type: array
+              items:
+                $ref: '#/components/schemas/PinlessDebitSchemeMetadata'
+            star:
+              type: array
+              items:
+                $ref: '#/components/schemas/PinlessDebitSchemeMetadata'
+          description: "Provides additional information about the scheme or local scheme's capabilities. It is sent if the card is issued in the US and can be used in a PINless debit network. <br/>\n`scheme_metadata` is returned when you provide: \n  - The full card number or \n  -  11 digit bin\n"
+        account_funding_transaction:
+          $ref: '#/components/schemas/AccountFundingTransaction'
+      description: Card Metadata
+    CardMetadataRequest:
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/CardMetadataRequestSource'
+        format:
+          enum:
+          - basic
+          - card_payouts
+          type: string
+          description: 'The format to provide the output in.
+
+
+            A `basic` response will only include standard metadata, while a `card_payouts` formatted response will also include fields specific to card payouts.
+
+            '
+          default: basic
+          example: basic
+        reference:
+          type: string
+          description: 'A reference you can later use to identify this Payment Context. For example, an order number.
+
+            '
+          example: ORD-5023-4E89
+    AccountFundingTransaction:
+      type: object
+      properties:
+        aft_indicator:
+          type: object
+          properties:
+            pull_funds:
+              $ref: '#/components/schemas/PullFunds'
+          description: Describes whether the card is eligible for Account Funding Transactions
+      description: Account Funding Transaction
+    CardMetadataRequestSourceBin:
+      title: bin
+      required:
+      - type
+      - bin
+      type: object
+      properties:
+        type:
+          type: string
+          description: The source type
+          example: bin
+        bin:
+          maxLength: 8
+          minLength: 6
+          pattern: ^[0-9]+$
+          type: string
+          description: The issuer's Bank Identification Number (BIN)
+          example: '454347'
+      description: An existing payment source
+    PullFunds:
+      type: object
+      properties:
+        cross_border:
+          type: boolean
+          description: Describes whether the card is eligible for Account Funding Transactions between accounts in different countries
+          example: true
+        domestic:
+          type: boolean
+          description: Describes whether the card is eligible for Account Funding Transactions between accounts in the same country
+          example: true
+      description: Describes whether the card is eligible to take funds from different accounts to fund other non-merchant accounts
+    CardMetadataRequestSourceCard:
+      title: card
+      required:
+      - type
+      - number
+      type: object
+      properties:
+        type:
+          type: string
+          description: The source type
+          example: card
+        number:
+          maxLength: 19
+          minLength: 12
+          pattern: ^[0-9]+$
+          type: string
+          description: The Primary Account Number (PAN)
+          example: '4543474002249996'
+      description: An existing payment source
+    CardMetadataRequestSourceInstrument:
+      title: id
+      required:
+      - type
+      - id
+      type: object
+      properties:
+        type:
+          type: string
+          description: The source type
+          example: id
+        id:
+          pattern: ^(src)_(\w{26})$
+          type: string
+          description: The unique ID for the payment instrument that was created using the card's details
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+      description: An existing payment source
+    PinlessDebitSchemeMetadata:
+      type: object
+      properties:
+        network_id:
+          type: string
+          description: The PINless debit network identifier
+          example: aam
+        network_description:
+          type: string
+          description: The PINless debit network name
+          example: Accel Money Transfer Advantage
+        bill_pay_indicator:
+          type: boolean
+          description: Describes whether the card is eligible for bill payment transactions
+          example: true
+        ecommerce_indicator:
+          type: boolean
+          description: Describes whether the card is eligible for e-commerce transactions
+          example: true
+        interchange_fee_indicator:
+          type: string
+          description: The type of interchange fee used for transactions
+          example: '00'
+        money_transfer_indicator:
+          type: boolean
+          description: Describes whether the card is eligible for money transfer transactions
+          example: true
+        token_indicator:
+          type: boolean
+          description: True indicates that the card PAN is a DPAN, false indicates that it is a FPAN
+          example: false
+    CardMetadataRequestSource:
+      oneOf:
+      - $ref: '#/components/schemas/CardMetadataRequestSourceCard'
+      - $ref: '#/components/schemas/CardMetadataRequestSourceBin'
+      - $ref: '#/components/schemas/CardMetadataRequestSourceToken'
+      - $ref: '#/components/schemas/CardMetadataRequestSourceInstrument'
+      description: The source object
+      discriminator:
+        propertyName: type
+        mapping:
+          card: '#/components/schemas/CardMetadataRequestSourceCard'
+          bin: '#/components/schemas/CardMetadataRequestSourceBin'
+          token: '#/components/schemas/CardMetadataRequestSourceToken'
+          id: '#/components/schemas/CardMetadataRequestSourceInstrument'
+    ValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HL80RJLS76I7
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: payment_source_required
+    CardMetadataRequestSourceToken:
+      title: token
+      required:
+      - type
+      - token
+      type: object
+      properties:
+        type:
+          type: string
+          description: The source type
+          example: token
+        token:
+          pattern: ^(tok)_(\w{26})$
+          type: string
+          description: The Checkout.com unique token that was generated when the card's details were tokenized
+          example: tok_ubfj2q76miwundwlk72vxt2i7q
+      description: An existing payment source
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

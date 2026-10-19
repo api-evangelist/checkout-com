@@ -1,26 +1,102 @@
 openapi: 3.2.0
 info:
-  title: Checkout.com Customers API
-  description: 'Checkout.com is a global payment processor offering card acquiring, alternative
+  title: Checkout.com API Reference Customers API
+  description: '## Get started
 
-    payments, payouts, tokenization, customers, instruments, and notification workflows
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
 
-    via a single API. This OpenAPI is a best-effort partial spec derived from the public
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
 
-    API reference at https://api-reference.checkout.com/.'
-  version: '2026-05-23'
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
   contact:
-    name: Checkout.com Developer Support
-    url: https://api-reference.checkout.com/
-  license:
-    name: Proprietary
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
 servers:
-- url: https://api.checkout.com
-  description: Production
-- url: https://api.sandbox.checkout.com
-  description: Sandbox
-security:
-- BearerAuth: []
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
 tags:
 - name: Customers
 paths:
@@ -29,45 +105,1373 @@ paths:
       tags:
       - Customers
       summary: Create a customer
+      description: 'Store a customer''s details in a customer object to reuse in future payments. When creating a customer, you can link payment instruments – the customer `id` returned can be passed as a source when making a payment.
+
+
+        **NOTE:** Specify a `default` instrument, otherwise the `instruments` array will not be saved on creation.'
       operationId: createCustomer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreCustomerRequest'
+        required: true
       responses:
         '201':
-          description: Customer created
-  /customers/{id}:
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreCustomerResponse'
+        '401':
+          description: Unauthorized
+        '409':
+          description: A concurrent update conflict occurred. Retry the request.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ValidationError'
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal Error
+      security:
+      - OAuth:
+        - vault
+        - vault:customers
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Common;\nusing CustomerRequest = Checkout.Customers.CustomerRequest;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Vault)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\nCustomerRequest request = new CustomerRequest\n{\n    Email = \"email@docs.checkout.com\",\n    Name = \"FirstName LastName\",\n    Phone = new Phone {CountryCode = \"1\", Number = \"4155552671\"},\n    Metadata = new Dictionary<string, object>() {{\"coupon_code\", \"NY2018\"}, {\"partner_id\", \"123989\"}}\n};\n\ntry\n{\n    IdResponse response = await api.CustomersClient().Create(request);\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/common\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/customers\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Vault}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nrequest := customers.CustomerRequest{\n\tEmail: \"email@docs.checkout.com\",\n\tName:  \"Name\",\n\tPhone: &common.Phone{\n\t\tCountryCode: \"44\",\n\t\tNumber:      \"4155552671\",\n\t},\n}\n\nresponse, err := api.Customers.Create(request)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.common.IdResponse;\nimport com.checkout.common.Phone;\nimport com.checkout.customers.CustomerRequest;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.GATEWAY) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\nCustomerRequest request = CustomerRequest.builder()\n    .email(\"email@docs.checkout.com\")\n    .name(\"name\")\n    .phone(Phone.builder().countryCode(\"1\").number(\"415 555 2671\").build())\n    .instruments(Arrays.asList(\"instrument_id_1\", \"instrument_id_2\"))\n    .metadata(new HashMap<>())\n    .build();\n\ntry {\n    IdResponse response = api.customersClient().create(request).get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst customerResponse = await cko.customers.create({\n\t\temail: 'JohnTest@test.com',\n\t\tname: 'John Test',\n\t\tphone: {\n\t\t\tcountry_code: '+1',\n\t\t\tnumber: '4155552671',\n\t\t},\n\t\tmetadata: {\n\t\t\tcoupon_code: 'NY2018',\n\t\t\tpartner_id: 123989,\n\t\t},\n\t});\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Common\\Phone;\nuse Checkout\\Customers\\CustomerRequest;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Gateway])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\n$phone = new Phone();\n$phone->country_code = \"+1\";\n$phone->number = \"415 555 2671\";\n\n$request = new CustomerRequest();\n$request->email = \"email@docs.checkout.com\";\n$request->name = \"name\";\n$request->phone = $phone;\n$request->instruments = [\"instrument_id_1\", \"instrument_id_2\"];\n\ntry {\n    $response = $api->getCustomersClient()->create($request);\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.common.common import Phone\nfrom checkout_sdk.customers.customers import CustomerRequest\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder()\n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder()\n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.GATEWAY]) \n    .build()\n)\n\nphone = Phone()\nphone.country_code = '44'\nphone.number = '4155552671'\n\nrequest = CustomerRequest()\nrequest.email = 'email@docs.checkout.com'\nrequest.name = 'Name'\nrequest.phone = phone\nrequest.instruments = ['instrument_id_1', 'instrument_id_2']\n\ntry:\n    response = api.customers.create(request)\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+  /customers/{identifier}:
     get:
       tags:
       - Customers
-      summary: Retrieve customer details
-      operationId: getCustomer
+      summary: Get customer details
+      description: Returns the details of a customer and their payment instruments.
+      operationId: getCustomerDetails
+      parameters:
+      - name: identifier
+        in: path
+        description: The customer's ID or email
+        required: true
+        schema:
+          type: string
+          oneOf:
+          - title: Customer ID
+            pattern: ^(cus)_(\w{26})$
+          - title: Customer Email
+            maxLength: 255
+            properties:
+              email:
+                maxLength: 255
+                type: string
+                format: email
+            format: email
       responses:
         '200':
-          description: Customer details
+          description: Customer retrieved successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveCustomerResponse'
+              examples:
+                bank_account:
+                  value:
+                    id: cus_y3oqhf46pyzuxjbcn2giaqnb44
+                    email: brucewayne@gmail.com
+                    name: Bruce Wayne
+                    instruments:
+                    - type: bank_account
+                      id: src_wmlfc3zyhqzehihu7giusaaawu
+                      fingerprint: vnsdrvikkvre3dtrjjvlm5du4q
+                      account_number: 13654567455
+                      bank_code: 123-456
+                      currency: GBP
+                      country: GB
+                card:
+                  value:
+                    id: cus_y3oqhf46pyzuxjbcn2giaqnb44
+                    email: brucewayne@gmail.com
+                    name: Bruce Wayne
+                    instruments:
+                    - type: card
+                      id: src_wmlfc3zyhqzehihu7giusaaawu
+                      fingerprint: vnsdrvikkvre3dtrjjvlm5du4q
+                      expiry_month: 6
+                      expiry_year: 2025
+                      scheme: VISA
+                      last4: 9996
+                      bin: 454347
+                      card_type: CREDIT
+                      card_category: CONSUMER
+                      issuer: TEST STATE BANK
+                ach:
+                  value:
+                    id: cus_y3oqhf46pyzuxjbcn2giaqnb44
+                    email: brucewayne@gmail.com
+                    name: Bruce Wayne
+                    instruments:
+                    - type: ach
+                      id: src_wmlfc3zyhqzehihu7giusaaawu
+                      fingerprint: vnsdrvikkvre3dtrjjvlm5du4q
+                      created_on: '2021-01-01T00:00:00.0000000+00:00'
+                      modified_on: '2021-01-01T00:00:00.0000000+00:00'
+                      vault_id: vid_wmlfc3zyhqzehihu7giusaaawu
+                      instrument_data:
+                        account_type: savings
+                        account_number: 4099999992
+                        bank_code: 211370545
+                        currency: USD
+                        country: US
+                      account_holder:
+                        first_name: John
+                        last_name: Smith
+                        company_name: Smith Enterprises
+                        type: individual
+                sepa:
+                  value:
+                    id: cus_y3oqhf46pyzuxjbcn2giaqnb44
+                    email: brucewayne@gmail.com
+                    name: Bruce Wayne
+                    instruments:
+                    - type: sepa
+                      id: src_wmlfc3zyhqzehihu7giusaaawu
+                      fingerprint: vnsdrvikkvre3dtrjjvlm5du4q
+                      created_on: '2021-01-01T00:00:00.0000000+00:00'
+                      modified_on: '2021-01-01T00:00:00.0000000+00:00'
+                      vault_id: vid_wmlfc3zyhqzehihu7giusaaawu
+                      instrument_data:
+                        account_number: FR2810096000509685512959O86
+                        country: GB
+                        currency: GBP
+                        payment_type: recurring
+                        mandate_id: 1234567890
+                        date_of_signature: '2021-01-01T00:00:00.0000000+00:00'
+                      account_holder:
+                        first_name: Hannah
+                        last_name: Bret
+                        billing_address:
+                          address_line1: 123 High St.
+                          address_line2: Flat 456
+                          city: London
+                          zip: SW1A 1AA
+                          country: GB
+        '401':
+          description: Unauthorized
+        '404':
+          description: Customer not found
+      security:
+      - OAuth:
+        - vault
+        - vault:customers
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Customers;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Vault)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    CustomerDetailsResponse response = await api.CustomersClient().Get(\"customer_id\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Vault}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Customers.Get(\"customer_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.customers.CustomerResponse;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.GATEWAY) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\ntry {\n    CustomerResponse response = api.customersClient().get(\"customer_id\").get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst customerResponse = await cko.customers.get('cus_2tvaccfvs3lulevzg42vgyvtdq');\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Gateway])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\ntry {\n    $response = $api->getCustomersClient()->get(\"customer_id\");\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder()\n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.GATEWAY]) \n    .build()\n)\n\ntry:\n    response = api.customers.get(\"customer_id\")\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
     patch:
       tags:
       - Customers
-      summary: Update a customer
-      operationId: updateCustomer
+      summary: Update customer details
+      description: Update the details of a customer and link payment instruments to them.
+      operationId: updateCustomerDetails
+      parameters:
+      - name: identifier
+        in: path
+        description: The customer's ID
+        required: true
+        schema:
+          pattern: ^(cus)_(\w{26})$
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerDetailsRequest'
+        required: true
       responses:
-        '200':
-          description: Customer updated
+        '204':
+          description: Customer updated successfully
+        '401':
+          description: Unauthorized
+        '409':
+          description: A concurrent update conflict occurred. Call the [Get customer details](/tag/Customers#operation/getCustomerDetails) to retrieve the latest state before retrying.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ValidationError'
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Customer not found
+      security:
+      - OAuth:
+        - vault
+        - vault:customers
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Common;\nusing CustomerRequest = Checkout.Customers.CustomerRequest;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Vault)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\nCustomerRequest request = new CustomerRequest\n{\n    Email = \"email@docs.checkout.com\",\n    Name = \"FirstName LastName\",\n    Phone = new Phone\n    {\n        CountryCode = \"1\",\n        Number = \"4155552671\"\n    },\n    Metadata = new Dictionary<string, object>()\n    {\n        {\"coupon_code\", \"NY2018\"},\n        {\"partner_id\", \"123989\"}\n    }\n};\n\nCustomerRequest request = new CustomerRequest\n{\n    Email = \"email@docs.checkout.com\",\n    Name = \"FirstName LastName\",\n    Phone = new Phone {CountryCode = \"1\", Number = \"4155552671\"},\n    Metadata = new Dictionary<string, object>() {{\"coupon_code\", \"NY2018\"}, {\"partner_id\", \"123989\"}}\n};\n\ntry\n{\n    await api.CustomersClient().Update(\"customer_id\", request);\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/common\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/customers\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Vault}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nrequest := customers.CustomerRequest{\n\tEmail: \"email@docs.checkout.com\",\n\tName:  \"Name\",\n\tPhone: &common.Phone{\n\t\tCountryCode: \"44\",\n\t\tNumber:      \"4155552671\",\n\t},\n}\n\nresponse, err := api.Customers.Update(\"customer_id\", request)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.EmptyResponse;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.common.Phone;\nimport com.checkout.customers.CustomerRequest;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.GATEWAY) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\nCustomerRequest customerRequest = CustomerRequest.builder()\n    .email(\"email@docs.checkout.com\")\n    .name(\"name\")\n    .phone(Phone.builder().countryCode(\"1\").number(\"4155552671\").build())\n    .instruments(Arrays.asList(\"instrument_id_1\", \"instrument_id_2\"))\n    .metadata(new HashMap<>())\n    .build();\n\ntry {\n    EmptyResponse response = api.customersClient().update(\"customer_id\", customerRequest).get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst customerResponse = await cko.customers.update('cus_2tvaccfvs3lulevzg42vgyvtdq', {\n\t\tname: 'James Bond',\n\t});\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Common\\Phone;\nuse Checkout\\Customers\\CustomerRequest;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Gateway])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\n$phone = new Phone();\n$phone->country_code = \"+1\";\n$phone->number = \"415 555 2671\";\n\n$request = new CustomerRequest();\n$request->email = \"email@docs.checkout.com\";\n$request->name = \"name\";\n$request->phone = $phone;\n$request->instruments = [\"instrument_id_1\", \"instrument_id_2\"];\n\ntry {\n    $response = $api->getCustomersClient()->update(\"customer_id\", $request);\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.common.common import Phone\nfrom checkout_sdk.customers.customers import CustomerRequest\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder() \n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.GATEWAY]) \n    .build()\n)\n\nphone = Phone()\nphone.country_code = '44'\nphone.number = '4155552671'\n\nrequest = CustomerRequest()\nrequest.email = 'email@docs.checkout.com'\nrequest.name = 'Name'\nrequest.phone = phone\nrequest.instruments = ['instrument_id_1', 'instrument_id_2']\n\ntry:\n    response = api.customers.update(request)\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+    delete:
+      tags:
+      - Customers
+      summary: Delete a customer
+      description: Delete a customer and all of their linked payment instruments.
+      operationId: deleteCustomer
+      parameters:
+      - name: identifier
+        in: path
+        description: The customer's ID
+        required: true
+        schema:
+          pattern: ^(cus)_(\w{26})$
+          type: string
+      responses:
+        '204':
+          description: Customer deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Customer not found or not associated with client
+        '409':
+          description: A concurrent update conflict occurred. Retry the request.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ValidationError'
+      security:
+      - OAuth:
+        - vault
+        - vault:customers
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Vault)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    EmptyResponse response = await api.CustomersClient().Delete(\"customer_id\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Vault}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Customers.Delete(\"customer_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.EmptyResponse;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.GATEWAY) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\ntry {\n    EmptyResponse response = api.customersClient().delete(\"customer_id\").get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst customerResponse = await cko.customers.delete('cus_2tvaccfvs3lulevzg42vgyvtdq');\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Vault])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\ntry {\n    $response = $api->getCustomersClient()->delete(\"customer_id\");\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder()\n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder()\n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.GATEWAY]) \n    .build()\n)\n\ntry:\n    response = api.customers.delete(\"customer_id\")\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
 components:
+  schemas:
+    BankDetails:
+      type: object
+      properties:
+        name:
+          maxLength: 128
+          type: string
+          description: The bank's name
+          example: Lloyds TSB
+        branch:
+          maxLength: 128
+          type: string
+          description: The bank branch's name
+          example: Bournemouth
+        address:
+          allOf:
+          - $ref: '#/components/schemas/Address'
+          description: The bank's contact address
+      description: Details of the bank
+    RetrieveCustomerBankAccountInstrumentResponse:
+      title: bank_account
+      required:
+      - type
+      - id
+      - fingerprint
+      - currency
+      - country
+      type: object
+      properties:
+        type:
+          type: string
+          description: The instrument type
+          example: bank_account
+        id:
+          type: string
+          description: The unique identifier of the payment source or destination that can be used later for payments
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+        fingerprint:
+          pattern: ^([a-z0-9]{26})$
+          type: string
+          description: A token that can uniquely identify this instrument across all customers
+          example: vnsdrvikkvre3dtrjjvlm5du4q
+        account_type:
+          enum:
+          - savings
+          - current
+          - cash
+          type: string
+          description: The type of account
+          example: savings
+        account_number:
+          type: string
+          description: Number (which can contain letters) that identifies the account
+          example: '13654567455'
+        bank_code:
+          type: string
+          description: Code that identifies the bank
+          example: 123-456
+        branch_code:
+          type: string
+          description: Code that identifies the bank branch
+          example: '6443'
+        iban:
+          type: string
+          description: Internationally agreed standard for identifying bank account
+          example: HU93116000060000000012345676
+        bban:
+          type: string
+          description: The combination of bank code and/or branch code and account number
+          example: 3704 0044 0532 0130 00
+        swift_bic:
+          type: string
+          description: 8 or 11 character code which identifies the bank or bank branch
+          example: '37040044'
+        currency:
+          type: string
+          description: The three-letter <a href="https://www.checkout.com/docs/resources/codes/currency-codes" target="_blank">ISO currency code</a> of the account's currency
+          example: GBP
+        country:
+          type: string
+          description: The two-letter <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="_blank">ISO country code</a> of where the account is based
+          example: GB
+        account_holder:
+          $ref: '#/components/schemas/AccountHolder'
+        bank:
+          $ref: '#/components/schemas/BankDetails'
+      description: Bank account details
+    UpdateCustomerDetailsRequest:
+      type: object
+      properties:
+        email:
+          maxLength: 255
+          type: string
+          description: The email address of the customer
+          format: email
+          example: brucewayne@gmail.com
+        name:
+          maxLength: 255
+          type: string
+          description: The name of the customer
+          example: Bruce Wayne
+        phone:
+          allOf:
+          - $ref: '#/components/schemas/PhoneNumber'
+          description: The customer's phone number
+        metadata:
+          type: object
+          description: Allows you to store additional information about a customer. You can include a maximum of 20 key-value pairs. Each key and value can be up to 100 characters long. Providing metadata in this request will replace any existing stored for this customer.
+          example:
+            coupon_code: NY2018
+            partner_id: 123989
+        default:
+          type: string
+          description: The ID of this customer's default instrument
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+      description: The customer's details
+    StoreCustomerRequest:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          maxLength: 255
+          type: string
+          description: The customer's email address
+          format: email
+          example: brucewayne@gmail.com
+        name:
+          maxLength: 255
+          type: string
+          description: The customer's name
+          example: Bruce Wayne
+        phone:
+          allOf:
+          - $ref: '#/components/schemas/PhoneNumber'
+          description: The customer's phone number
+        metadata:
+          type: object
+          description: Allows you to store additional information about a customer. You can include a maximum of 20 key-value pairs. Each key and value can be up to 100 characters long.
+          example:
+            coupon_code: NY2018
+            partner_id: 123989
+        default:
+          type: string
+          description: The ID of the instrument you want to set as this customer's default instrument
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+      description: Create a customer
+    RetrieveInstrumentCustomerResponse:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          pattern: ^(cus)_(\w{26})$
+          type: string
+          description: The customer's unique identifier. This can be passed as a source when making a payment.
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        email:
+          type: string
+          description: The customer's email address
+          example: brucewayne@gmail.com
+        name:
+          type: string
+          description: The customer's name
+          example: Bruce Wayne
+        default:
+          type: boolean
+          description: This will be true if this instrument is set as the default for the customer
+          example: true
+      description: Stored customer details
+    AccountHolder:
+      required:
+      - type
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/01_PayoutRequestIndividualAccountHolder'
+      - $ref: '#/components/schemas/03_PayoutRequestGovernmentAccountHolder'
+      - $ref: '#/components/schemas/02_PayoutRequestCorporateAccountHolder'
+      description: The bank account holder details. Having accurate and complete data improves payout performance (increases success rate and the prevents delays).
+      discriminator:
+        propertyName: type
+        mapping:
+          individual: '#/components/schemas/01_PayoutRequestIndividualAccountHolder'
+          government: '#/components/schemas/03_PayoutRequestGovernmentAccountHolder'
+          corporate: '#/components/schemas/02_PayoutRequestCorporateAccountHolder'
+    StoreCustomerResponse:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: The customer's unique identifier
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+      description: Customer created successfully
+    01_PayoutRequestIndividualAccountHolder:
+      title: individual
+      required:
+      - type
+      - first_name
+      - last_name
+      - billing_address
+      type: object
+      properties:
+        type:
+          enum:
+          - individual
+          - corporate
+          - government
+          type: string
+          description: The type of the legal account holder.
+          example: individual
+        first_name:
+          type: string
+          description: 'The <b>legal</b> first name of the account holder.
+
+            '
+          example: John
+        last_name:
+          type: string
+          description: 'The <b>legal</b> last name of the account holder.
+
+            '
+          example: Smith
+        tax_id:
+          type: string
+          description: The <b>legal</b> account holder's tax number or reference.
+          example: '123456'
+        date_of_birth:
+          type: string
+          description: The account holder's date of birth in a `YYYY-MM-DD` format. Strongly recommended where available.
+          format: date
+          example: '1986-01-01T00:00:00.0000000'
+        country_of_birth:
+          type: string
+          description: The two-letter <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="_blank">ISO country code</a> of the account holder's country of birth.
+          example: GB
+        residential_status:
+          enum:
+          - resident
+          - non_resident
+          type: string
+          description: The account holder's residential status.
+          example: resident
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/Address'
+          description: The current billing address associated with the destination account. Required for payouts to individuals. Strongly recommended when available.
+        phone:
+          allOf:
+          - $ref: '#/components/schemas/PhoneNumber'
+          description: The phone number of the account holder.
+        identification:
+          type: object
+          properties:
+            type:
+              type: string
+              description: The document type
+              example: SSN
+            issuing_country:
+              type: string
+              description: The country where the document was issued
+            number:
+              type: string
+              description: The document number
+          description: The account holder's government document identification. For example, the social security number (SSN).
+      description: Store a previously tokenized instrument
+    RetrieveCustomerCardInstrumentResponse:
+      title: card
+      required:
+      - type
+      - id
+      - fingerprint
+      - expiry_month
+      - expiry_year
+      - last4
+      - bin
+      type: object
+      properties:
+        type:
+          type: string
+          description: The instrument type
+          example: card
+        id:
+          type: string
+          description: The unique identifier of the payment source or destination that can be used later for payments
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+        fingerprint:
+          pattern: ^([a-z0-9]{26})$
+          type: string
+          description: A token that can uniquely identify this instrument across all customers
+          example: vnsdrvikkvre3dtrjjvlm5du4q
+        expiry_month:
+          minimum: 1
+          maxLength: 2
+          type: integer
+          description: The expiry month
+          example: 6
+        expiry_year:
+          maxLength: 4
+          minLength: 4
+          type: integer
+          description: The expiry year
+          example: 2025
+        scheme:
+          type: string
+          description: The card scheme
+          example: VISA
+        last4:
+          maxLength: 4
+          minLength: 4
+          type: string
+          description: The last four digits of the card number
+          example: '9996'
+        bin:
+          type: string
+          description: The card issuer's bank identification number (BIN)
+          example: '454347'
+        card_type:
+          enum:
+          - CREDIT
+          - DEBIT
+          - PREPAID
+          - CHARGE
+          type: string
+          description: The card type
+          example: CREDIT
+        card_category:
+          enum:
+          - CONSUMER
+          - COMMERCIAL
+          type: string
+          description: The card category
+          example: CONSUMER
+        issuer:
+          type: string
+          description: The name of the card issuer
+          example: GOTHAM STATE BANK
+        issuer_country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The card issuer's country (<a href="https://www.checkout.com/docs/resources/codes/country-codes" target="blank">two-letter ISO code</a>)
+          example: US
+        product_id:
+          type: string
+          description: The issuer/card scheme product identifier
+          example: F
+        product_type:
+          type: string
+          description: The issuer/card scheme product type
+          example: CLASSIC
+        account_holder:
+          type: object
+          properties:
+            first_name:
+              type: string
+              description: The first name of the account holder
+              example: John
+            last_name:
+              type: string
+              description: The last name of the account holder
+              example: Smith
+            billing_address:
+              allOf:
+              - $ref: '#/components/schemas/Address'
+              description: The billing address of the account holder
+            phone:
+              allOf:
+              - $ref: '#/components/schemas/PhoneNumber'
+              description: The phone number of the account holder
+          description: The account holder details
+        card_wallet_type:
+          enum:
+          - googlepay
+          - applepay
+          type: string
+          description: The type of digital wallet used for the card.
+      description: card instrument response
+    02_PayoutRequestCorporateAccountHolder:
+      title: corporate
+      required:
+      - type
+      - company_name
+      type: object
+      properties:
+        type:
+          enum:
+          - individual
+          - corporate
+          - government
+          type: string
+          description: The type of the legal account holder.
+          example: corporate
+        company_name:
+          type: string
+          description: 'The full <b>legal</b> name of a registered company that holds the account.
+
+            '
+          example: Test company
+        tax_id:
+          type: string
+          description: The <b>legal</b> account holder's tax number or reference.
+          example: '123456'
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/Address'
+          description: The current billing address associated with the destination account. Strongly recommended when available.
+      description: Store a previously tokenized instrument
+    RetrieveCustomerResponse:
+      required:
+      - id
+      - email
+      type: object
+      properties:
+        id:
+          type: string
+          description: The customer's unique identifier
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        email:
+          type: string
+          description: The customer's email address
+          format: email
+          example: brucewayne@gmail.com
+        default:
+          type: string
+          description: The ID for this customer's default instrument
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+        name:
+          type: string
+          description: The customer's name
+          example: Bruce Wayne
+        phone:
+          allOf:
+          - $ref: '#/components/schemas/PhoneNumber'
+          description: The customer's phone number
+        metadata:
+          type: object
+          description: A set of key-value pairs that is attached to a customer
+          example:
+            coupon_code: NY2018
+            partner_id: 123989
+        instruments:
+          title: Instrument
+          type: array
+          items:
+            $ref: '#/components/schemas/RetrieveCustomerInstrumentResponse'
+          description: The details of the instruments linked to this customer
+          example:
+          - type: card
+            id: src_wmlfc3zyhqzehihu7giusaaawu
+            fingerprint: vnsdrvikkvre3dtrjjvlm5du4q
+            expiry_month: 6
+            expiry_year: 2025
+            scheme: VISA
+            last4: 9996
+            bin: 454347
+            card_type: CREDIT
+            card_category: CONSUMER
+            issuer: TEST STATE BANK
+            issuer_country: US
+            product_id: F
+            product_type: CLASSIC
+            account_holder:
+              first_name: John
+              last_name: Smith
+              billing_address:
+                address_line1: 123 High St.
+                address_line2: Flat 456
+                city: London
+                zip: SW1A 1AA
+                country: GB
+              phone:
+                country_code: 1
+                number: 415 555 2671
+            card_wallet_type: applepay
+      description: Customer retrieved successfully
+    RetrieveCustomerInstrumentResponse:
+      required:
+      - type
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/RetrieveCustomerBankAccountInstrumentResponse'
+      - $ref: '#/components/schemas/RetrieveCustomerCardInstrumentResponse'
+      - $ref: '#/components/schemas/RetrieveCustomerAchInstrumentResponse'
+      - $ref: '#/components/schemas/RetrieveCustomerSepaInstrumentResponse'
+      discriminator:
+        propertyName: type
+        mapping:
+          bank_account: '#/components/schemas/RetrieveCustomerBankAccountInstrumentResponse'
+          card: '#/components/schemas/RetrieveCustomerCardInstrumentResponse'
+          ach: '#/components/schemas/RetrieveCustomerAchInstrumentResponse'
+          sepa: '#/components/schemas/RetrieveCustomerSepaInstrumentResponse'
+    03_PayoutRequestGovernmentAccountHolder:
+      title: government
+      required:
+      - type
+      - company_name
+      type: object
+      properties:
+        type:
+          enum:
+          - individual
+          - corporate
+          - government
+          type: string
+          description: The type of the legal account holder.
+          example: government
+        company_name:
+          type: string
+          description: 'The full <b>legal</b> name of a registered company that holds the account.
+
+            '
+          example: Test company
+        tax_id:
+          type: string
+          description: The <b>legal</b> account holder's tax number or reference.
+          example: '123456'
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/Address'
+          description: The current billing address associated with the destination account. Strongly recommended when available.
+      description: Store a previously tokenized instrument
+    RetrieveCustomerAchInstrumentResponse:
+      title: ach
+      required:
+      - type
+      - id
+      - fingerprint
+      - created_on
+      - modified_on
+      - vault_id
+      - instrument_data
+      - account_holder
+      type: object
+      properties:
+        type:
+          type: string
+          description: The instrument type
+          example: ach
+        id:
+          type: string
+          description: "The unique identifier of the payment source or destination. \n\nYou can use the `id` in future payments.\n"
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+        fingerprint:
+          pattern: ^([a-z0-9]{26})$
+          type: string
+          description: A token that can uniquely identify this instrument across all customers.
+          example: vnsdrvikkvre3dtrjjvlm5du4q
+        created_on:
+          type: string
+          description: The date and time the instrument was created.
+          format: date-time
+          example: '2021-01-01T00:00:00.0000000+00:00'
+        modified_on:
+          type: string
+          description: The date and time the instrument was last modified.
+          format: date-time
+          example: '2021-01-01T00:00:00.0000000+00:00'
+        vault_id:
+          type: string
+          description: The Vault ID currently attached to the instrument.
+          example: vid_wmlfc3zyhqzehihu7giusaaawu
+        instrument_data:
+          required:
+          - account_type
+          - account_number
+          - bank_code
+          - currency
+          - country
+          type: object
+          properties:
+            account_type:
+              enum:
+              - savings
+              - checking
+              type: string
+              description: The type of Direct Debit account
+              example: savings
+            account_number:
+              maxLength: 17
+              minLength: 4
+              type: string
+              description: The account number of the Direct Debit account
+              example: '4099999992'
+            bank_code:
+              maxLength: 9
+              minLength: 8
+              type: string
+              description: The bank code of the Direct Debit account
+              example: '211370545'
+            currency:
+              maxLength: 3
+              minLength: 3
+              type: string
+              description: The currency of the account
+              example: USD
+            country:
+              maxLength: 2
+              minLength: 2
+              type: string
+              description: The country of the account
+              example: US
+          description: The details of the bank account
+        account_holder:
+          required:
+          - first_name
+          - last_name
+          - company_name
+          - type
+          type: object
+          properties:
+            first_name:
+              type: string
+              description: First name. Required for individual account holder type
+              example: John
+            last_name:
+              type: string
+              description: Last name. Required for individual account holder type
+              example: Smith
+            company_name:
+              type: string
+              description: Company name. Required for corporate account holder type
+              example: Smith Enterprises
+            type:
+              enum:
+              - individual
+              - corporate
+              type: string
+              description: Account holder type
+          description: The account holder details
+        customer:
+          $ref: '#/components/schemas/RetrieveInstrumentCustomerResponse'
+      description: card instrument response
+    ValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HL80RJLS76I7
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: payment_source_required
+    RetrieveCustomerSepaInstrumentResponse:
+      title: sepa
+      required:
+      - type
+      - id
+      - fingerprint
+      - created_on
+      - modified_on
+      - vault_id
+      type: object
+      properties:
+        type:
+          type: string
+          description: The instrument type
+          example: sepa
+        id:
+          type: string
+          description: "The unique identifier of the payment source or destination. \n\nYou can use the `id` in future payments.\n"
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+        fingerprint:
+          pattern: ^([a-z0-9]{26})$
+          type: string
+          description: A token that can uniquely identify this instrument across all customers.
+          example: vnsdrvikkvre3dtrjjvlm5du4q
+        created_on:
+          type: string
+          description: The date and time the instrument was created.
+          format: date-time
+          example: '2021-01-01T00:00:00.0000000+00:00'
+        modified_on:
+          type: string
+          description: The date and time the instrument was last modified.
+          format: date-time
+          example: '2021-01-01T00:00:00.0000000+00:00'
+        vault_id:
+          type: string
+          description: The Vault ID currently attached to the instrument.
+          example: vid_wmlfc3zyhqzehihu7giusaaawu
+        instrument_data:
+          required:
+          - country
+          - account_number
+          - currency
+          - payment_type
+          - mandate_id
+          - date_of_signature
+          type: object
+          properties:
+            account_number:
+              maxLength: 34
+              minLength: 15
+              type: string
+              description: The International Bank Account Number (IBAN) of the account.
+              example: FR2810096000509685512959O86
+            country:
+              maxLength: 2
+              minLength: 2
+              type: string
+              description: The country of the account.
+              example: GB
+            currency:
+              maxLength: 3
+              minLength: 3
+              type: string
+              description: The currency of the account.
+              example: GBP
+            payment_type:
+              enum:
+              - recurring
+              - regular
+              type: string
+              description: The type of payment.
+              example: recurring
+            mandate_id:
+              maxLength: 35
+              minLength: 1
+              type: string
+              description: 'The mandate ID.
+
+
+                If this value was not provided when the instrument was created, it may take up to five seconds for the generated mandate ID to be available.
+
+                '
+              example: '1234567890'
+            date_of_signature:
+              maxLength: 10
+              minLength: 10
+              type: string
+              description: 'The date the mandate was signed.
+
+
+                If `mandate_id` was not provided when the instrument was created, it may take up to five seconds for the generated date of signature to be available.
+
+                '
+              format: date
+              example: '2021-01-01T00:00:00.0000000'
+          description: The details of the SEPA mandate.
+        account_holder:
+          required:
+          - first_name
+          - last_name
+          - billing_address
+          type: object
+          properties:
+            first_name:
+              type: string
+              description: The first name of the account holder.
+              example: Hannah
+            last_name:
+              type: string
+              description: The last name of the account holder.
+              example: Bret
+            billing_address:
+              required:
+              - address_line1
+              - address_line2
+              - city
+              - zip
+              - country
+              type: object
+              properties:
+                address_line1:
+                  type: string
+                  description: The first line of the address.
+                  example: 123 High St.
+                address_line2:
+                  type: string
+                  description: The second line of the address.
+                  example: Flat 456
+                city:
+                  type: string
+                  description: The address city.
+                  example: London
+                zip:
+                  type: string
+                  description: The address ZIP or postal code.
+                  example: SW1A 1AA
+                country:
+                  maxLength: 2
+                  minLength: 2
+                  type: string
+                  description: The address country.
+                  example: GB
+              description: The billing address of the account holder.
+          description: The account holder's details.
+        customer:
+          $ref: '#/components/schemas/RetrieveInstrumentCustomerResponse'
+      description: card instrument response
+    Address:
+      type: object
+      properties:
+        address_line1:
+          maxLength: 200
+          type: string
+          description: The first line of the address.
+          example: 123 High St.
+        address_line2:
+          maxLength: 200
+          type: string
+          description: "The second line of the address. <p/>\n\n For SEPA payments, this value has a maximum length of 10 characters.\n"
+          example: Flat 456
+        city:
+          maxLength: 50
+          type: string
+          description: The address city.
+          example: London
+        state:
+          maxLength: 3
+          type: string
+          description: 'The state or province of the address country <a href="https://en.wikipedia.org/wiki/ISO_3166-2" target="_blank">ISO 3166-2 code</a> (for example: CA for California in the United States).'
+        zip:
+          maxLength: 50
+          type: string
+          description: The address zip or postal code.
+          example: SW1A 1AA
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The two-letter <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="_blank">ISO country code</a> of the address.
+          example: GB
+    PhoneNumber:
+      type: object
+      properties:
+        country_code:
+          maxLength: 7
+          minLength: 1
+          type: string
+          description: The international <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="_blank">country calling code</a>. Required if `source.type` is `tamara`.
+          example: '+1'
+        number:
+          maxLength: 25
+          minLength: 6
+          type: string
+          description: The phone number. Required if `source.type` is `tamara`.
+          example: 415 555 2671
+      description: A phone number
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      description: Secret API key as Bearer token (format `Bearer sk_...`).
-    OAuth2:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
       type: oauth2
-      description: OAuth 2.0 client credentials flow
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
       flows:
         clientCredentials:
-          tokenUrl: https://access.checkout.com/connect/token
+          tokenUrl: string
           scopes:
-            gateway: Access to gateway resources
-            vault: Access to vault resources
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

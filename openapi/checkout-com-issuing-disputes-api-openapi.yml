@@ -1,0 +1,1432 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Issuing disputes API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Issuing disputes
+paths:
+  /issuing/disputes:
+    post:
+      tags:
+      - Issuing disputes
+      summary: Create an Issuing dispute
+      description: 'Beta
+
+
+        Create and submit an Issuing dispute for an Issuing transaction. The dispute is sent to the card scheme for processing. For full guidance, see Manage Issuing disputes.
+
+        The transaction must already be cleared and not refunded.'
+      operationId: createDispute
+      parameters:
+      - $ref: '#/components/parameters/IssuingCkoIdempotencyKeyRequired'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create-dispute-request'
+        required: true
+      responses:
+        '200':
+          description: Dispute already exists for this transaction/presentment
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-dispute-response'
+        '201':
+          description: Dispute created successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/create-dispute-response'
+        '401':
+          description: Unauthorized Request
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '422':
+          description: Dispute is ineligble
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '429':
+          description: Too Many Requests
+        '415':
+          description: Unsupported Media Type
+        '406':
+          description: Not Acceptable
+      security:
+      - OAuth:
+        - issuing:disputes-write
+  /issuing/disputes/{disputeId}:
+    get:
+      tags:
+      - Issuing disputes
+      summary: Get an Issuing dispute
+      description: 'Beta
+
+
+        Retrieve the details of an Issuing dispute.'
+      operationId: getDispute
+      parameters:
+      - name: disputeId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingDisputeId'
+      responses:
+        '200':
+          description: Issuing dispute retrieved successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-dispute-response'
+        default:
+          description: Issuing dispute response retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-dispute-response'
+        '401':
+          description: Unauthorized Request
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '404':
+          description: Issuing dispute not found
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+        '415':
+          description: Unsupported Media Type
+        '406':
+          description: Not Acceptable
+      security:
+      - OAuth:
+        - issuing:disputes-read
+  /issuing/disputes/{disputeId}/amend:
+    post:
+      tags:
+      - Issuing disputes
+      summary: Amend an Issuing dispute
+      description: 'Beta
+
+
+        Amend an Issuing dispute
+
+        that has been blocked from proceeding. This endpoint is used when the dispute''s submission
+
+        could not go through — either because the DR team requested changes before sending to the
+
+        card scheme, or because the card scheme returned the submission for a fixable reason (in
+
+        which case the DR team reviews the rejection and instructs the consumer via `action_details`).
+
+
+        This endpoint is only applicable when `status` is `action_required` and the `status_reason` is one of `chargeback_change_requested`, `chargeback_evidence_invalid_or_insufficient`, `escalation_change_requested`,`prearbitration_evidence_invalid_or_insufficient`. The `_links.amend`
+
+        link in the GET response is present whenever an amendment is required.
+
+
+        Check `action_details.instructions` in `GET /issuing/disputes/{id}` for the specific changes
+
+        required before calling this endpoint.
+
+
+        ### Chargeback stage (`status_reason: chargeback_change_requested`, `chargeback_evidence_invalid_or_insufficient`)
+
+
+        Address changes required before the chargeback can proceed. This covers two scenarios:
+
+
+        - **issuing rejection:** The Disputes Resolution team reviews the submission and rejects providing corrective instructions via `action_details`.
+
+
+        - **Scheme rejection:** The card scheme returned the chargeback for a fixable reason.
+
+
+        ### Escalation stage (`status_reason: escalation_change_requested`, `prearbitration_evidence_invalid_or_insufficient`)
+
+
+        Address changes required before the escalation (pre-arbitration or arbitration) can proceed.
+
+        The same two scenarios apply as at the chargeback stage. `reason_change_justification`
+
+        is **required** when changing the `reason` at this stage.'
+      operationId: amendDispute
+      parameters:
+      - $ref: '#/components/parameters/IssuingCkoIdempotencyKeyRequired'
+      - name: disputeId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingDisputeId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/amend-dispute-request'
+            examples:
+              chargeback_change:
+                summary: Amend chargeback — DR team or scheme requested changes
+                value:
+                  reason: 4853
+                  evidence:
+                  - name: cardholder_signed_declaration.pdf
+                    content: JVBERi0xLjQKJeLjz9M...
+                    description: Signed cardholder declaration as requested by DR team.
+                  action_response: Updated reason to 4853 as requested. New evidence meets scheme requirements.
+              chargeback_change_fraud:
+                summary: Amend chargeback — fraud reason code (fraud_details required)
+                value:
+                  reason: 4837
+                  fraud_details:
+                    fraud_type: card_not_present_fraud
+                    description: Cardholder confirmed they did not make any online purchases on this date.
+                  evidence:
+                  - name: notarised_fraud_affidavit.pdf
+                    content: JVBERi0xLjQKJeLjz9M...
+                    description: Notarised fraud affidavit as requested by DR team.
+                  action_response: Notarised affidavit provided as requested.
+              escalation_change:
+                summary: Amend escalation — reason code change (reason_change_justification required)
+                value:
+                  reason: 4837
+                  reason_change_justification: The cardholder's sworn statement confirms this was an unauthorized transaction. Reason code 4837 (No Cardholder Authorization) more accurately reflects the fraud nature and is required for pre-arbitration at this stage.
+                  evidence:
+                  - name: fraud_affidavit.pdf
+                    content: JVBERi0xLjQKJeLjz9M...
+                    description: Completed fraud affidavit signed by cardholder.
+                  fraud_details:
+                    fraud_type: counterfeit_card
+                    description: Cardholder's PIN was used without their knowledge, likely via skimming at the point of sale.
+                  action_response: Reason updated to 4837 per DR team guidance. Fraud affidavit attached.
+      responses:
+        '200':
+          description: Your corrections were accepted; the dispute continues processing.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-dispute-response'
+        '401':
+          description: Unauthorized Request
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '404':
+          description: Issuing dispute not found
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '409':
+          description: This dispute is not in a state that accepts corrections (e.g. not action_required).
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '422':
+          description: 'Request is missing required information — for example, `fraud_details` for a fraud reason code,
+
+            or `reason_change_justification` when changing the reason code at the escalation stage.
+
+            '
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+      security:
+      - OAuth:
+        - issuing:disputes-write
+  /issuing/disputes/{disputeId}/cancel:
+    post:
+      tags:
+      - Issuing disputes
+      summary: Cancel an Issuing dispute
+      description: 'Beta
+
+
+        Cancel an Issuing dispute.
+
+        If you decide not to proceed with a dispute, you can cancel it either:
+
+        * While the dispute `status` is `processing` and `status_reason` is `chargeback_pending` or `chargeback_processed`
+
+        For more information, see Cancel a dispute.'
+      operationId: cancelDispute
+      parameters:
+      - $ref: '#/components/parameters/IssuingCkoIdempotencyKeyRequired'
+      - name: disputeId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingDisputeId'
+      responses:
+        '202':
+          description: Issuing dispute cancellation requested successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '401':
+          description: Unauthorized Request
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '404':
+          description: Issuing dispute not found
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '409':
+          description: Issuing dispute cannot be canceled
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '422':
+          description: Request missing required information
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+      security:
+      - OAuth:
+        - issuing:disputes-write
+  /issuing/disputes/{disputeId}/escalate:
+    post:
+      tags:
+      - Issuing disputes
+      summary: Escalate an Issuing dispute
+      description: 'Beta
+
+
+        Escalate an Issuing dispute to pre-arbitration or arbitration.'
+      operationId: escalateDispute
+      parameters:
+      - $ref: '#/components/parameters/IssuingCkoIdempotencyKeyRequired'
+      - name: disputeId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingDisputeId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/escalate-dispute-request'
+            example:
+              justification: The cardholder maintains that the goods were not received.
+              amount: 100
+              reason_change:
+                reason: 4837
+                justification: Reason changed due to evidence from the acquirer.
+              additional_evidence:
+              - name: evidence.pdf
+                content: c29tZSBiYXNlNjQgZGF0YQ==
+                description: Goods were not received.
+      responses:
+        '202':
+          description: Issuing dispute escalation requested successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '401':
+          description: Unauthorized Request
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '404':
+          description: Issuing dispute not found
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '409':
+          description: Issuing dispute cannot be escalated
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '422':
+          description: Request missing required information
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+      security:
+      - OAuth:
+        - issuing:disputes-write
+  /issuing/disputes/{disputeId}/submit:
+    post:
+      tags:
+      - Issuing disputes
+      summary: Submit an Issuing dispute
+      description: 'Beta
+
+
+        Use the Create an Issuing dispute endpoint instead to create and submit a dispute in a single step.
+
+
+        You can also use the Amend endpoint to submit changes if the dispute status is `action_required`.
+
+        This endpoint may still be used to re-submit after a rejected submission or to re-attempt an escalation; existing clients will receive advance communication when the new re-open flow is available.'
+      operationId: submitDispute
+      parameters:
+      - $ref: '#/components/parameters/IssuingCkoIdempotencyKeyRequired'
+      - name: disputeId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingDisputeId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/submit-dispute-request'
+      responses:
+        '200':
+          description: Issuing dispute submitted successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-dispute-response'
+        '401':
+          description: Unauthorized Request
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '404':
+          description: Issuing dispute not found
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '409':
+          description: Issuing dispute cannot be submitted
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+        '422':
+          description: Request missing required information
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+      deprecated: true
+      security:
+      - OAuth:
+        - issuing:disputes-write
+components:
+  schemas:
+    IssuingDispute:
+      type: object
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeId'
+          description: The unique identifier for the Issuing dispute.
+        reason:
+          type: string
+          description: The four-digit scheme-specific [reason code](https://www.checkout.com/docs/developer-resources/codes/chargeback-codes#Mastercard) you provide for the chargeback.
+          example: '4802'
+        disputed_amount:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: The disputed amount, in the [minor unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount) of the transaction currency.
+        status:
+          $ref: '#/components/schemas/IssuingDisputeStatus'
+        status_reason:
+          $ref: '#/components/schemas/IssuingDisputeStatusReason'
+        transaction_id:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionId'
+          description: The unique Checkout.com identifier for the transaction.
+        presentment_message_id:
+          allOf:
+          - $ref: '#/components/schemas/IssuingMessageId'
+          description: The unique identifier for the disputed presentment message.
+        merchant:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeMerchant'
+          description: The details of the merchant you raised the dispute with.
+        created_on:
+          type: string
+          description: The date and time when the dispute was created, in UTC. <br/>Format – ISO 8601 code <br/>Example – `2025-01-31T10:20:30.456`
+          format: date-time
+        modified_on:
+          type: string
+          description: The date and time when the dispute was last modified, in UTC. <br/>Format – ISO 8601 code <br/>Example – `2025-01-31T10:20:30.456`
+          format: date-time
+        action_details:
+          $ref: '#/components/schemas/IssuingDisputeActionDetails'
+        chargeback:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeChargeback'
+        representment:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeSecondPresentment'
+        pre_arbitration:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputePreArbitration'
+        arbitration:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeArbitration'
+        _links:
+          type: object
+          properties:
+            self:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI for the dispute.
+            card:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI for the card used for the disputed transaction.
+            cardholder:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI for the cardholder who requested the chargeback.
+            transaction:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI for the disputed transaction.
+            amend:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: "The URI to amend and resubmit the dispute, if the dispute `status` is `action_required`.\n\n Refer to `action_details` for the required amendments.\n"
+            escalate:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI for escalating the Issuing dispute.
+            cancel:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI to cancel the dispute.
+          description: The links related to the dispute.
+      description: The client's dispute view.
+    create-dispute-request:
+      required:
+      - transaction_id
+      - reason
+      type: object
+      properties:
+        transaction_id:
+          $ref: '#/components/schemas/IssuingTransactionId'
+        reason:
+          type: string
+          description: 'The four-digit scheme-specific [reason code](https://www.checkout.com/docs/developer-resources/codes/chargeback-codes#Mastercard) for the chargeback.
+
+            Only provide this if Checkout.com is your issuing processor.
+
+            Checkout.com does not validate this value.
+
+            '
+          example: '4807'
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssuingDisputeEvidence'
+          description: 'Your evidence for raising the chargeback, in line with the [card scheme''s requirements](https://www.checkout.com/docs/card-issuing/manage-cardholder-transactions/manage-issuing-disputes#Evidence_file_requirements).
+
+            '
+        amount:
+          type: number
+          description: 'The chargeback amount, in the [minor unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount) of the transaction currency. <br/>
+
+            If not provided, Checkout.com uses the full amount of the presentment.
+
+            '
+          example: 100
+        presentment_message_id:
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/IssuingMessageId'
+          description: 'The unique identifier for the disputed presentment message. <br/> <br/>
+
+            If the transaction has multiple presentments, you must provide this field to specify the presentment you want to dispute. <br/><br/>
+
+            If the transaction has only one presentment, you do not need to provide this field because Checkout.com uses that presentment automatically. <br/>
+
+            '
+        fraud_details:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeFraudDetails'
+          description: 'Contains all fraud-related information to be sent with the chargeback.
+
+
+            This field is required if the dispute has a fraud-related reason code.
+
+            '
+        justification:
+          maxLength: 100
+          type: string
+          description: 'Short justification for raising this dispute, to be sent to the scheme.
+
+            '
+    IssuingTransactionAmount:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: The amount is provided in the <a href="https://www.checkout.com/docs/resources/calculating-the-amount" target="blank">minor currency unit</a>.
+          example: 100
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/IssuingCurrency'
+    IssuingDisputeChargeback:
+      type: object
+      properties:
+        submitted_on:
+          type: string
+          description: The date and time when the chargeback was successfully submitted to the card scheme, in UTC. <br/>Format – ISO 8601 code <br/>Example – `2025-01-31T10:20:30.456`
+          format: date-time
+          example: '2025-09-10T10:11:12.0000000+00:00'
+        reason:
+          type: string
+          description: The four-digit scheme-specific [reason code](https://www.checkout.com/docs/developer-resources/codes/chargeback-codes#Mastercard) you provide for the chargeback.
+          example: '4802'
+        amount:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: The disputed amount, in the [minor unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount) of the transaction currency.
+        evidence:
+          type: array
+          items:
+            required:
+            - file_id
+            type: object
+            properties:
+              file_id:
+                allOf:
+                - $ref: '#/components/schemas/IssuingFileId'
+                description: The unique identifier for an uploaded file.
+              description:
+                type: string
+                description: A brief description of the evidence.
+                example: Goods were not received.
+          description: Your evidence for the chargeback.
+        justification:
+          type: string
+          description: A brief description of why the dispute is being raised. This is forwarded to the scheme.
+      description: The dispute details at the chargeback stage.
+    IssuingTransactionId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^trx_[a-z0-9]{26}$
+      type: string
+      description: The transaction's unique identifier.
+      example: trx_aayhhfwbdyxwcaeyhhfwbd4xga
+    create-dispute-response:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IssuingDispute'
+    escalate-dispute-request:
+      required:
+      - justification
+      type: object
+      properties:
+        additional_evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssuingDisputeEvidence'
+          description: 'Your evidence for escalating the dispute, in line with the [card scheme''s requirements](https://www.checkout.com/docs/card-issuing/manage-cardholder-transactions/manage-issuing-disputes#Evidence_file_requirements).
+
+            If the request goes to arbitration, the card scheme ignores any evidence you provide at this stage using this request.
+
+            '
+        amount:
+          type: number
+          description: The updated disputed amount, in the [minor unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount) of the representment currency.
+          example: 100
+        reason_change:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeReasonChange'
+        fraud_details:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeFraudDetails'
+          description: "Provides fraud-related details.\n\n This field is required if the dispute has a fraud-related reason code at the escalation stage, or after a requested reason code change to a fraud code.\n"
+        justification:
+          maxLength: 13000
+          type: string
+          description: 'Justification for escalating the dispute.
+
+            '
+    IssuingDisputeStatus:
+      enum:
+      - created
+      - canceled
+      - processing
+      - action_required
+      - won
+      - lost
+      type: string
+      description: The [dispute status](https://www.checkout.com/docs/developer-resources/codes/issuing-dispute-codes) as returned to the client.
+      example: processing
+    submit-dispute-request:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: "The updated four-digit scheme-specific [reason code](https://www.checkout.com/docs/developer-resources/codes/chargeback-codes#Mastercard). \nIf not provided, Checkout.com uses the existing reason code.\n"
+          example: '4807'
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssuingDisputeEvidence'
+          description: Your evidence for the chargeback, if updated since you created the dispute.
+        amount:
+          type: number
+          description: 'The updated disputed amount, in the [minor unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount) of the transaction or representment currency.
+
+            If not provided, Checkout.com uses the existing disputed amount.
+
+            '
+          example: 100
+    IssuingDisputeArbitration:
+      type: object
+      properties:
+        submitted_on:
+          type: string
+          description: The date and time when the arbitration was successfully escalated to the card scheme, in UTC. <br/>Format – ISO 8601 code <br/>Example – `2025-01-31T10:20:30.456`
+          format: date-time
+          example: '2025-09-10T10:11:12.0000000+00:00'
+        amount:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: The disputed amount at the arbitration stage, in the [minor currency unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount).
+        justification:
+          type: string
+          description: Your justification for escalating the dispute to arbitration.
+        decided_on:
+          type: string
+          description: The date and time when the card scheme decided the arbitration case, in UTC. <br/>Format – ISO 8601 code <br/>Example – `2025-01-31T10:20:30.456`
+          format: date-time
+          example: '2025-01-31T10:20:30.0000000+00:00'
+      description: The dispute details during the arbitration stage.
+    IssuingMessageId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^msg_[a-z0-9]{26}$
+      type: string
+      description: The message's unique Checkout.com identifier.
+      example: msg_fa6psq242dcd6fdn5gifcq1491
+    IssuingFileId:
+      maxLength: 31
+      minLength: 31
+      pattern: ^file_[a-z0-9]{26}$
+      type: string
+      description: The unique Checkout.com identifier for the uploaded file.
+      example: file_6lbss42ezvoufcb2beo76rvwly
+    IssuingDisputeEvidence:
+      required:
+      - name
+      - content
+      type: object
+      properties:
+        name:
+          type: string
+          description: The complete file name, including the extension.
+          example: evidence.pdf
+        content:
+          type: string
+          description: 'The base64-encoded string that represents a single JPG, PDF, TIFF, or ZIP file.
+
+            ZIP files can contain multiple JPG, PDF, or TIFF files.
+
+            '
+        description:
+          type: string
+          description: A brief description of the evidence.
+          example: Goods were not received.
+    IssuingValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HLHPN8802NUF:00000003
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          maxItems: 20
+          type: array
+          items:
+            type: string
+            example: request_body_malformed
+      additionalProperties: false
+    IssuingLink:
+      required:
+      - href
+      - actions
+      - types
+      type: object
+      properties:
+        href:
+          maxLength: 100
+          pattern: ^https:\/.*$
+          type: string
+          description: The link URL.
+        actions:
+          maxItems: 20
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^(GET|POST|PUT|DELETE|PATCH)$
+            enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            type: string
+          additionalProperties: false
+          description: The HTTP Methods that can be performed on the link.
+        types:
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^application\/.*$
+            type: string
+          additionalProperties: false
+          description: The Content Types for the link to the resource
+      additionalProperties: false
+    IssuingDisputeReasonChange:
+      required:
+      - reason
+      - justification
+      type: object
+      properties:
+        reason:
+          type: string
+          description: 'The updated four-digit scheme-specific [reason code](https://www.checkout.com/docs/developer-resources/codes/chargeback-codes) for the chargeback.
+
+            '
+          example: '4807'
+        justification:
+          maxLength: 13000
+          type: string
+          description: Your justification for changing the dispute reason.
+      description: The change to the dispute reason and your justification for changing it.
+    IssuingDisputeMerchant:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The merchant's identifier. This can vary from one acquirer to another.
+          example: (*)123456789
+        name:
+          type: string
+          description: The merchant's name.
+          example: Software Company
+        city:
+          type: string
+          description: The city where the merchant is located.
+          example: Paris
+        state:
+          type: string
+          description: The state where the merchant is located (US only).
+          example: ''
+        country_code:
+          type: string
+          description: The two-digit [country code](https://www.checkout.com/docs/developer-resources/codes/country-codes) where the merchant is located.
+          example: FR
+        category_code:
+          type: string
+          description: 'The merchant''s [category code](https://www.checkout.com/docs/developer-resources/testing/codes/merchant-category-codes) for the disputed transaction.
+
+            '
+          example: '5331'
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssuingFileId'
+          description: Any evidence submitted by the merchant during the dispute lifecycle.
+    IssuingCurrency:
+      maxLength: 3
+      minLength: 3
+      pattern: ^[a-zA-Z]{3}$
+      type: string
+      description: The issuing currency, as a three-letter <a href="https://docs.checkout.com/docs/currency-codes" target="blank">ISO currency code</a>.
+      format: ISO4217
+      example: USD
+    IssuingDisputeStatusReason:
+      enum:
+      - ''
+      - expired
+      - chargeback_pending
+      - chargeback_change_requested
+      - chargeback_evidence_invalid_or_insufficient
+      - chargeback_processed
+      - chargeback_rejected
+      - chargeback_reversal_pending
+      - chargeback_reversed
+      - chargeback_response_accepted
+      - prearbitration_pending
+      - escalation_change_requested
+      - prearbitration_evidence_invalid_or_insufficient
+      - prearbitration_processed
+      - prearbitration_rejected
+      - prearbitration_reversal_pending
+      - prearbitration_reversed
+      - prearbitration_response_accepted
+      - arbitration_pending
+      - arbitration_processed
+      - presentment_reversed
+      type: string
+      description: The status reason as returned to the client. An empty string indicates no status reason currently applies.
+      example: chargeback_processed
+    get-dispute-response:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IssuingDispute'
+      description: The client's dispute response.
+    IssuingDisputeActionDetails:
+      type: object
+      properties:
+        instructions:
+          type: string
+          description: 'The amendments required before the dispute can proceed. For example, if you need to provide a reason code, or update the submitted evidence.
+
+            '
+        last_action_response:
+          type: string
+          description: 'Specifies whether the dispute was previously amended and an action response was provided.
+
+            '
+      description: 'Provides instructions on the amendments required before the dispute can proceed, if the dispute `status` is `action_required`.
+
+
+        Use the <a target="_blank" href="https://api-reference.checkout.com/tag/Issuing-disputes#operation/amendDispute">Amend an Issuing dispute</a> endpoint to submit your amendments.
+
+        Use the correct endpoint to send your updates as requested.
+
+        '
+    IssuingDisputePreArbitration:
+      type: object
+      properties:
+        submitted_on:
+          type: string
+          description: The date and time when the pre-arbitration was successfully escalated to the card scheme, in UTC. <br/>Format – ISO 8601 code <br/>Example – `2025-01-31T10:20:30.456`
+          format: date-time
+          example: '2025-09-10T10:11:12.0000000+00:00'
+        evidence:
+          type: array
+          items:
+            required:
+            - file_id
+            type: object
+            properties:
+              file_id:
+                allOf:
+                - $ref: '#/components/schemas/IssuingFileId'
+                description: The unique identifier for an uploaded file.
+              description:
+                type: string
+                description: A brief description of the evidence.
+                example: Goods were not received.
+          description: The evidence relating to the Issuing dispute provided at the pre-arbitration stage.
+        amount:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: The disputed amount at the pre-arbitration stage, in the [minor currency unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount).
+        reason_change:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeReasonChange'
+          description: The change to the dispute reason and your justification for changing it.
+        justification:
+          type: string
+          description: Your justification for escalating the dispute to pre-arbitration.
+        merchant_responded_on:
+          type: string
+          description: The date and time when the merchant provided evidence against the pre-arbitration, in UTC. <br/>Format – ISO 8601 code <br/>Example – `2025-01-31T10:20:30.456`
+          format: date-time
+        merchant_evidence:
+          type: array
+          items:
+            required:
+            - file_id
+            type: object
+            properties:
+              file_id:
+                allOf:
+                - $ref: '#/components/schemas/IssuingFileId'
+                description: The unique identifier for an uploaded file.
+              description:
+                type: string
+                description: A brief description of the evidence.
+                example: Goods were not received.
+            description: 'The evidence provided by the merchant against the pre-arbitration case.
+
+              '
+      description: The dispute details at the pre-arbitration stage.
+    IssuingDisputeSecondPresentment:
+      type: object
+      properties:
+        received_on:
+          type: string
+          description: The date and time when you received the representment, in UTC. <br/>Format – ISO 8601 code <br/>Example – `2025-01-31T10:20:30.456`
+          format: date-time
+        amount:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: The representment amount, in the [minor currency unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount).
+        evidence:
+          type: array
+          items:
+            required:
+            - file_id
+            type: object
+            properties:
+              file_id:
+                allOf:
+                - $ref: '#/components/schemas/IssuingFileId'
+                description: The unique identifier for an uploaded file.
+              description:
+                type: string
+                description: A brief description of the evidence.
+                example: Goods were not received.
+          description: The evidence provided by the merchant against the chargeback.
+      description: The information provided by the merchant when they reject the chargeback and send a representment.
+    IssuingDisputeFraudDetails:
+      required:
+      - fraud_type
+      type: object
+      properties:
+        fraud_type:
+          enum:
+          - card_lost
+          - card_stolen
+          - card_never_received
+          - fraudulent_account
+          - counterfeit_card
+          - account_takeover
+          - card_not_present_fraud
+          - merchant_misrepresentation
+          - cardholder_manipulation
+          - incorrect_processing
+          - other
+          type: string
+          description: "The type of fraud the cardholder is asserting. This can be one of:\n  - `card_lost`: The cardholder does not have the physical card and cannot explain how it was lost.\n  - `card_stolen`: The cardholder does not have the physical card and provided an explanation as to how it was lost. For example, their wallet was stolen.\n  - `card_never_received`: The card was issued and mailed but was not received by the cardholder.\n  - `fraudulent_account`: The account was opened fraudulently using a stolen, fake, or synthetic identity.\n  - `counterfeit_card`: The cardholder has their physical card but a duplicate or altered card was used in an unauthorized card-present transaction.\n  - `account_takeover`: A fraudster gained control of the cardholder's account or credentials. For example, they may have changed the registered address, ordered a new card, or provisioned the card to a digital wallet.\n  - `card_not_present_fraud`: The cardholder still has the card but the card details were used in an unauthorized card-not-present transaction. For example, it was used in an ecommerce transaction, or in a mail order/telephone order (MOTO) payment.\n  - `merchant_misrepresentation`: The merchant deliberately misled the cardholder. For example, the goods provided were sub-standard, there were hidden charges, or the services advertised were fake.\n  - `cardholder_manipulation`: The cardholder was tricked into authorizing the transaction themselves. For example, due to a scam, an impersonation, or authorized push payment (APP) fraud.\n  - `incorrect_processing`: A security check failed and made fraudulent activity possible. For example, a card verification value (CVV) check was not performed, or the EMV cryptogram was not validated.\n  - `other`: The confirmed fraud does not fit any of the other fraud type categories, or there were multiple fraud types applicable to the same transaction.\n"
+          example: card_not_present_fraud
+        description:
+          maxLength: 3000
+          type: string
+          description: A description of the fraud circumstances, for internal reference. This is not forwarded to the scheme.
+          example: Cardholder confirmed they made no online purchases on this date.
+      description: Fraud-related information required when the dispute reason code is fraud-related.
+    IssuingDisputeId:
+      maxLength: 31
+      minLength: 31
+      pattern: ^idsp_[a-z0-9]{26}$
+      type: string
+      description: The unique identifier for the Issuing dispute.
+      example: idsp_fa6psq242dcd6fdn5gifcq1491
+    amend-dispute-request:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: 'The updated four-digit scheme-specific [reason code](https://www.checkout.com/docs/developer-resources/codes/chargeback-codes#Mastercard).
+
+            If a value is not provided, the existing reason code is retained.
+
+            '
+          example: '4807'
+        amount:
+          type: number
+          description: 'The updated disputed amount, in the [minor unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount)
+
+            of the transaction currency. If not provided, the existing amount is retained.
+
+            '
+          example: 1500
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssuingDisputeEvidence'
+          description: 'The updated or additional evidence requested by the Dispute Resolution team.
+
+            Follow the [card scheme''s requirements](https://www.checkout.com/docs/card-issuing/manage-cardholder-transactions/manage-issuing-disputes#Evidence_file_requirements).
+
+            '
+        fraud_details:
+          allOf:
+          - $ref: '#/components/schemas/IssuingDisputeFraudDetails'
+          description: 'Provides the fraud category, and additional context if available.
+
+
+            This field is required if `reason` specifies a fraud-related dispute.
+
+            '
+        reason_change_justification:
+          maxLength: 13000
+          type: string
+          description: 'Explains the justification for the reason change. This is shared with the Dispute Resolution review team and may be submitted to the card scheme.
+
+            This field is required if you change the `reason` at the escalation stage.
+
+            '
+          example: New evidence confirms this was an unauthorized transaction, making reason 4837 more appropriate.
+        action_response:
+          maxLength: 1000
+          type: string
+          description: 'Free-form text that you can use to explain your choices, provide additional context, or ask questions about the requested changes.
+
+            '
+          example: Updated reason as requested. The cardholder confirmed the goods were never delivered.
+      description: 'Submit an amendment to a dispute that is currently blocked from proceeding. This endpoint
+
+        handles both chargeback-stage and escalation-stage amendments using the same flat payload
+
+        as the server determines the context from the dispute''s current state.
+
+
+        Refer to the `action_details` returned in the <a target="_blank" href="https://api-reference.checkout.com/tag/Issuing-disputes#operation/getDispute">Get issuing dispute</a> endpoint to view the instructions provided by the Dispute Resolution team and the deadline by which you must submit amendments.
+
+
+        If `reason` specifies a fraud-related dispute, you must provide `fraud_details`.
+
+        If you change the `reason` at the escalation stage,  you must provide `reason_change_justification`.
+
+        '
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+  parameters:
+    IssuingCkoIdempotencyKeyRequired:
+      name: Cko-Idempotency-Key
+      in: header
+      description: An idempotency key for safely retrying requests.
+      required: true
+      schema:
+        maxLength: 256
+        minLength: 1
+        pattern: ^[A-Za-z0-9._-]+$
+        type: string
+      example: 7c1b9f96-4f2e-4b1a-bc2b-3d0f1a2e9f3a
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

@@ -1,0 +1,3138 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Standalone API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Standalone
+  description: Use Standalone Sessions to authenticate transactions with 3D Secure (3DS) and comply with Strong Customer Authentication (SCA) requirements.
+paths:
+  /sessions:
+    post:
+      tags:
+      - Standalone
+      summary: Request a session
+      description: 'Create a payment session to authenticate a cardholder before requesting a payment.
+
+        Payment sessions can be linked to one or more payments (in the case of recurring and other merchant-initiated payments).
+
+
+        The `next_actions` object in the response tells you which actions can be performed next.'
+      operationId: createSession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionRequest'
+      responses:
+        '201':
+          description: Session processed successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSessionOkResponse'
+        '202':
+          description: Session accepted and further action required
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSessionAcceptedResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: 'Forbidden. Ensure scope matches `"channel_data.channel"`: Use `sessions:app` for `"app"` and `sessions:browser` for `"browser"`.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service not available. A temporary server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - OAuth:
+        - sessions:app
+        - sessions:browser
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/common\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/sessions\"\n\t\"github.com/checkout/checkout-sdk-go/sessions/completion\"\n\t\"github.com/checkout/checkout-sdk-go/sessions/sources\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.SessionsApp, configuration.SessionsBrowser}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nsource := sources.NewSessionCardSource()\nsource.Number = \"12345678\"\nsource.ExpiryMonth = 10\nsource.ExpiryYear = 2027\n\ncompletion := completion.NewHostedCompletion()\ncompletion.SuccessUrl = \"https://docs.checkout.com/sessions/success\"\ncompletion.FailureUrl = \"https://docs.checkout.com/sessions/fail\"\n\nrequest := sessions.SessionRequest{\n\tSource:                 source,\n\tAmount:                 10,\n\tCurrency:               common.GBP,\n\tProcessingChannelId:    \"processing_channel_id\",\n\tAuthenticationType:     sessions.RegularAuthType,\n\tAuthenticationCategory: sessions.Payment,\n\tChallengeIndicator:     common.NoPreference,\n\tReference:              \"reference\",\n\tTransactionType:        sessions.GoodsService,\n\tShippingAddress: &sources.SessionAddress{\n\t\tAddress: common.Address{\n\t\t\tAddressLine1: \"123 High St.\",\n\t\t\tAddressLine2: \"Flat 456\",\n\t\t\tCity:         \"London\",\n\t\t\tState:        \"GB\",\n\t\t\tZip:          \"SW1A 1AA\",\n\t\t\tCountry:      common.GB,\n\t\t},\n\t},\n\tCompletion:  completion,\n}\n\nresponse, err := api.Sessions.RequestSession(request)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+  /sessions/{id}:
+    get:
+      tags:
+      - Standalone
+      summary: Get session details
+      description: Returns the details of the session with the specified identifier string.
+      operationId: getSession
+      parameters:
+      - name: id
+        in: path
+        description: Session ID
+        required: true
+        schema:
+          type: string
+      - name: channel
+        in: header
+        description: Optionally provide the type of channnel so you only get the relevant actions
+        schema:
+          enum:
+          - browser
+          - app
+          type: string
+          description: If a value is not provided, and if the `status` is `pending`, then `next_actions` will return `collect_channel_data` and if available, `issuer_fingerprint`.
+          example: browser
+      responses:
+        '200':
+          description: Session retrieved successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSessionResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden. This can happen when the OAuth token scope is `sessions:app`, but the session was initiated with the scope `sessions:browser`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Bad gateway
+      security:
+      - OAuth:
+        - sessions:app
+        - sessions:browser
+      - SessionSecret: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.SessionsApp, configuration.SessionsBrowser}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Sessions.GetSessionDetails(\"session_id\", \"session_secret\") // \"session_secret\" is optional\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+  /sessions/{id}/collect-data:
+    put:
+      tags:
+      - Standalone
+      summary: Update a session
+      description: Update a session by providing information about the environment.
+      operationId: updateSession
+      parameters:
+      - name: id
+        in: path
+        description: Session ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelData'
+        required: true
+      responses:
+        '200':
+          description: Session updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSessionResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable channel information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - OAuth:
+        - sessions:app
+        - sessions:browser
+      - SessionSecret: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/common\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/sessions/channels\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.SessionsApp, configuration.SessionsBrowser}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nchannel := channels.NewBrowserSession()\nchannel.AcceptHeader = \"Accept:  *.*, q=0.1\"\nchannel.JavaEnabled = true\nchannel.Language = \"FR-fr\"\nchannel.ColorDepth = \"16\"\nchannel.ScreenWidth = \"1920\"\nchannel.ScreenHeight = \"1080\"\nchannel.Timezone = \"60\"\nchannel.UserAgent = \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36\"\nchannel.ThreeDsMethodCompletion = common.Y\nchannel.IpAddress = \"1.12.123.255\"\n\nresponse, err := api.Sessions.UpdateSession(\"session_id\", channel,\"session_secret\") // \"session_secret\" is optional\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+  /sessions/{id}/complete:
+    post:
+      tags:
+      - Standalone
+      summary: Complete a session
+      description: 'Completes a session by posting the following request to the callback URL. This step is optional and only applies to non-hosted sessions:
+
+        ```
+
+        {
+
+        "session_id": "sid_llraltf4jlwu5dxdtprcv7ba5i",
+
+        "amount" : 6540,
+
+        "currency": "USD",
+
+        "status": "approved",
+
+        "authentication_type": "regular",
+
+        "authentication_category": "payment",
+
+        "reference": "ORD-5023-4E89",
+
+        "approved": true,
+
+        "protocol_version": "2.2.0",
+
+        "response_code": "Y",
+
+        "response_status_reason": "01",
+
+        "cryptogram": "MTIzNDU2Nzg5MDA5ODc2NTQzMjE=",
+
+        "eci": "05",
+
+        "xid": "XSUErNftqkiTdlkpSk8p32GWOFA",
+
+        "cardholder_info": "Card declined. Please contact your issuing bank.",
+
+        "challenged": true
+
+        }
+
+        ```
+
+
+        The fields of the above are the same as they would be in a GET session response. If the callback URL fails, we recommend that you use a GET call as a fallback.'
+      operationId: completeSession
+      parameters:
+      - name: id
+        in: path
+        description: Session ID
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Session completed successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - OAuth:
+        - sessions:app
+        - sessions:browser
+      - SessionSecret: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.SessionsApp, configuration.SessionsBrowser}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Sessions.CompleteSession(\"session_id\", \"session_secret\") // \"session_secret\" is optional\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+  /sessions/{id}/issuer-fingerprint:
+    put:
+      tags:
+      - Standalone
+      summary: Update session 3DS Method completion indicator
+      description: Update the session's 3DS Method completion indicator based on the result of accessing the 3DS Method URL.
+      operationId: updateSessionThreeDsMethodCompletion
+      parameters:
+      - name: id
+        in: path
+        description: Session ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThreeDsMethodCompletion'
+        required: true
+      responses:
+        '200':
+          description: Session updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSessionResponseAfterChannelDataSupplied'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable channel information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - OAuth:
+        - sessions:browser
+      - SessionSecret: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/common\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/sessions\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.SessionsApp, configuration.SessionsBrowser}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nrequest := sessions.ThreeDsMethodCompletionRequest{ThreeDsMethodCompletion: common.Y}\n\nresponse, err := api.Sessions.Update3dsMethodCompletion(\"session_id\", request, \"session_secret\") // \"session_secret\" is optional\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+components:
+  schemas:
+    ThreeDsRequestorAuthenticationInfo:
+      type: object
+      properties:
+        three_ds_req_auth_method:
+          enum:
+          - no_threeds_requestor_authentication_occurred
+          - three3ds_requestor_own_credentials
+          - federated_id
+          - issuer_credentials
+          - third_party_authentication
+          - fido_authenticator
+          - fido_authenticator_fido_assurance_data_signed
+          - src_assurance_data
+          type: string
+          description: The mechanism used by the cardholder to authenticate with the 3DS Requestor.
+        three_ds_req_auth_timestamp:
+          type: string
+          description: The UTC date and time the cardholder authenticated with the 3DS Requestor, in ISO 8601 format.
+          format: date-time
+        three_ds_req_auth_data:
+          maxLength: 20000
+          type: string
+          description: Data that documents and supports a specific authentication process.
+      description: Information about how the 3DS Requestor authenticated the cardholder before or during the transaction.
+    Eci:
+      maxLength: 2
+      minLength: 2
+      type: string
+      description: 'Electronic Commerce Indicator.  Please be advised that this field will only be included in responses when authenticating with a valid OAuth token and not when authenticating with `session_secret`.
+
+        '
+      example: '05'
+    GetSessionResponse:
+      required:
+      - id
+      - transaction_id
+      - scheme
+      - amount
+      - currency
+      - authentication_type
+      - authentication_category
+      - status
+      - protocol_version
+      - _links
+      - challenge_indicator
+      properties:
+        id:
+          $ref: '#/components/schemas/SessionId'
+        session_secret:
+          $ref: '#/components/schemas/SessionSecret'
+        transaction_id:
+          maxLength: 36
+          minLength: 36
+          type: string
+          description: The transaction identifier that needs to be provided when communicating directly with the Access Control Server (ACS)
+          example: 9aea641d-0549-4222-9ca9-d90b43a4f38c
+        scheme:
+          enum:
+          - visa
+          - mastercard
+          - jcb
+          - amex
+          - diners
+          - cartes_bancaires
+          - discover
+          - upi
+          type: string
+          description: Indicates the scheme this authentication is carried out against
+        amount:
+          $ref: '#/components/schemas/Amount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        completed:
+          type: boolean
+          description: Indicates whether this session has been completed
+          example: false
+        challenged:
+          type: boolean
+          description: Indicates whether this session involved a challenge. This will only be set after communication with the scheme is finished.
+          example: true
+        authentication_type:
+          $ref: '#/components/schemas/AuthenticationType'
+        authentication_category:
+          $ref: '#/components/schemas/Category'
+        certificates:
+          $ref: '#/components/schemas/DsPublicKeys'
+        status:
+          $ref: '#/components/schemas/Status'
+        status_reason:
+          $ref: '#/components/schemas/StatusReason'
+        approved:
+          $ref: '#/components/schemas/Approved'
+        protocol_version:
+          $ref: '#/components/schemas/ProtocolVersion'
+        account_info:
+          $ref: '#/components/schemas/CardholderAccountInfo'
+        merchant_risk_info:
+          $ref: '#/components/schemas/MerchantRiskInfo'
+        reference:
+          $ref: '#/components/schemas/Reference'
+        transaction_type:
+          $ref: '#/components/schemas/TransactionType'
+        next_actions:
+          $ref: '#/components/schemas/NextActions'
+        ds:
+          $ref: '#/components/schemas/Ds'
+        acs:
+          $ref: '#/components/schemas/Acs'
+        response_code:
+          $ref: '#/components/schemas/ResponseCode'
+        response_status_reason:
+          $ref: '#/components/schemas/ResponseStatusReason'
+        cryptogram:
+          $ref: '#/components/schemas/Cryptogram'
+        eci:
+          $ref: '#/components/schemas/Eci'
+        xid:
+          type: string
+          description: The xid value to use for authorization
+          example: XSUErNftqkiTdlkpSk8p32GWOFA
+        cardholder_info:
+          type: string
+          description: May provide cardholder information from the DS to be presented to the cardholder
+          example: Card declined. Please contact your issuing bank.
+        card:
+          $ref: '#/components/schemas/CardInfo'
+        recurring:
+          $ref: '#/components/schemas/Recurring'
+        installment:
+          $ref: '#/components/schemas/Installment'
+        initial_transaction:
+          $ref: '#/components/schemas/InitialTransaction'
+        customer_ip:
+          type: string
+          description: 'Indicates the card holder''s IP address.       Only available when the scheme selected is Cartes Bancaires.
+
+            '
+          example: 192.168.1.1
+        _links:
+          $ref: '#/components/schemas/GetSessionLinks'
+        authentication_date:
+          type: string
+          description: Authentication date and time
+          format: date-time
+        exemption:
+          type: object
+          properties:
+            requested:
+              enum:
+              - none
+              type: string
+              description: Indicates merchant requested exemption
+            applied:
+              enum:
+              - none
+              - low_value
+              - transaction_risk_assessment
+              - secure_corporate_payment
+              - trusted_listing
+              - 3ds_outage
+              - sca_delegation
+              - out_of_sca_scope
+              - other
+              - low_risk_program
+              type: string
+              description: Indicates Issuer accepted or applied exemption
+            code:
+              type: string
+              description: Indicates Cartes Bancaire specific exemption value
+            trusted_beneficiary:
+              $ref: '#/components/schemas/TrustedBeneficiary'
+          description: Details related to exemption present in 3DS flow
+        flow_type:
+          enum:
+          - challenged
+          - frictionless
+          - frictionless_delegated
+          type: string
+          description: Indicates whether the 3D Secure 2 authentication was challenged or frictionless
+        challenge_indicator:
+          enum:
+          - no_preference
+          - no_challenge_requested
+          - challenge_requested
+          - challenge_requested_mandate
+          type: string
+          description: Indicates the preference for whether or not a 3DS challenge should be performed. The customer’s bank has the final say on whether or not the customer receives the challenge
+          default: no_preference
+        optimization:
+          type: object
+          properties:
+            optimized:
+              type: boolean
+              description: 'Indicates if any optimization has been applied
+
+                '
+              example: true
+            framework:
+              enum:
+              - acceptance_rates
+              type: string
+              description: 'The optimization framework applied
+
+                '
+            optimized_properties:
+              title: OptimizedProperty
+              type: array
+              items:
+                $ref: '#/components/schemas/OptimizedProperty'
+              description: The collection of fields optimized
+          description: 'The information about the optimization options selected
+
+            '
+        scheme_info:
+          type: object
+          properties:
+            name:
+              enum:
+              - cartes_bancaires
+              - visa
+              - mastercard
+              type: string
+              description: Indicates which scheme was used to perform authentication
+            score:
+              type: string
+              description: Risk score calculated by Directory Server (DS). Cartes Bancaires 3D Secure 2 only
+            avalgo:
+              type: string
+              description: Identification of the algorithm used by the ACS to calculate the Authentication Value indicated
+          description: Indicates scheme-specific information
+        3ds:
+          type: object
+          properties:
+            challenge_request:
+              type: string
+              description: The CReq message, encoded in Base 64.
+              example: eyJ0aHJlZURTU2VydmVyVHJhbnNJRCI6IjYwYTY2ZDRjLTdjY2EtNDc1Zi04YzMxLWFiMjkwNTI1M2M4NiIsImFjc1RyYW5zSUQiOiI1ODVhM2NlZi04OWQ4LTQ3ZDMtYjk4Yi0xMDhiMGRjYjEyYzEiLCJtZXNzYWdlVHlwZSI6IkNSZXEiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwiY2hhbGxlbmdlV2luZG93U2l6ZSI6IjA1In0
+            interaction_counter:
+              maxLength: 2
+              type: string
+              description: The number of authentication attempts performed by the cardholder.
+              example: '03'
+            error_details:
+              $ref: '#/components/schemas/ErrorDetails'
+          description: This object provides more information about the 3DS experience
+        preferred_experiences:
+          $ref: '#/components/schemas/PreferredExperiences'
+        experience:
+          $ref: '#/components/schemas/Experience'
+        google_spa:
+          $ref: '#/components/schemas/GoogleSpaInfo'
+    CardInfo:
+      required:
+      - instrument_id
+      - fingerprint
+      type: object
+      properties:
+        instrument_id:
+          type: string
+          description: The identifier of the card instrument.
+          example: src_ubfj2q76miwundwlk72vxt2i7q
+        fingerprint:
+          type: string
+          description: A token that can uniquely identify this card across all customers.
+          example: vnsdrvikkvre3dtrjjvlm5du4q
+        metadata:
+          type: object
+          properties:
+            card_type:
+              enum:
+              - CREDIT
+              - DEBIT
+              - PREPAID
+              - CHARGE
+              - DEFERRED DEBIT
+              type: string
+              description: The card type
+              example: CREDIT
+            card_category:
+              enum:
+              - CONSUMER
+              - COMMERCIAL
+              type: string
+              description: The card category.
+              example: CONSUMER
+            issuer_name:
+              type: string
+              description: The card issuer's name.
+              example: Checkout
+            issuer_country:
+              pattern: ^[A-Z]{2}
+              type: string
+              description: The two letter alpha country code of the card issuer.
+              example: GB
+            product_id:
+              type: string
+              description: The issuer/card scheme product identifier.
+              example: MDS
+            product_type:
+              type: string
+              description: The issuer/card scheme product type.
+              example: Debit MasterCard® Card
+          description: Additional details for this card
+      description: Details related to the Session source. This property should always be in the response, unless a `card` source was used and communication with Checkout.com's Vault was not possible.
+    TokenSource:
+      title: token
+      required:
+      - type
+      - token
+      type: object
+      properties:
+        type:
+          type: string
+          description: The payment source type
+          default: card
+          example: token
+        scheme:
+          enum:
+          - amex
+          - cartes_bancaires
+          - diners
+          - mastercard
+          - visa
+          - discover
+          - upi
+          - jcb
+          type: string
+          description: Indicates the cardholder scheme choice
+        number:
+          maxLength: 19
+          minLength: 13
+          type: string
+          description: The card number.
+          example: '4242424242424242'
+        expiry_month:
+          maximum: 12
+          minimum: 1
+          maxLength: 2
+          minLength: 1
+          type: integer
+          description: The expiry month of the card.
+          example: 12
+        expiry_year:
+          maxLength: 4
+          minLength: 4
+          type: integer
+          description: The expiry year of the card.
+          example: 2077
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/SessionAddress'
+          description: The customer's billing address. Any special characters will be replaced.
+        home_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's home phone number
+        mobile_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's mobile phone number
+        work_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's work phone number
+        email:
+          maxLength: 254
+          type: string
+          description: The email of the cardholder
+          example: bruce.wayne@email.com
+        token:
+          maxLength: 100
+          type: string
+          description: The Checkout.com card token
+          example: tok_4gzeau5o2uqubbk6fufs3m7p54
+    CreateSessionLinks:
+      allOf:
+      - $ref: '#/components/schemas/GetSessionLinks'
+      properties:
+        redirect_url:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: http://3ds2.checkout.com/interceptor/sid_y3oqhf46pyzuxjbcn2giaqnb44
+          description: 'The link to which the cardholder should be redirected. </br> Only available when the `hosted` value is `true`.
+
+            '
+    ErrorResponse:
+      required:
+      - request_id
+      - error_type
+      - error_codes
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 5342217f-7fa2-4626-a6c9-c979a04671a6
+        error_type:
+          enum:
+          - operation_not_allowed
+          - not_implemented
+          - not_found
+          - forbidden
+          - callback_failed
+          - internal_server_error
+          - unprocessable_entity
+          - conflict
+          - duplicate_requests_detected
+          - service_not_available
+          type: string
+          description: 'The type of error. <br/> • operation_not_allowed = Usually with an http status code 403. The request is not allowed by business rules. <br/> • not_implemented = Usually with an http status code 501. This particular feature is not implemented yet. <br/> • not_found = Usually with an http status code 404. The resource requested was not found. <br/> • forbidden = Usually with an http status code 401. You do not have permissions for the requested operation. <br/> • callback_failed = (Non Hosted Only) Only during the complete request. The callback_url responded with a non-success status code. <br/> • internal_server_error = Usually with an http status code 500. Unexpected error during the request or an upstream service failure. <br/> • unprocessable_entity = Usually with an http status code 422. The request payload failed validation. <br/> • conflict = Usually with an http status code 409 during the creation of a resource. The resource already exists. <br/> • duplicate_requests_detected = Usually with an http status code 409. This is returned when a Session is currently being processed. <br /> • service_not_available = Usually with an http status code 503. Triggered given an upstream service failure.<br />
+
+            '
+        error_codes:
+          type: array
+          items:
+            type: string
+          description: 'Error response code. Full list of error codes below: <br/> • unknown_error = Usually with an error type `internal_server_error`. An unexpected/unhandled error occurred. <br/> • operation_not_allowed = Usually with an error type `operation_not_allowed`. The request is not allowed by business rules. <br/> • scheme_not_supported = The processor was setup with a scheme not supported by the server. <br/> • card_not_enrolled = The card number was not enrolled for 3DS2 and 3DS1 was either not enabled or not supported for Session (eg amount is 0). <br/> • card_not_eligible = The card number was not eligible for 3DS1. <br/> • card_eligibility_unavailable = A technical issue prevented the 3DS1 transaction from completing. <br /> • card_protocol_version_not_supported = The protocol version provided is not enabled for the processor being used. <br/> • update_not_allowed_due_to_state = The Session was in a state that did not allow for the operation attempted. <br/> • source_not_supported = Support for the Session Source used is not implemented yet. <br/> • session_callback_failed = (Non Hosted Only) Only during the complete request. The callback_url responded with a non-success status code. <br/> • session_persistence_failed = Usually with an error type `internal_server_error`. The API failed to persist the Session. Can be retried. <br/> • hosted_not_supported_for_app = You tried to create a Hosted Session with app channel data which is not allowed. <br/> • three_ds_method_not_supported_for_app = You tried to perform issuer fingerprint on a Session with app channel data which is not allowed. <br/> • three_ds_method_not_supported_without_url = You tried to perform issuer fingerprint on a Session without a 3DS method URL which is not allowed. <br/> • operation_not_allowed_for_scope = You are using an OAuth2.0 token that does not contain the right scope. <br/> • protocol_version_not_supported_by_sdk = You created an App channel Session with a protocol version not supported by the relevant mobile SDK. <br/> • ds_error = The Directory Server (schemes) responded with an unexpected error or timed out. <br/> • processing_channel_disabled = The Processing Channel or processor used for this Session is not active. <br/> • vault_not_configured_for_processing_channel = Using a Processing Channel not configured for use with Checkout.com Vault offering but trying to use a relevant source (`id` or `token`). <br/> • error_getting_instrument = Getting an instrument responded with an unexpected error or timed out. Only relevant for sources `id` or `token`. <br/> • invalid_token = The token used in the source object was invalid. <br/> • instrument_used_is_not_card = Using an `id` type source that is not a card (only card type instruments are supported in 3DS) . <br/> • no_processor_configured_for_card_scheme = Using a card that belongs to a scheme that is not configured in the Processing Channel being used. <br/> • currency_not_supported = An American Express SE number is not associated with the currency in the request. <br/> • scheme_outage = With error type `operation_not_allowed`. This is returned when there is a technical issue on the scheme''s platform. <br/> • session_already_in_use = With error type `duplicate_requests_detected`. More than one action requests have been sent in parallel for the same session. <br/><br/> • merchant_initiated_request_not_supported_by_3ds_protocol = With error type `unprocessable_entity`. The merchant-initiated request is not supported by the selected 3DS protocol version. <br/> • initial_session_not_found = With error type `unprocessable_entity`. A previous session could not be found with the provided initial session ID. <br/> • initial_session_invalid = With error type `unprocessable_entity`. The previous session was not valid to be used as an initial transaction. <br/> • invalid_target_scheme = With error type `unprocessable_entity`. The card number cannot be processed with the specified scheme. <br/> • unrecognized_scheme = With error type `unprocessable_entity`. The card number is associated with a scheme that is not supported. <br/>
+
+            Also, there is a number of generic error codes as described below: <br/> • some_field_required = Usually with an error type `unprocessable_entity`. The field `some_field` is required but not provided in the payload. <br/> • some_field_invalid = Usually with an error type `unprocessable_entity`. The field `some_field` failed validation. Please consult the API spec. <br/> • unable_to_verify_some_field = Usually with an error type `service_not_available`. The field `some_field` could not be validated due to an upstream service failure. <br/> • some_resource_already_exists = Usually with an error type `conflict`. The resource you are trying to create already exists (not relevant for Sessions with an auto-generated id). <br/> • some_resource_not_found = Usually with an error type `not_found`. The resource you are trying to get does not exist. <br/>
+
+            '
+    CardSource:
+      title: card
+      required:
+      - type
+      - number
+      - expiry_month
+      - expiry_year
+      type: object
+      properties:
+        type:
+          type: string
+          description: The payment source type
+          default: card
+          example: card
+        scheme:
+          enum:
+          - amex
+          - cartes_bancaires
+          - diners
+          - mastercard
+          - visa
+          - discover
+          - upi
+          - jcb
+          type: string
+          description: Indicates the cardholder scheme choice
+        number:
+          maxLength: 19
+          minLength: 13
+          type: string
+          description: The card number.
+          example: '4242424242424242'
+        expiry_month:
+          maximum: 12
+          minimum: 1
+          maxLength: 2
+          minLength: 1
+          type: integer
+          description: The expiry month of the card.
+          example: 12
+        expiry_year:
+          maxLength: 4
+          minLength: 4
+          type: integer
+          description: The expiry year of the card.
+          example: 2077
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/SessionAddress'
+          description: The customer's billing address. Any special characters will be replaced.
+        home_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's home phone number
+        mobile_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's mobile phone number
+        work_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's work phone number
+        email:
+          maxLength: 254
+          type: string
+          description: The email of the cardholder
+          example: bruce.wayne@email.com
+        name:
+          maxLength: 45
+          minLength: 2
+          type: string
+          description: The name of the cardholder. Any special characters will be replaced.
+          example: Bruce Wayne
+        stored:
+          type: boolean
+          description: Indicates whether this card is being submitted from your own stored card-on-file system, rather than being entered by the customer at the time of payment. Set to `true` when you provide card details that you already have on file for the customer.
+          default: false
+          example: true
+    OptimizedProperty:
+      type: object
+      properties:
+        field:
+          type: string
+          description: 'Name of the field which has been optimized.
+
+            '
+          example: challenge_indicator
+        original_value:
+          type: string
+          description: 'Value prior to optimization.
+
+            '
+          example: trusted_listing
+        optimized_value:
+          type: string
+          description: 'Value prior to optimization.
+
+            '
+          example: transaction_risk_assessment
+      description: 'Optionally opt into request optimization
+
+        '
+    HostedGoogleSpaInfo:
+      title: Hosted
+      type: object
+      properties:
+        token:
+          $ref: '#/components/schemas/GoogleSpaToken'
+      description: 'Details of Google SPA (Secure Payment Authentication) for a hosted authentication
+
+        '
+    Acs:
+      required:
+      - reference_number
+      - transaction_id
+      - operator_id
+      - challenge_mandated
+      type: object
+      properties:
+        reference_number:
+          maxLength: 32
+          type: string
+          description: EMVCo-assigned unique identifier to track approved ACS
+          example: ACSRefNum1234
+        transaction_id:
+          maxLength: 36
+          minLength: 36
+          type: string
+          description: Universally unique transaction identifier assigned by the ACS
+          example: be481bd1-1f1d-4ef8-9fa8-0fb2a38e3c87
+        operator_id:
+          maxLength: 32
+          type: string
+          description: DS assigned ACS identifier
+          example: ACSRefNum1234
+        url:
+          maxLength: 2048
+          type: string
+          description: Fully qualified URL of the ACS to be used for the challenge
+          example: https://server.acsdomainname.com
+        signed_content:
+          maxLength: 512
+          type: string
+          description: 'Contains the JSON web signature (JWS) compact serialization created by the ACS for a challenged app authentication. (Example has been truncated for readability.)
+
+            '
+          example: eyJ4NWMiOlsiTUlJQjdEQ0NBWktnQXdJQkFnSVZBSzIxWEc5SVBCL083QzZjUTBvRlJJUkIwWDI0TUFvR0NDcUdTTTQ5QkFNQ01INHhDekFKQm
+        challenge_mandated:
+          type: boolean
+          description: Indicates whether a challenge is required for the transaction to be authorized
+        authentication_type:
+          pattern: ^\d{2}$
+          type: string
+          description: 'The type of authentication as returned from the ACS provider. <br/> • 01 = Static <br/> • 02 = Dynamic <br/> • 03 = OOB <br/> • 04-79 = Reserved for EMVCo future use <br/> • 80-99 = Reserved for DS use
+
+            '
+        challenge_cancel_reason:
+          enum:
+          - cardholder_cancel
+          - transaction_timed_out
+          - challenge_timed_out
+          - transaction_error
+          - unknown
+          - sdk_timed_out
+          type: string
+          description: Indicator informing the ACS and the DS that the authentication has been cancelled
+        interface:
+          enum:
+          - native_ui
+          - html
+          type: string
+        ui_template:
+          enum:
+          - text
+          - single_select
+          - multi_select
+          - oob
+          - html_other
+          type: string
+        challenge_cancel_reason_code:
+          maximum: 99
+          minimum: 0
+          type: string
+          description: Indicator in the 3D Secure 2 RReq when the challenge is cancelled
+      description: The access control server (ACS) information. Can be empty if the session is still pending or if communication with the ACS failed. This will be available when the channel data and issuer fingerprint result have been provided.
+    GetSessionResponseAfterChannelDataSupplied:
+      required:
+      - id
+      - transaction_id
+      - scheme
+      - amount
+      - currency
+      - authentication_type
+      - authentication_category
+      - status
+      - protocol_version
+      - _links
+      properties:
+        id:
+          $ref: '#/components/schemas/SessionId'
+        session_secret:
+          $ref: '#/components/schemas/SessionSecret'
+        transaction_id:
+          maxLength: 36
+          minLength: 36
+          type: string
+          description: The transaction identifier that needs to be provided when communicating directly with the Access Control Server (ACS)
+          example: 9aea641d-0549-4222-9ca9-d90b43a4f38c
+        scheme:
+          enum:
+          - visa
+          - mastercard
+          - jcb
+          - amex
+          - diners
+          - cartes_bancaires
+          - discover
+          - upi
+          type: string
+          description: Indicates the scheme this authentication is carried out against
+        amount:
+          $ref: '#/components/schemas/Amount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        completed:
+          type: boolean
+          description: Indicates whether this session has been completed
+          example: false
+        challenged:
+          type: boolean
+          description: Indicates whether this session involved a challenge. This will only be set after communication with the scheme is finished.
+          example: true
+        authentication_type:
+          $ref: '#/components/schemas/AuthenticationType'
+        authentication_category:
+          $ref: '#/components/schemas/Category'
+        status:
+          $ref: '#/components/schemas/Status'
+        status_reason:
+          $ref: '#/components/schemas/StatusReason'
+        approved:
+          $ref: '#/components/schemas/Approved'
+        protocol_version:
+          $ref: '#/components/schemas/ProtocolVersion'
+        account_info:
+          $ref: '#/components/schemas/CardholderAccountInfo'
+        merchant_risk_info:
+          $ref: '#/components/schemas/MerchantRiskInfo'
+        reference:
+          $ref: '#/components/schemas/Reference'
+        transaction_type:
+          $ref: '#/components/schemas/TransactionType'
+        initial_transaction:
+          $ref: '#/components/schemas/InitialTransaction'
+        next_actions:
+          $ref: '#/components/schemas/NextActions'
+        ds:
+          $ref: '#/components/schemas/Ds'
+        acs:
+          $ref: '#/components/schemas/Acs'
+        response_code:
+          $ref: '#/components/schemas/ResponseCode'
+        response_status_reason:
+          $ref: '#/components/schemas/ResponseStatusReason'
+        cryptogram:
+          $ref: '#/components/schemas/Cryptogram'
+        eci:
+          $ref: '#/components/schemas/Eci'
+        xid:
+          type: string
+          description: The xid value to use for authorization
+          example: XSUErNftqkiTdlkpSk8p32GWOFA
+        preferred_experiences:
+          $ref: '#/components/schemas/PreferredExperiences'
+        experience:
+          $ref: '#/components/schemas/Experience'
+        google_spa:
+          $ref: '#/components/schemas/GoogleSpaInfo'
+        card:
+          $ref: '#/components/schemas/CardInfo'
+        _links:
+          $ref: '#/components/schemas/GetFingerprintSessionLinks'
+        3ds:
+          type: object
+          properties:
+            challenge_request:
+              type: string
+              description: The CReq message, encoded in Base 64.
+              example: eyJ0aHJlZURTU2VydmVyVHJhbnNJRCI6IjYwYTY2ZDRjLTdjY2EtNDc1Zi04YzMxLWFiMjkwNTI1M2M4NiIsImFjc1RyYW5zSUQiOiI1ODVhM2NlZi04OWQ4LTQ3ZDMtYjk4Yi0xMDhiMGRjYjEyYzEiLCJtZXNzYWdlVHlwZSI6IkNSZXEiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwiY2hhbGxlbmdlV2luZG93U2l6ZSI6IjA1In0
+            interaction_counter:
+              maxLength: 2
+              type: string
+              description: The number of authentication attempts performed by the cardholder.
+              example: '03'
+            error_details:
+              $ref: '#/components/schemas/ErrorDetails'
+          description: Provides additional information about the 3DS authentication experience.
+    CompletionInfo:
+      required:
+      - type
+      oneOf:
+      - $ref: '#/components/schemas/HostedCompletionInfo'
+      - $ref: '#/components/schemas/NonHostedCompletionInfo'
+      description: The redirect information needed for callbacks or redirects after the payment is completed
+      discriminator:
+        propertyName: type
+        mapping:
+          hosted: '#/components/schemas/HostedCompletionInfo'
+          non_hosted: '#/components/schemas/NonHostedCompletionInfo'
+      example:
+        type: non_hosted
+        callback_url: https://merchant.com/callback
+    StatusReason:
+      enum:
+      - ares_status
+      - ares_error
+      - rreq_error
+      - rreq_status
+      - risk_declined
+      type: string
+      description: 'When the Session is unavailable this will point to the reason it is so.  <br/><br/>
+
+        • ares_error = There was an issue in the Authentication response we got back from the Directory Server (scheme server - 3DS2) <br/> • ares_status = The status was set to the status in the Authentication response we got back from the Directory Server (scheme server - 3DS2) <br/> • rreq_error = There was an issue in the Response we got back from the Access Control Server (issuer server - 3DS2) <br/> • rreq_status = The status was set to the status in the Response we got back from the Access Control Server (issuer server - 3DS2) <br/> • risk_declined = The status was set to declined because the Risk engine recommended we decline the authentication <br/>
+
+        '
+    Category:
+      enum:
+      - payment
+      - non_payment
+      type: string
+      description: Indicates the category of the authentication request
+      default: payment
+    Optimization:
+      type: object
+      properties:
+        framework:
+          enum:
+          - acceptance_rates
+          type: string
+          description: 'The theme-based option for optimization
+
+            '
+      description: 'Optionally opt into request optimization
+
+        '
+    ResponseStatusReason:
+      type: string
+      description: "Only available as a result of a 3DS2 authentication. \nThe response from the DS or ACS which provides information on why the `response_code` field has the specified value.  <br/> Only available when `response_code` is not `Y`.  <br/> Learn more about the reasons for <a href=\"https://www.checkout.com/docs/risk-management/3d-secure/sessions/understand-authentication-failures\" target=\"_blank\">authentication failures</a>.<br/><br/>\n"
+      example: '01'
+    Status:
+      enum:
+      - challenged
+      - pending
+      - processing
+      - challenge_abandoned
+      - expired
+      - approved
+      - attempted
+      - unavailable
+      - declined
+      - rejected
+      type: string
+      description: Indicates the status of the session
+    InitialTransaction:
+      type: object
+      properties:
+        acs_transaction_id:
+          minLength: 36
+          type: string
+          description: The Access Control Server (ACS) transaction ID for a previously authenticated transaction
+        authentication_method:
+          enum:
+          - frictionless_authentication
+          - challenge_occurred
+          - avs_verified
+          - other_issuer_methods
+          type: string
+        authentication_timestamp:
+          type: string
+          description: The timestamp of the previous authentication, in ISO 8601 format.
+          example: '2023-02-06T15:00:00.000Z'
+        authentication_data:
+          maxLength: 2048
+          type: string
+          description: Data that documents and supports a specific authentication process
+        initial_session_id:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: The ID for a previous session, which is used for retrieve the initial transaction's properties
+          example: sid_p6prbhogijnuxgv4grm3ber55u
+      description: Details of a previous transaction
+    NextActions:
+      type: array
+      items:
+        enum:
+        - redirect_cardholder
+        - collect_channel_data
+        - issuer_fingerprint
+        - challenge_cardholder
+        - complete
+        type: string
+      description: "Specifies which action to take in order to complete the session. \n\nThe `redirect_cardholder` action is only applicable for <a href=\"https://www.checkout.com/docs/payments/authenticate-payments/3d-secure/standalone-sessions/hosted-sessions\">hosted sessions</a>.\n"
+    DsPublicKeys:
+      required:
+      - ds_public
+      type: object
+      properties:
+        ds_public:
+          maxLength: 1024
+          type: string
+          description: A public certificate provided by the DS for encryption of device data. It is a base64 URL encoded <a href="https://tools.ietf.org/html/rfc7517" target="_blank">JSON web key</a>.
+          example: eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ik1LQkNUTkljS1VTRGlpMTF5U3MzNTI2aURaOEFpVG83VHU2S1BBcXY3RDQiLCJ5IjoiNEV0bDZTUlcyWWlMVXJONXZmdlZIdWhwN3g4UHhsdG1XV2xiYk00SUZ5TSIsInVzZSI6ImVuYyIsImtpZCI6IjEifQ
+        ca_public:
+          maxLength: 1024
+          type: string
+          description: Certificate authority (CA) public certificate (root) of the DS-CA. This certificate is used to validate the ACS signed content JSON web signature (JWS) object. It is a base64 URL encoded DER encoded X.509.
+          example: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxWEvDZRhKEefZ5sQS7RJZXWbSOPxus-ZyLQjtmrrAQawnKI-AG8BKpVdZVGlpcdxCnGbCIy8CKk2Oi7Mgdqfv5R_4_jI7yl4j7Svmh1Sw934eeF9RyB59Ihl36Y0pNfVW9hBqJuq2o8ulrA1TOtpTpje23CY8sjFE5QnJm1evZRB_ZZQ1txl4nrAiHkno4cVJPouBesryVGVQ0zi1bM0P-05Ydgksvph-1nyjnDldD68mejVF69Tijxa22b6BUCXEuPfbXZcW2NpM_W3msnvKiTWFaMlnIzGYIoFnAnCIVU7Min6CPn565tv0iyIt8BrcezsGzefUw17NEq0J4tCvWwIDAQAB
+        ca_public_all:
+          type: array
+          items:
+            maxLength: 1024
+            type: string
+          description: "An array of available certificate authority (CA) public certificates (root) of the DS-CA. \n\nThe certificates are used to validate the JSON web signature (JWS) object signed by the access control server (ACS). Each array element is a Base64 URL-encoded DER-encoded X.509 certificate.\n"
+          example:
+          - MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxWEvDZRhKEefZ5sQS7RJZXWbSOPxus-ZyLQjtmrrAQawnKI-AG8BKpVdZVGlpcdxCnGbCIy8CKk2Oi7Mgdqfv5R_4_jI7yl4j7Svmh1Sw934eeF9RyB59Ihl36Y0pNfVW9hBqJuq2o8ulrA1TOtpTpje23CY8sjFE5QnJm1evZRB_ZZQ1txl4nrAiHkno4cVJPouBesryVGVQ0zi1bM0P-05Ydgksvph-1nyjnDldD68mejVF69Tijxa22b6BUCXEuPfbXZcW2NpM_W3msnvKiTWFaMlnIzGYIoFnAnCIVU7Min6CPn565tv0iyIt8BrcezsGzefUw17NEq0J4tCvWwIDAQAB
+      description: Public certificates specific to a Directory Server (DS) for encrypting device data and verifying ACS signed content. Required when channel is `app`.
+    App:
+      title: app
+      required:
+      - channel
+      - sdk_app_id
+      - sdk_max_timeout
+      - sdk_ephem_pub_key
+      - sdk_encrypted_data
+      - sdk_reference_number
+      - sdk_transaction_id
+      - sdk_interface_type
+      - sdk_ui_elements
+      properties:
+        channel:
+          enum:
+          - app
+          type: string
+        sdk_app_id:
+          maxLength: 36
+          minLength: 36
+          type: string
+          description: 'Universally unique ID created upon all installations and updates of the 3DS Requestor App on a consumer device. This will be newly generated and stored by the 3DS SDK for each installation or update.
+
+            '
+          example: dbd64fcb-c19a-4728-8849-e3d50bfdde39
+        sdk_max_timeout:
+          minimum: 5
+          type: integer
+          description: 'Indicates maximum amount of time (in minutes) for all exchanges
+
+            '
+          example: 5
+        sdk_ephem_pub_key:
+          $ref: '#/components/schemas/SdkEphemeralPublicKey'
+        sdk_reference_number:
+          maxLength: 32
+          type: string
+          description: 'Identifies the vendor and version for the 3DS SDK that is integrated in a 3DS Requestor App, assigned by EMVCo when the 3DS SDK is approved.
+
+            '
+          example: 3DS_LOA_SDK_PPFU_020100_00007
+        sdk_encrypted_data:
+          maxLength: 64000
+          type: string
+          description: 'A JSON web encryption (JWE) object in compact serialization, containing data encrypted by the SDK for the Directory Server to decrypt.
+
+            '
+          example: <device-information>
+        sdk_transaction_id:
+          maxLength: 36
+          minLength: 36
+          type: string
+          description: 'Universally unique transaction identifier assigned by the 3DS SDK to identify a single transaction
+
+            '
+          example: b2385523-a66c-4907-ac3c-91848e8c0067
+        sdk_interface_type:
+          enum:
+          - native
+          - html
+          - both
+          type: string
+          description: 'Lists all of the SDK interface types that the device supports for displaying specific challenge user interfaces within the SDK
+
+            '
+        sdk_ui_elements:
+          type: array
+          items:
+            enum:
+            - text
+            - single_select
+            - multi_select
+            - oob
+            - html_other
+            type: string
+          description: 'Lists all the user interface elements that the cardholder''s device supports for displaying specific challenge user interfaces within the SDK
+
+            '
+    SessionMarketplaceData:
+      type: object
+      properties:
+        sub_entity_id:
+          type: string
+          description: The sub-entity that the authentication is being processed on behalf of
+          example: ent_rgyzti4x74xubmu72m6r3pvksa
+      description: Information related to authentication for payfac payments
+    NetworkTokenSource:
+      title: network_token
+      required:
+      - type
+      - token
+      - expiry_month
+      - expiry_year
+      type: object
+      properties:
+        type:
+          type: string
+          description: The payment source type
+          default: card
+          example: network_token
+        scheme:
+          enum:
+          - amex
+          - cartes_bancaires
+          - diners
+          - mastercard
+          - visa
+          - discover
+          - upi
+          - jcb
+          type: string
+          description: Indicates the cardholder scheme choice
+        number:
+          maxLength: 19
+          minLength: 13
+          type: string
+          description: The card number.
+          example: '4242424242424242'
+        expiry_month:
+          maximum: 12
+          minimum: 1
+          maxLength: 2
+          minLength: 1
+          type: integer
+          description: The expiry month of the card.
+          example: 12
+        expiry_year:
+          maxLength: 4
+          minLength: 4
+          type: integer
+          description: The expiry year of the card.
+          example: 2077
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/SessionAddress'
+          description: The customer's billing address. Any special characters will be replaced.
+        home_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's home phone number
+        mobile_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's mobile phone number
+        work_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's work phone number
+        email:
+          maxLength: 254
+          type: string
+          description: The email of the cardholder
+          example: bruce.wayne@email.com
+        token:
+          maxLength: 19
+          minLength: 9
+          type: string
+          description: The network token PAN
+          example: '4543474002249996'
+        name:
+          maxLength: 45
+          minLength: 2
+          type: string
+          description: The customer's name. Any special characters will be replaced.
+          example: Bruce Wayne
+        stored:
+          type: boolean
+          description: Indicates whether this card is being submitted from your own stored card-on-file system, rather than being entered by the customer at the time of payment. Set to `true` when you provide card details that you already have on file for the customer.
+          default: false
+          example: true
+    GoogleSpaInfo:
+      oneOf:
+      - $ref: '#/components/schemas/HostedGoogleSpaInfo'
+      - $ref: '#/components/schemas/NonHostedGoogleSpaInfo'
+      description: "Details of Google SPA (Secure Payment Authentication)\n \n"
+    GetFingerprintSessionLinks:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/GetBaseSessionLinks'
+      properties:
+        complete:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://{prefix}.api.checkout.com/sessions/sid_y3oqhf46pyzuxjbcn2gia/complete
+          description: The URI to signal the session as complete. Only available if `next_actions` contains `complete`
+        issuer_fingerprint:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://{prefix}.api.checkout.com/sessions/sid_y3oqhf46pyzuxjbcn2gia/issuer-fingerprint
+          description: 'The URI to send the 3ds method completion indicator to. Use this if device information was sent when requesting a session.  Only available if `next_actions` contains `issuer_fingerprint`
+
+            '
+        collect_channel_data:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://{prefix}.api.checkout.com/sessions/sid_y3oqhf46pyzuxjbcn2gia/collect-data
+          description: The URI to send device information to. Only available if `next_actions` contains `collect_data`
+        three_ds_method_url:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://api.hsbc.com/3dsmethod?tx=123456
+          description: The URI of the issuer fingerprint (3DS method). Only available if `next_actions` contains `issuer_fingerprint`
+      description: The links related to the session
+    ThreeDsMethodCompletion:
+      required:
+      - three_ds_method_completion
+      properties:
+        three_ds_method_completion:
+          maxLength: 1
+          minLength: 1
+          enum:
+          - Y
+          - N
+          - U
+          type: string
+          description: 'The result of the 3DS method URL.<br>  Default to `U` if a response is not received from the 3DS Method URL within 10 seconds.
+
+            '
+          example: Y
+      description: The result of the 3DS method url
+      example:
+        three_ds_method_completion: Y
+    Ds:
+      type: object
+      properties:
+        ds_id:
+          maxLength: 32
+          type: string
+          description: Required if the session is deemed app-based. Registered application provider identifier (RID) that is unique to the payment system. RIDs are defined by the ISO 7816-5 standard. Used as part of the device data encryption process.
+          example: A000000003
+        reference_number:
+          maxLength: 32
+          type: string
+          description: EMVCo-assigned unique identifier to track approved DS
+          example: VISA.V 17 0003
+        transaction_id:
+          maxLength: 36
+          minLength: 36
+          type: string
+          description: Universally unique transaction identifier assigned by the DS
+          example: 9aea641d-0549-4222-9ca9-d90b43a4f38c
+      description: The directory server (DS) information. Can be empty if the session is pending or communication with the DS failed
+    IdSource:
+      title: id
+      required:
+      - type
+      - id
+      type: object
+      properties:
+        type:
+          type: string
+          description: The payment source type
+          default: card
+          example: id
+        scheme:
+          enum:
+          - amex
+          - cartes_bancaires
+          - diners
+          - mastercard
+          - visa
+          - discover
+          - upi
+          - jcb
+          type: string
+          description: Indicates the cardholder scheme choice
+        number:
+          maxLength: 19
+          minLength: 13
+          type: string
+          description: The card number.
+          example: '4242424242424242'
+        expiry_month:
+          maximum: 12
+          minimum: 1
+          maxLength: 2
+          minLength: 1
+          type: integer
+          description: The expiry month of the card.
+          example: 12
+        expiry_year:
+          maxLength: 4
+          minLength: 4
+          type: integer
+          description: The expiry year of the card.
+          example: 2077
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/SessionAddress'
+          description: The customer's billing address. Any special characters will be replaced.
+        home_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's home phone number
+        mobile_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's mobile phone number
+        work_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's work phone number
+        email:
+          maxLength: 254
+          type: string
+          description: The email of the cardholder
+          example: bruce.wayne@email.com
+        id:
+          maxLength: 100
+          type: string
+          description: The card instrument id
+          example: src_4gzeau5o2uqubbk6fufs3m7p54
+    GetBaseSessionLinks:
+      required:
+      - self
+      type: object
+      properties:
+        self:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://{prefix}.api.checkout.com/sessions/sid_y3oqhf46pyzuxjbcn2giaqnb441
+          description: The URI of the session
+      description: The links related to the session
+    ChannelData:
+      required:
+      - channel
+      oneOf:
+      - $ref: '#/components/schemas/Browser'
+      - $ref: '#/components/schemas/App'
+      - $ref: '#/components/schemas/MerchantInitiated'
+      description: The information gathered from the environment used to initiate the session
+      discriminator:
+        propertyName: channel
+        mapping:
+          browser: '#/components/schemas/Browser'
+          app: '#/components/schemas/App'
+          merchant_initiated: '#/components/schemas/MerchantInitiated'
+      example:
+        channel: browser
+        accept_header: 'Accept:  *.*, q=0.1'
+        java_enabled: true
+        javascript_enabled: true
+        language: FR-fr
+        color_depth: 16
+        screen_height: 1080
+        screen_width: 1920
+        timezone: 60
+        user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36
+        three_ds_method_completion: Y
+        ip_address: 1.12.123.255
+        iframe_payment_allowed: true
+        user_agent_client_hint: 'Sec-CH-UA: " Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"'
+    SessionRequest:
+      required:
+      - currency
+      - source
+      - completion
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/SessionSource'
+        amount:
+          minimum: 0
+          maxLength: 48
+          type: integer
+          description: 'The payment amount in the [minor currency unit](https://www.checkout.com/docs/payments/accept-payments/format-the-payment-amount).
+
+
+            For `recurring` and `installment` payment types, this value is required and must be greater than zero.
+
+
+            Omitting this value will set `authentication_category` to `non_payment`.
+
+            '
+          example: 6540
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: 'The three-letter ISO currency code
+
+            '
+          example: USD
+        processing_channel_id:
+          pattern: ^(pc)_(\w{26})$
+          type: string
+          description: 'The processing channel to be used for the session. Required if this was not set in the request for the OAuth token.
+
+            '
+        marketplace:
+          $ref: '#/components/schemas/SessionMarketplaceData'
+        authentication_type:
+          $ref: '#/components/schemas/AuthenticationType'
+        authentication_category:
+          $ref: '#/components/schemas/Category'
+        account_info:
+          $ref: '#/components/schemas/CardholderAccountInfo'
+        challenge_indicator:
+          $ref: '#/components/schemas/ChallengeIndicator'
+        billing_descriptor:
+          $ref: '#/components/schemas/SessionsBillingDescriptor'
+        reference:
+          $ref: '#/components/schemas/Reference'
+        merchant_risk_info:
+          $ref: '#/components/schemas/MerchantRiskInfo'
+        transaction_type:
+          $ref: '#/components/schemas/TransactionType'
+        shipping_address:
+          $ref: '#/components/schemas/SessionAddress'
+        shipping_address_matches_billing:
+          type: boolean
+          description: 'Indicates whether the cardholder shipping address and billing address are the same.
+
+            '
+          example: false
+        completion:
+          $ref: '#/components/schemas/CompletionInfo'
+        channel_data:
+          $ref: '#/components/schemas/ChannelData'
+        recurring:
+          $ref: '#/components/schemas/Recurring'
+        installment:
+          $ref: '#/components/schemas/Installment'
+        optimization:
+          $ref: '#/components/schemas/Optimization'
+        initial_transaction:
+          $ref: '#/components/schemas/InitialTransaction'
+        google_spa:
+          type: object
+          properties:
+            continue_url:
+              type: string
+              description: 'Fully qualified URL for redirecting the user''s browser session after authentication.<br/> For example, this field may be the merchant''s website for purchase confirmation once payment is complete.<br/> Required if in full redirect (not iframe) mode.<br/>
+
+                '
+          description: 'This object contains the Google SPA properties (non-hosted only)
+
+            '
+        preferred_experiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Experience'
+          description: 'Indicates the chosen experience(s) for this session.<br/> <br/> Available experiences include: <br/> • `3ds` <br/> • `google_spa` <br/>
+
+            '
+        device_information:
+          $ref: '#/components/schemas/DeviceInformation'
+    SessionAddress:
+      type: object
+      properties:
+        address_line1:
+          maxLength: 50
+          type: string
+          description: The first line of the address
+          example: 123 High St.
+        address_line2:
+          maxLength: 50
+          type: string
+          description: The second line of the address
+          example: ABC building
+        address_line3:
+          maxLength: 50
+          type: string
+          description: The third line of the address
+          example: 14 Wells Mews
+        city:
+          maxLength: 50
+          type: string
+          description: The address city
+          example: London
+        state:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The country subdivision code defined in ISO 3166-2
+          example: ENG
+        zip:
+          maxLength: 16
+          type: string
+          description: The address zip/postal code
+          example: SW1A 1AA
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The two-letter <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="_blank">ISO country code</a> of the address
+          example: GB
+      description: The shipping address. Any special characters will be replaced.
+    Currency:
+      type: string
+      description: The three-letter ISO currency code
+      example: USD
+    NonHostedGoogleSpaInfo:
+      title: Non Hosted
+      type: object
+      properties:
+        challenge_url:
+          type: string
+          description: 'Fully qualified URL of the Google SPA (Secure Payment Authentication) frontend for user challenge/unlock
+
+            '
+        initial_timeout:
+          type: string
+          description: 'Indicates the amount of time (in minutes) allowed for establishing the initial connection to the user''s specific authentication session, as determined by the challenge_url)
+
+            '
+        max_timeout:
+          type: string
+          description: 'Indicates maximum amount of time (in minutes) allowed for completing all PSP-Google message exchanges for current authentication session
+
+            '
+        iframe:
+          type: object
+          properties:
+            height:
+              type: string
+              description: 'Height of the challenge iframe displayed in the Cardholder browser window.
+
+                '
+            width:
+              type: string
+              description: 'Width of the challenge iframe displayed in the Cardholder browser window.
+
+                '
+          description: 'Details of the challenge iframe displayed in the Cardholder browser window
+
+            '
+        token:
+          $ref: '#/components/schemas/GoogleSpaToken'
+      description: 'Details of Google SPA (Secure Payment Authentication) for a non-hosted authentication
+
+        '
+    MerchantRiskInfo:
+      type: object
+      properties:
+        delivery_email:
+          maxLength: 254
+          type: string
+          description: 'For Electronic delivery, the email address to which the merchandise was delivered.
+
+            '
+          example: brucewayne@email.com
+        delivery_timeframe:
+          enum:
+          - electronic_delivery
+          - same_day
+          - overnight
+          - two_day_or_more
+          type: string
+          description: 'Indicates the merchandise delivery timeframe.
+
+            '
+        is_preorder:
+          type: boolean
+          description: 'Indicates whether the cardholder is placing an order for merchandise with a future availability or release date.
+
+            '
+          example: true
+        is_reorder:
+          type: boolean
+          description: 'Indicates whether the cardholder is reordering previously purchased merchandise.
+
+            '
+          example: false
+        shipping_indicator:
+          enum:
+          - billing_address
+          - another_address_on_file
+          - not_on_file
+          - store_pick_up
+          - digital_goods
+          - travel_and_event_no_shipping
+          - other
+          type: string
+          description: 'Indicates the shipping method chosen for the transaction. Please choose an option that accurately describes the cardholder''s specific transaction.
+
+            '
+        reorder_items_indicator:
+          enum:
+          - first_time_ordered
+          - reordered
+          type: string
+          description: Specifies whether the cardholder is reordering merchandise they've previously purchased.
+        pre_order_purchase_indicator:
+          enum:
+          - merchandise_available
+          - future_availability
+          type: string
+          description: Specifies whether the cardholder is placing an order for merchandise with an availability date or release date in the future.
+        pre_order_date:
+          type: string
+          description: The UTC date the pre-ordered merchandise is expected to be available, in ISO 8601 format.
+          format: date-time
+        gift_card_amount:
+          maxLength: 15
+          type: string
+          description: The total purchase amount, in major units. For example, the major unit amount for a gift card purchase of 135.20 USD is `135`. Only applicable for prepaid or gift card purchases.
+          example: '123'
+        gift_card_currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The currency code of the gift card,  as a three-digit ISO 4217 code. Only applicable for prepaid or gift card purchases.
+          example: USD
+        gift_card_count:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The total number of individual prepaid cards, gift cards, or gift codes purchased. Only applicable for prepaid or gift card purchases.
+          example: '02'
+      description: 'Additional information about the cardholder''s purchase.
+
+        '
+    Installment:
+      required:
+      - number_of_payments
+      type: object
+      properties:
+        number_of_payments:
+          minimum: 2
+          maxLength: 3
+          type: integer
+          description: Indicates the agreed total number of payment installments to be made in the duration of the installment agreement. Required when the authentication type is `instalment`.
+          example: 2
+        days_between_payments:
+          type: integer
+          description: Indicates the minimum number of days between authorisations. If no value is specified for an installment authentication type the default value will be used.
+          default: 1
+          example: 28
+        expiry:
+          type: string
+          description: Date after which no further authorisations are performed in the format yyyyMMdd. If no value is specified for an installment authentication type the default value will be used.
+          default: '99991231'
+          example: '20220901'
+      description: Details of an installment authentication. This property is needed only for an installment authentication type. Value will be ignored in any other cases.
+    DeviceInformation:
+      type: object
+      properties:
+        device_id:
+          type: string
+          description: The unique identifier for the device.
+        device_session_id:
+          pattern: ^(dsid)_(\w{26})$
+          type: string
+          description: Device session ID collected from our standalone Risk.js package.
+          example: dsid_ipsmclhxwq72phhr32iwfvrflm
+      description: Details of the device from which the authentication originated.
+    TrustedBeneficiary:
+      type: object
+      properties:
+        status:
+          enum:
+          - Y
+          - N
+          - E
+          - P
+          - R
+          - U
+          type: string
+          description: 'Enables the communication of trusted beneficiary status between the Access Control Server (ACS), the Directory Server (DS), and the 3D Secure (3DS) Requestor.<br/><br/>
+
+            • Y = 3DS Requestor is allowlisted by cardholder<br/> • N = 3DS Requestor is not allowlisted by cardholder<br/> • E = Not eligible as determined by issuer<br/> • P = Pending confirmation by cardholder<br/> • R = Cardholder rejected<br/> • U = Allowlist status unknown, unavailable, or does not apply
+
+            '
+          example: Y
+        source:
+          type: string
+          description: 'The system setting trusted beneficiary status.<br/><br/>
+
+            • 01 = 3DS Server <br/> • 02 = DS <br/> • 03 = ACS <br/> • 80-99 = DS-specific values <br/>
+
+            '
+          example: '01'
+      description: Details of the trusted listing status of the merchant.
+    CardholderAccountInfo:
+      type: object
+      properties:
+        purchase_count:
+          maximum: 9999
+          minimum: 0
+          type: number
+          description: 'The number of purchases with this cardholder''s account during the last six months.
+
+            '
+          example: 10
+        account_age:
+          enum:
+          - no_account
+          - created_during_transaction
+          - less_than_thirty_days
+          - thirty_to_sixty_days
+          - more_than_sixty_days
+          type: string
+          description: 'The length of time that the payment account was enrolled in the cardholder''s account.
+
+            '
+        add_card_attempts:
+          maximum: 999
+          minimum: 0
+          type: number
+          description: 'The number of Add Card attempts in the last 24 hours.
+
+            '
+          example: 10
+        shipping_address_age:
+          enum:
+          - this_transaction
+          - less_than_thirty_days
+          - thirty_to_sixty_days
+          - more_than_sixty_days
+          type: string
+          description: 'Indicates when the shipping address used for this transaction was first used.
+
+            '
+        account_name_matches_shipping_name:
+          type: boolean
+          description: 'Indicates if the Cardholder Name on the account is identical to the shipping Name used for this transaction.
+
+            '
+          example: true
+        suspicious_account_activity:
+          type: boolean
+          description: 'Indicates whether suspicious activity on the cardholder account has been observed.
+
+            '
+          example: true
+        transactions_today:
+          maximum: 999
+          minimum: 0
+          type: number
+          description: 'The number of transactions (successful and abandoned) for the cardholder account across all payment accounts in the previous 24 hours
+
+            '
+          example: 10
+        authentication_method:
+          enum:
+          - no_authentication
+          - own_credentials
+          - federated_id
+          - issuer_credentials
+          - third_party_authentication
+          - fido
+          type: string
+          description: 'Information about how the cardholder was authenticated before or during the transaction.
+
+            '
+          deprecated: true
+        cardholder_account_age_indicator:
+          enum:
+          - no_account,
+          - this_transaction
+          - less_than_thirty_days
+          - thirty_to_sixty_days
+          - more_than_sixty_days
+          type: string
+          description: The length of time the cardholder has held the account with the 3DS Requestor.
+        account_change:
+          type: string
+          description: 'The UTC date and time the cardholder’s account with the 3DS Requestor was last changed, in ISO 8601 format.
+
+
+            Changes that affect this value include:
+
+            - updating the billing or shipping address
+
+            - adding a new payment account
+
+            - adding a new user
+
+            '
+          format: date-time
+        account_change_indicator:
+          enum:
+          - this_transaction
+          - less_than_thirty_days
+          - thirty_to_sixty_days
+          - more_than_sixty_days
+          type: string
+          description: 'The amount of time since the cardholder’s account information with the 3DS Requestor was last changed.
+
+
+            Changes that affect this value include:
+
+            - updating the billing or shipping address
+
+            - adding a new payment account
+
+            - adding a new user
+
+            '
+        account_date:
+          type: string
+          description: The UTC date and time the cardholder opened the account with the 3DS Requestor, in ISO 8601 format.
+          format: date-time
+        account_password_change:
+          type: string
+          description: The UTC date and time the cardholder’s account with the 3DS Requestor was last reset or had a password change, in ISO 8601 format.
+          format: date-time
+        account_password_change_indicator:
+          enum:
+          - no_change
+          - this_transaction
+          - less_than_thirty_days
+          - thirty_to_sixty_days
+          - more_than_sixty_days
+          type: string
+          description: The amount of time since the cardholder’s account with the 3DS Requestor was last reset or had a password change.
+        transactions_per_year:
+          maximum: 999
+          maxLength: 3
+          type: integer
+          description: "The number of transactions associated with the cardholder's account with the 3DS Requestor in the previous year. This value includes both successful and abandoned transactions, across all payment accounts. \n\nSet this value to `999` if the number of transactions is `1000` or greater.\n"
+          example: 2
+        payment_account_age:
+          type: string
+          description: The UTC date and time the payment account was enrolled in the cardholder’s account with the 3DS Requestor, in ISO 8601 format.
+          format: date-time
+        shipping_address_usage:
+          type: string
+          description: The UTC date and time the shipping address used for the transaction was first used with the 3DS Requestor, in ISO 8601 format.
+          format: date-time
+        account_type:
+          enum:
+          - not_applicable
+          - credit
+          - debit
+          type: string
+          description: The type of account, in the case of a card product with multiple accounts.
+        account_id:
+          maxLength: 64
+          type: string
+          description: Additional information about the account optionally provided by the 3DS Requestor.
+        three_ds_requestor_authentication_info:
+          $ref: '#/components/schemas/ThreeDsRequestorAuthenticationInfo'
+      description: 'Additional information about the Cardholder''s account.
+
+        '
+    Browser:
+      title: browser
+      required:
+      - channel
+      - accept_header
+      - java_enabled
+      - javascript_enabled
+      - language
+      - color_depth
+      - screen_height
+      - screen_width
+      - timezone
+      - user_agent
+      - ip_address
+      properties:
+        channel:
+          enum:
+          - browser
+          type: string
+        three_ds_method_completion:
+          maxLength: 1
+          minLength: 1
+          enum:
+          - Y
+          - N
+          - U
+          type: string
+          description: 'Indicates whether the 3DS Method successfully completed<br/> • Y = Successfully completed <br/> • N = Did not successfully complete <br/> • U = Unavailable (3DS Method URL was not present in the preparation response (PRes) message data for the card range associated with the cardholder''s account number)
+
+            '
+          default: U
+          example: U
+        accept_header:
+          maxLength: 2048
+          type: string
+          description: 'Exact content of the HTTP accept headers as sent to the 3DS Requestor from the cardholder’s browser
+
+            '
+          example: 'Accept:  *.*, q=0.1'
+        java_enabled:
+          type: boolean
+          description: 'Boolean that represents the ability of the cardholder''s browser to execute Java. Value is returned from the `navigator.javaEnabled` property.
+
+            '
+          example: true
+        javascript_enabled:
+          type: boolean
+          description: "Boolean that represents the ability of the cardholder's browser to execute Javascript. Value is returned from the `navigator.javascriptEnabled` property.             *only applicable/required for authentication performed using 3DS 2.2. If authentications results in processing on 2.1 or lower, this field will be disregarded. \n"
+          default: true
+          example: true
+        language:
+          maxLength: 12
+          minLength: 1
+          type: string
+          description: 'Value representing the browser language as defined in IETF BCP47. Returned from the `navigator.language` property.
+
+            '
+          example: FR-fr
+        color_depth:
+          maxLength: 2
+          minLength: 1
+          type: string
+          description: 'Value representing the bit depth of the color palette for displaying images, in bits per pixel. Obtained from the cardholder''s browser from the `screen.colorDepth` property.
+
+            '
+          example: '16'
+        screen_height:
+          maxLength: 6
+          minLength: 1
+          type: string
+          description: 'Total height of the cardholder’s screen in pixels. Value is returned from the `screen.height` property.
+
+            '
+          example: '1080'
+        screen_width:
+          maxLength: 6
+          minLength: 1
+          type: string
+          description: 'Total width of the cardholder’s screen in pixels. Value is returned from the `screen.width` property.
+
+            '
+          example: '1920'
+        timezone:
+          maxLength: 5
+          minLength: 1
+          type: string
+          description: 'Time difference between UTC time and the local time of the cardholder''s browser, in minutes.
+
+            '
+          example: '60'
+        user_agent:
+          maxLength: 2048
+          type: string
+          description: 'Exact content of the HTTP user-agent header
+
+            '
+          example: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36
+        ip_address:
+          maxLength: 45
+          type: string
+          description: 'IP address of the browser as returned by the HTTP headers to the 3DS Requestor
+
+            '
+          example: 1.12.123.255
+        iframe_payment_allowed:
+          type: boolean
+          description: 'Whether the Payment API is enabled for all parent frames. This is required for Google SPA support in hosted sessions.
+
+            '
+          example: true
+        user_agent_client_hint:
+          type: string
+          description: 'The raw Sec-CH-UA header value. This can improve Google SPA support.
+
+            '
+          example: '''Sec-CH-UA: " Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"''
+
+            '
+    HostedCompletionInfo:
+      title: hosted
+      required:
+      - type
+      - success_url
+      - failure_url
+      properties:
+        type:
+          maxLength: 10
+          enum:
+          - hosted
+          type: string
+          description: 'Whether the session should be hosted by Checkout.com.
+
+            '
+          example: hosted
+        success_url:
+          maxLength: 256
+          type: string
+          description: For `hosted` sessions, this overrides the default success redirect URL configured on your account
+          format: uri
+          example: http://example.com/payments/success
+        failure_url:
+          maxLength: 256
+          type: string
+          description: For `hosted` sessions, this overrides the default failure redirect URL configured on your account
+          format: uri
+          example: http://example.com/payments/fail
+    SessionsBillingDescriptor:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 40
+          type: string
+          description: 'A dynamic description of the payment that replaces the Merchant Name that is displayed in 3DS Challenge window. Applies to card payments only. Special characters allowed: `.` `!` `*` `-` `=` `_` `@`'
+          example: SUPERHEROES.COM
+      description: An optional dynamic billing descriptor.
+    PreferredExperiences:
+      type: object
+      properties:
+        google_spa:
+          type: object
+          properties:
+            status:
+              enum:
+              - available
+              - unprocessed
+              - processed
+              - unavailable
+              type: string
+            reason:
+              type: array
+              items:
+                type: string
+              description: 'Reason(s) why processing the experience was unsuccessful.
+
+                '
+              example:
+              - Invalid response
+          description: 'Google SPA experience.
+
+            '
+        3ds:
+          type: object
+          properties:
+            status:
+              enum:
+              - available
+              - unprocessed
+              - processed
+              - unavailable
+              type: string
+            reason:
+              type: array
+              items:
+                type: string
+              description: 'Reason(s) why processing the experience was unsuccessful.
+
+                '
+              example:
+              - Invalid response
+          description: '3DS experience.
+
+            '
+      description: 'Preferred Experiences
+
+        '
+    Cryptogram:
+      maxLength: 28
+      minLength: 28
+      type: string
+      description: "Payment system-specific value provided as part of the ACS registration for each supported DS. Please be advised that this field will only be included in responses when authenticating with a valid OAuth token and not when authenticating \n  with `session_secret`. Cryptogram can only be retrieved for up to 24 hours after the session is created.\n"
+      example: MTIzNDU2Nzg5MDA5ODc2NTQzMjE=
+    SessionId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^(sid)_(\w{26})$
+      type: string
+      description: Session unique identifier
+      example: sid_y3oqhf46pyzuxjbcn2giaqnb44
+    TransactionType:
+      maxLength: 50
+      enum:
+      - goods_service
+      - check_acceptance
+      - account_funding
+      - quasi_card_transaction
+      - prepaid_activation_and_load
+      type: string
+      description: Identifies the type of transaction being authenticated
+      default: goods_service
+      example: goods_service
+    ProtocolVersion:
+      maxLength: 50
+      type: string
+      description: The protocol version number of the specification used by the API for authentication
+      example: 2.2.0
+    GetSessionLinks:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/GetBaseSessionLinks'
+      properties:
+        issuer_fingerprint:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://{prefix}.api.checkout.com/sessions/sid_y3oqhf46pyzuxjbcn2gia/issuer-fingerprint
+          description: 'The URI to send the 3ds method completion indicator to. Use this if device information was sent when requesting a session.  Only available if `next_actions` contains `issuer_fingerprint`
+
+            '
+        collect_channel_data:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://{prefix}.api.checkout.com/sessions/sid_y3oqhf46pyzuxjbcn2gia/collect-data
+          description: The URI to send device information to. Only available if `next_actions` contains `collect_data`
+        three_ds_method_url:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://api.hsbc.com/3dsmethod?tx=123456
+          description: The URI of the issuer fingerprint (3DS method). Only available if `next_actions` contains `issuer_fingerprint`
+        acs_url:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://api.hsbc.com/challenge
+          description: Fully qualified URL of the ACS to be used for the challenge. Only available if `next_actions` contains `authenticate`
+        complete:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 100
+              type: string
+              example: https://{prefix}.api.checkout.com/sessions/sid_y3oqhf46pyzuxjbcn2gia/complete
+          description: The URI to signal the session as complete. Only available if `next_actions` contains `complete`
+        success_url:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 300
+              type: string
+          description: The cardholder will be redirected to this URI given an authentication was approved or attempted. Only available if the completion type is `hosted`.
+        failure_url:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 300
+              type: string
+          description: The cardholder will be redirected to this URI given an authentication was not approved or attempted. Only available if the completion type is `hosted`.
+        callback_url:
+          required:
+          - href
+          type: object
+          properties:
+            href:
+              maxLength: 300
+              type: string
+          description: An endpoint which will receive a POST request highlighting the result of an authentication. See the "Complete a Session" request for more details. Only available if the completion type is `non_hosted`.
+      description: The links related to the session
+    SessionSecret:
+      maxLength: 48
+      minLength: 48
+      pattern: ^(sek)_(.{44})$
+      type: string
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API.  This value is returned as the `session_secret` when requesting a session.
+
+        '
+      example: sek_Dal7UyiH8rIFXA4PfgiIk2jUyQkVDeEWgVBEL4TsRTE=
+    Recurring:
+      type: object
+      properties:
+        days_between_payments:
+          type: integer
+          description: Indicates the minimum number of days between authorisations. If no value is specified for a recurring authentication type the default value will be used.
+          default: 1
+          example: 28
+        expiry:
+          type: string
+          description: Date after which no further authorisations are performed in the format yyyyMMdd. If no value is specified for a recurring authentication type the default value will be used.
+          default: '99991231'
+          example: '20220901'
+      description: Details of a recurring authentication. This property is needed only for a recurring authentication type. Value will be ignored in any other cases.
+    ErrorDetails:
+      type: object
+      properties:
+        error_code:
+          type: string
+          description: An error code identifying the type of issue.
+          example: '101'
+        error_component:
+          type: string
+          description: A code that specifies which 3D Secure component identified the error.
+          example: D
+        error_detail:
+          maxLength: 2048
+          type: string
+          description: Provides additional details about the issue.
+          example: acctNumber
+        error_description:
+          maxLength: 2048
+          type: string
+          description: A description of the issue identified.
+          example: Cardholder Account Number is not in a range belonging to Issuer.
+      description: Provides additional information about the error returned.
+    NonHostedCompletionInfo:
+      title: non_hosted
+      required:
+      - type
+      properties:
+        type:
+          maxLength: 10
+          enum:
+          - non_hosted
+          type: string
+          description: 'Whether the session should be hosted by Checkout.com.
+
+            '
+          example: non_hosted
+        callback_url:
+          maxLength: 256
+          type: string
+          description: For `non-hosted` sessions, you can define a URL to be called once the session is complete
+          format: uri
+          example: http://example.com/payments/callback/pay_mbabizu24mvu3mela5njyhpit4
+        challenge_notification_url:
+          maxLength: 256
+          type: string
+          description: For `non-hosted` sessions, you can define a URL to be your own challenge notification endpoint. When not provided, a Checkout.com endpoint will be used.
+          format: uri
+          example: http://example.com/payments/challenge/sid_mbabizu24mvu3mela5njyhpit4
+    ResponseCode:
+      enum:
+      - Y
+      - N
+      - U
+      - A
+      - C
+      - D
+      - R
+      - I
+      type: string
+      description: "Only available as a result of a 3DS2 authentication. \nThe response from the DS or ACS which indicates whether a transaction qualifies as an authenticated transaction or account verification. <br/> Only available if communication with the scheme was successful and the Session is in a final state. <br/><br/> • Y = Authentication Verification Successful. <br/> • N = Not Authenticated /Account Not Verified; Transaction denied. <br/> • U = Authentication/ Account Verification Could Not Be Performed; Technical or other problem, as indicated in ARes or RReq. <br/> • A = Attempts Processing Performed; Not Authenticated/Verified, but a proof of attempted authentication/verification is provided. <br/> • C = Challenge Required; Additional authentication is required using the CReq/CRes. <br/> • D = Challenge Required; Decoupled Authentication confirmed. <br/> • R = Authentication/ Account Verification Rejected; Issuer is rejecting authentication/verification and request that authorization not be attempted. <br/> • I = Informational Only; 3DS Requestor challenge preference acknowledged.\n"
+    CreateSessionAcceptedResponse:
+      required:
+      - session_secret
+      - id
+      - transaction_id
+      - scheme
+      - amount
+      - currency
+      - authentication_type
+      - authentication_category
+      - status
+      - protocol_version
+      - _links
+      - challenge_indicator
+      - authentication_date
+      - next_actions
+      properties:
+        session_secret:
+          $ref: '#/components/schemas/SessionSecret'
+        id:
+          $ref: '#/components/schemas/SessionId'
+        transaction_id:
+          maxLength: 36
+          minLength: 36
+          type: string
+          description: The transaction identifier that needs to be provided when communicating directly with the Access Control Server (ACS)
+          example: 9aea641d-0549-4222-9ca9-d90b43a4f38c
+        scheme:
+          enum:
+          - visa
+          - mastercard
+          - jcb
+          - amex
+          - diners
+          - cartes_bancaires
+          - discover
+          - upi
+          type: string
+          description: Indicates the scheme this authentication is carried out against
+        amount:
+          $ref: '#/components/schemas/Amount'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        completed:
+          type: boolean
+          description: Specifies if the session was completed.
+          example: false
+        authentication_type:
+          $ref: '#/components/schemas/AuthenticationType'
+        authentication_category:
+          $ref: '#/components/schemas/Category'
+        status:
+          enum:
+          - pending
+          - processing
+          - challenged
+          - challenge_abandoned
+          - expired
+          - approved
+          - attempted
+          - unavailable
+          - declined
+          - rejected
+          type: string
+          description: The status of the session.
+        next_actions:
+          type: array
+          items:
+            enum:
+            - collect_channel_data
+            - redirect_cardholder
+            - issuer_fingerprint
+            - challenge_cardholder
+            - complete
+            type: string
+          description: "Specifies which action to take in order to complete the session. \n\nThe `redirect_cardholder` action is only applicable for <a href=\"https://www.checkout.com/docs/payments/authenticate-payments/3d-secure/standalone-sessions/hosted-sessions\">hosted sessions</a>.\n"
+        protocol_version:
+          $ref: '#/components/schemas/ProtocolVersion'
+        account_info:
+          $ref: '#/components/schemas/CardholderAccountInfo'
+        merchant_risk_info:
+          $ref: '#/components/schemas/MerchantRiskInfo'
+        reference:
+          $ref: '#/components/schemas/Reference'
+        transaction_type:
+          $ref: '#/components/schemas/TransactionType'
+        card:
+          $ref: '#/components/schemas/CardInfo'
+        recurring:
+          $ref: '#/components/schemas/Recurring'
+        installment:
+          $ref: '#/components/schemas/Installment'
+        initial_transaction:
+          $ref: '#/components/schemas/InitialTransaction'
+        _links:
+          $ref: '#/components/schemas/CreateSessionLinks'
+        authentication_date:
+          type: string
+          description: Authentication date and time
+          format: date-time
+        challenge_indicator:
+          enum:
+          - no_preference
+          - no_challenge_requested
+          - challenge_requested
+          - challenge_requested_mandate
+          type: string
+          description: Indicates the preference for whether or not a 3DS challenge should be performed. The customer’s bank has the final say on whether or not the customer receives the challenge
+          default: no_preference
+        optimization:
+          type: object
+          properties:
+            optimized:
+              type: boolean
+              description: 'Indicates if any optimization has been applied
+
+                '
+              example: true
+            framework:
+              enum:
+              - acceptance_rates
+              type: string
+              description: 'The optimization framework applied
+
+                '
+            optimized_properties:
+              title: OptimizedProperty
+              type: array
+              items:
+                $ref: '#/components/schemas/OptimizedProperty'
+              description: The collection of optimized fields
+          description: 'The information about the optimization options selected
+
+            '
+        preferred_experiences:
+          $ref: '#/components/schemas/PreferredExperiences'
+        experience:
+          $ref: '#/components/schemas/Experience'
+        google_spa:
+          $ref: '#/components/schemas/GoogleSpaInfo'
+        ds:
+          $ref: '#/components/schemas/Ds'
+        certificates:
+          $ref: '#/components/schemas/DsPublicKeys'
+    GoogleSpaToken:
+      type: object
+      properties:
+        number:
+          type: string
+          description: 'Value of token. Represented as a numerical string
+
+            '
+        expiry_month:
+          type: number
+          description: 'Expiry month of the token
+
+            '
+        expiry_year:
+          type: number
+          description: 'Expiry year of the token
+
+            '
+      description: 'Token for the given PAN provisioned and authenticated
+
+        '
+    Experience:
+      enum:
+      - 3ds
+      - google_spa
+      type: string
+      description: The authentication experience that was used for processing
+      example: 3ds
+    SdkEphemeralPublicKey:
+      type: object
+      properties:
+        kty:
+          enum:
+          - EC
+          type: string
+          description: The key type.
+          example: EC
+        crv:
+          maxLength: 40
+          type: string
+          description: The type of elliptic curve.
+          example: P-256
+        x:
+          maxLength: 100
+          type: string
+          description: x coordinate of the elliptic curve that is base64url-encoded.
+          example: f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU
+        y:
+          maxLength: 100
+          type: string
+          description: y coordinate of the elliptic curve that is base64url-encoded.
+          example: x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0
+      description: Public key component of the ephemeral key pair generated by the 3DS SDK and used to establish session keys between the 3DS SDK and ACS. Refer to https://tools.ietf.org/html/rfc7517#appendix-A.1
+    Amount:
+      maximum: 9007199254740991
+      minimum: 0
+      type: integer
+      description: The amount in the minor currency.
+      format: int64
+      example: 120
+    ChallengeIndicator:
+      maxLength: 50
+      enum:
+      - no_preference
+      - no_challenge_requested
+      - challenge_requested
+      - challenge_requested_mandate
+      - low_value
+      - trusted_listing
+      - trusted_listing_prompt
+      - transaction_risk_assessment
+      - data_share
+      type: string
+      description: 'Indicates whether a challenge is requested for this session.<br/> <br/> The following are requests for exemption: <br/> • `low_value` <br/> • `trusted_listing` <br/> • `trusted_listing_prompt` <br/> • `transaction_risk_assessment` <br/><br/>
+
+        If an exemption cannot be applied, then the value `no_challenge_requested` will be used instead.
+
+        '
+      default: no_preference
+      example: no_preference
+    SessionSource:
+      required:
+      - type
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/CardSource'
+      - $ref: '#/components/schemas/IdSource'
+      - $ref: '#/components/schemas/TokenSource'
+      - $ref: '#/components/schemas/NetworkTokenSource'
+      properties:
+        type:
+          type: string
+          description: The payment source type
+          default: card
+          example: card
+        scheme:
+          enum:
+          - amex
+          - cartes_bancaires
+          - diners
+          - mastercard
+          - visa
+          - discover
+          - upi
+          - jcb
+          type: string
+          description: Indicates the cardholder scheme choice
+        number:
+          maxLength: 19
+          minLength: 13
+          type: string
+          description: The card number.
+          example: '4242424242424242'
+        expiry_month:
+          maximum: 12
+          minimum: 1
+          maxLength: 2
+          minLength: 1
+          type: integer
+          description: The expiry month of the card.
+          example: 12
+        expiry_year:
+          maxLength: 4
+          minLength: 4
+          type: integer
+          description: The expiry year of the card.
+          example: 2077
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/SessionAddress'
+          description: The customer's billing address. Any special characters will be replaced.
+        home_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's home phone number
+        mobile_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's mobile phone number
+        work_phone:
+          allOf:
+          - $ref: '#/components/schemas/SessionPhone'
+          description: The cardholder's work phone number
+        email:
+          maxLength: 254
+          type: string
+          description: The email of the cardholder
+          example: bruce.wayne@email.com
+      description: The source of the authentication.
+      discriminator:
+        propertyName: type
+        mapping:
+          card: '#/components/schemas/CardSource'
+          id: '#/components/schemas/IdSource'
+          token: '#/components/schemas/TokenSource'
+          network_token: '#/components/schemas/NetworkTokenSource'
+    CreateSessionOkResponse:
+      required:
+      - session_secret
+      allOf:
+      - $ref: '#/components/schemas/GetSessionResponse'
+    Approved:
+      type: boolean
+      description: Whether the authentication was successful. This will only be set if the Session is in a final state
+      example: false
+    MerchantInitiated:
+      title: merchant_initiated
+      required:
+      - channel
+      - request_type
+      properties:
+        channel:
+          enum:
+          - merchant_initiated
+          type: string
+        request_type:
+          enum:
+          - recurring_transaction
+          - installment_transaction
+          - add_card
+          - maintain_card_information
+          - account_verification
+          - split_or_delayed_shipment
+          - top_up
+          - mail_order
+          - telephone_order
+          - whitelist_status_check
+          - other_payment
+          type: string
+    SessionPhone:
+      required:
+      - country_code
+      - number
+      type: object
+      properties:
+        country_code:
+          maxLength: 3
+          minLength: 1
+          pattern: ^\d{1,3}$
+          type: string
+          description: Country code. According to ITU-E.164
+          example: '234'
+        number:
+          maxLength: 15
+          pattern: ^\d{1,15}$
+          type: string
+          description: The rest of the number. According to ITU-E.164
+          example: 0204567895
+    AuthenticationType:
+      enum:
+      - regular
+      - recurring
+      - installment
+      - maintain_card
+      - add_card
+      type: string
+      description: Indicates the type of payment this session is for. Please note the spelling of `installment` consists of two `l`s.
+      default: regular
+      example: regular
+    Reference:
+      maxLength: 100
+      type: string
+      description: A reference you can later use to identify this payment, such as an order number. **Do not pass sensitive information in this field e.g. card details**
+      example: ORD-5023-4E89
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

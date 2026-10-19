@@ -1,0 +1,1442 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Cardholders API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Cardholders
+  description: Create new cardholders to issue cards to, and manage your existing cardholders.
+paths:
+  /issuing/cardholders:
+    post:
+      tags:
+      - Cardholders
+      summary: Create a cardholder
+      description: Create a new cardholder that you can issue a card to at a later point.
+      operationId: createCardholder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add-cardholder-request'
+        required: true
+      responses:
+        '201':
+          description: Cardholder created successfully
+          headers:
+            cko-request-id:
+              schema:
+                $ref: '#/components/schemas/cko-request-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/add-cardholder-response'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:card-management-write
+  /issuing/cardholders/{cardholderId}:
+    get:
+      tags:
+      - Cardholders
+      summary: Get cardholder details
+      description: Retrieve the details for a cardholder you created previously.
+      operationId: getCardholder
+      parameters:
+      - name: cardholderId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingCardholderId'
+      responses:
+        '200':
+          description: Cardholder retrieved successfully
+          headers:
+            cko-request-id:
+              schema:
+                $ref: '#/components/schemas/cko-request-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-cardholder-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Cardholder not found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:card-management-read
+    patch:
+      tags:
+      - Cardholders
+      summary: Update a cardholder
+      description: Updates the details of an existing cardholder.
+      operationId: updateCardholder
+      parameters:
+      - name: cardholderId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingCardholderId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update-cardholder-request'
+        required: true
+      responses:
+        '200':
+          description: Cardholder updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/update-cardholder-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Cardholder not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:card-management-write
+  /issuing/cardholders/{cardholderId}/cards:
+    get:
+      tags:
+      - Cardholders
+      summary: Get a cardholder's cards
+      description: 'Retrieves the cards issued to the specified cardholder.
+
+
+        Card credentials are not returned in the response.
+
+        The response is limited to a maximum of 150 cards.'
+      operationId: getCardholderCards
+      parameters:
+      - name: cardholderId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingCardholderId'
+      - name: statuses
+        in: query
+        description: 'The card statuses to filter the results by.
+
+          Cards matching any status in this list are returned. If the list is empty, all cards are returned.
+
+          Format - Comma-separated list
+
+          '
+        schema:
+          type: string
+        example: active,suspended
+      responses:
+        '200':
+          description: Cardholder's cards retrieved successfully
+          headers:
+            cko-request-id:
+              schema:
+                $ref: '#/components/schemas/cko-request-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-cardholder-cards-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Cardholder not found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:card-management-read
+components:
+  schemas:
+    IssuingAddress:
+      required:
+      - address_line1
+      - city
+      - zip
+      - country
+      type: object
+      properties:
+        address_line1:
+          maxLength: 45
+          minLength: 1
+          pattern: ^[a-zA-Z0-9/àáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð \-,.'_#:]{1,45}$
+          type: string
+          description: The first line of the address.
+          example: Checkout.com
+        address_line2:
+          maxLength: 45
+          minLength: 1
+          pattern: ^[a-zA-Z0-9/àáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð \-,.'_#:]{1,45}$
+          type: string
+          description: The second line of the address.
+          example: 90 Tottenham Court Road
+        city:
+          maxLength: 128
+          minLength: 1
+          pattern: ^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{1,128}$
+          type: string
+          description: The address city.
+          example: London
+        state:
+          maxLength: 128
+          minLength: 1
+          pattern: ^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'\-]{1,128}$
+          type: string
+          description: The address state.
+          example: London
+        zip:
+          maxLength: 10
+          minLength: 1
+          pattern: ^[0-9a-zA-Z ]{1,10}$
+          type: string
+          description: The address zip code, or postal code.
+          example: W1T 4TJ
+        country:
+          maxLength: 2
+          minLength: 2
+          pattern: ^[A-Z]{2}$
+          type: string
+          description: The address country, as an <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="blank">ISO country code</a>.
+          example: GB
+    get-physical-card-response:
+      title: physical
+      required:
+      - id
+      - client_id
+      - entity_id
+      - cardholder_id
+      - card_product_id
+      - last_four
+      - expiry_month
+      - expiry_year
+      - status
+      - type
+      - billing_currency
+      - issuing_country
+      - scheme
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingCardId'
+        client_id:
+          $ref: '#/components/schemas/IssuingClientId'
+        entity_id:
+          $ref: '#/components/schemas/IssuingEntityId'
+        cardholder_id:
+          $ref: '#/components/schemas/IssuingCardholderId'
+        card_product_id:
+          $ref: '#/components/schemas/IssuingCardProductId'
+        user_id:
+          $ref: '#/components/schemas/IssuingUserId'
+        last_four:
+          $ref: '#/components/schemas/LastFour'
+        expiry_month:
+          $ref: '#/components/schemas/ExpiryMonth'
+        expiry_year:
+          $ref: '#/components/schemas/ExpiryYear'
+        status:
+          $ref: '#/components/schemas/IssuingStatus'
+        display_name:
+          $ref: '#/components/schemas/DisplayName'
+        type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingType'
+          - enum:
+            - physical
+          example: physical
+        billing_currency:
+          $ref: '#/components/schemas/IssuingCurrency'
+        issuing_country:
+          $ref: '#/components/schemas/IssuingCountry'
+        reference:
+          $ref: '#/components/schemas/IssuingReference'
+        metadata:
+          $ref: '#/components/schemas/IssuingCardMetadata'
+        revocation_date:
+          $ref: '#/components/schemas/IssuingRevocationDate'
+        scheduled_activation_date:
+          $ref: '#/components/schemas/IssuingScheduledActivationDate'
+        root_card_id:
+          $ref: '#/components/schemas/IssuingRootCardId'
+        parent_card_id:
+          $ref: '#/components/schemas/IssuingParentCardId'
+        scheme:
+          $ref: '#/components/schemas/Scheme'
+        created_date:
+          $ref: '#/components/schemas/Datetime'
+        last_modified_date:
+          $ref: '#/components/schemas/Datetime'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/CardLinks'
+    IssuingParentCardId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^crd_[a-z0-9]{26}$
+      type: string
+      description: When a card is renewed, the unique identifier of the previous card in the renewal history.
+      example: crd_qm26t52qz3yejjo2t4btqvxtzi
+    Scheme:
+      enum:
+      - mastercard
+      - visa
+      type: string
+      description: the card scheme.
+      example: mastercard
+    IssuingType:
+      type: string
+      description: The card type.
+    IssuingCardholderId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^crh_[a-z0-9]{26}$
+      type: string
+      description: The cardholder's unique identifier.
+      example: crh_d3ozhf43pcq2xbldn2g45qnb44
+    IssuingPhoneNumber:
+      type: object
+      properties:
+        country_code:
+          maxLength: 7
+          minLength: 1
+          type: string
+          description: The international <a href="https://docs.checkout.com/resources/codes/country-codes" target="blank">country calling code</a>.
+          example: '+1'
+        number:
+          maxLength: 25
+          minLength: 6
+          type: string
+          description: A valid phone number without leading zeros.
+          example: 415 555 2671
+      description: The cardholder's mobile phone number. This is used in the card tokenization one-time passcode (OTP) challenge flow and in delivery details for physical cards.
+    IssuingScheduledRevocationDate:
+      type: string
+      description: 'The card will be revoked at midnight UTC on the date specified.
+
+
+        - Format: `YYYY-MM-DD`
+
+        '
+      format: date
+      example: '2027-03-12T00:00:00.0000000'
+    DisplayName:
+      maxLength: 26
+      minLength: 2
+      pattern: ^[0-9a-zA-Z.\- ]{2,26}$
+      type: string
+      description: The name to display on the card.
+      example: JOHN KENNEDY
+    ExpiryYear:
+      maxLength: 4
+      minLength: 4
+      type: integer
+      description: The card's expiration year.
+      format: int32
+      example: 2025
+    CardLinks:
+      minItems: 1
+      required:
+      - self
+      - credentials
+      - revoke
+      - controls
+      type: object
+      properties:
+        self:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to retrieve the card's details.
+        credentials:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to retrieve the card's credentials.
+        revoke:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to revoke the card.
+        controls:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to retrieve the card's controls.
+      description: The links related to the card.
+      example:
+        self:
+          href: https://{prefix}.api.checkout.com/issuing/cards/crd_fa6psq42dcdd6fdn5gifcq1491
+          actions:
+          - GET
+          types:
+          - application/json
+        credentials:
+          href: https://{prefix}.api.checkout.com/issuing/cards/crd_fa6psq42dcdd6fdn5gifcq1491/credentials
+          actions:
+          - GET
+          types:
+          - application/json
+        revoke:
+          href: https://{prefix}.api.checkout.com/issuing/cards/crd_fa6psq42dcdd6fdn5gifcq1491/revoke
+          actions:
+          - POST
+          types:
+          - application/json
+        controls:
+          href: https://{prefix}.api.checkout.com/issuing/controls?target_id=crd_fa6psq42dcdd6fdn5gifcq1491
+          actions:
+          - GET
+          types:
+          - application/json
+    IssuingCardId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^crd_[a-z0-9]{26}$
+      type: string
+      description: The card's unique identifier.
+      example: crd_fa6psq242dcd6fdn5gifcq1491
+    LastFour:
+      maximum: 4
+      minimum: 4
+      pattern: ^[0-9]{4}$
+      type: string
+      description: The last four digits of the card number, also known as the PAN.
+      example: '1234'
+    IssuingCardholderLinks:
+      minItems: 1
+      required:
+      - self
+      type: object
+      properties:
+        self:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to retrieve the cardholder
+        cards:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to add or retrieve the cards issued to the cardholder
+      description: The links related to the current cardholder.
+      example:
+        self:
+          href: https://{prefix}.api.checkout.com/issuing/cardholders/crh_d3ozhf43pcq2xbldn2g45qnb44
+          actions:
+          - GET
+          types:
+          - application/json
+        cards:
+          href: https://{prefix}.api.checkout.com/issuing/cards
+          actions:
+          - POST
+          types:
+          - application/json
+    IssuingCountry:
+      maxLength: 2
+      minLength: 2
+      type: string
+      description: The issuing country, as a two-letter <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="blank" >ISO country code</a>.
+      example: US
+    IssuingEmail:
+      maxLength: 254
+      minLength: 3
+      type: string
+      description: "The cardholder's email address. \n\nEmails are validated against the <a href=\"https://datatracker.ietf.org/doc/html/rfc6530\">rfc6530</a> standard.\n"
+      format: email
+      example: john.kennedy@myemaildomain.com
+    IssuingCardProductId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^pro_[a-z0-9]{26}$
+      type: string
+      description: The card product's unique identifier.
+      example: pro_7syjig3jq3mezlc3vjrdpfitl4
+    get-cardholder-response:
+      allOf:
+      - $ref: '#/components/schemas/IssuingCardholder'
+    IssuingReference:
+      maxLength: 256
+      type: string
+      description: Your reference.
+      example: X-123456-N11
+    ExpiryMonth:
+      maximum: 12
+      minimum: 1
+      type: integer
+      description: The card's expiration month.
+      format: int32
+      example: 5
+    IssuingUpdateCardholderLinks:
+      required:
+      - self
+      type: object
+      properties:
+        self:
+          $ref: '#/components/schemas/IssuingLink'
+      description: The links related to the current cardholder.
+      example:
+        self:
+          href: https://{prefix}.api.checkout.com/issuing/cardholders/crh_d3ozhf43pcq2xbldn2g45qnb44
+          actions:
+          - GET
+          types:
+          - application/json
+    IssuingValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HLHPN8802NUF:00000003
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          maxItems: 20
+          type: array
+          items:
+            type: string
+            example: request_body_malformed
+      additionalProperties: false
+    IssuingLink:
+      required:
+      - href
+      - actions
+      - types
+      type: object
+      properties:
+        href:
+          maxLength: 100
+          pattern: ^https:\/.*$
+          type: string
+          description: The link URL.
+        actions:
+          maxItems: 20
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^(GET|POST|PUT|DELETE|PATCH)$
+            enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            type: string
+          additionalProperties: false
+          description: The HTTP Methods that can be performed on the link.
+        types:
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^application\/.*$
+            type: string
+          additionalProperties: false
+          description: The Content Types for the link to the resource
+      additionalProperties: false
+    get-virtual-card-response:
+      title: virtual
+      required:
+      - id
+      - client_id
+      - entity_id
+      - cardholder_id
+      - card_product_id
+      - last_four
+      - expiry_month
+      - expiry_year
+      - status
+      - type
+      - billing_currency
+      - issuing_country
+      - scheme
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingCardId'
+        client_id:
+          $ref: '#/components/schemas/IssuingClientId'
+        entity_id:
+          $ref: '#/components/schemas/IssuingEntityId'
+        cardholder_id:
+          $ref: '#/components/schemas/IssuingCardholderId'
+        card_product_id:
+          $ref: '#/components/schemas/IssuingCardProductId'
+        user_id:
+          $ref: '#/components/schemas/IssuingUserId'
+        last_four:
+          $ref: '#/components/schemas/LastFour'
+        expiry_month:
+          $ref: '#/components/schemas/ExpiryMonth'
+        expiry_year:
+          $ref: '#/components/schemas/ExpiryYear'
+        status:
+          $ref: '#/components/schemas/IssuingStatus'
+        display_name:
+          $ref: '#/components/schemas/DisplayName'
+        type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingType'
+          - enum:
+            - virtual
+          example: virtual
+        billing_currency:
+          $ref: '#/components/schemas/IssuingCurrency'
+        issuing_country:
+          $ref: '#/components/schemas/IssuingCountry'
+        reference:
+          $ref: '#/components/schemas/IssuingReference'
+        metadata:
+          $ref: '#/components/schemas/IssuingCardMetadata'
+        revocation_date:
+          $ref: '#/components/schemas/IssuingRevocationDate'
+        scheduled_activation_date:
+          $ref: '#/components/schemas/IssuingScheduledActivationDate'
+        root_card_id:
+          $ref: '#/components/schemas/IssuingRootCardId'
+        parent_card_id:
+          $ref: '#/components/schemas/IssuingParentCardId'
+        scheme:
+          $ref: '#/components/schemas/Scheme'
+        created_date:
+          $ref: '#/components/schemas/Datetime'
+        last_modified_date:
+          $ref: '#/components/schemas/Datetime'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/CardLinks'
+        is_single_use:
+          type: boolean
+          description: Specifies whether the virtual card is set to expire after a single use.
+          default: false
+    add-individual-cardholder-request:
+      title: individual
+      required:
+      - type
+      - entity_id
+      - first_name
+      - last_name
+      - billing_address
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of cardholder to create.
+          example: individual
+        reference:
+          $ref: '#/components/schemas/IssuingReference'
+        entity_id:
+          $ref: '#/components/schemas/IssuingEntityId'
+        first_name:
+          maxLength: 40
+          minLength: 1
+          type: string
+          description: The cardholder's first name.
+          example: John
+        middle_name:
+          maxLength: 40
+          minLength: 1
+          type: string
+          description: The cardholder's middle name.
+          example: Fitzgerald
+        last_name:
+          maxLength: 40
+          minLength: 1
+          type: string
+          description: The cardholder's last name.
+          example: Kennedy
+        email:
+          allOf:
+          - $ref: '#/components/schemas/IssuingEmail'
+          description: The cardholder's email address.
+        phone_number:
+          allOf:
+          - $ref: '#/components/schemas/IssuingPhoneNumber'
+        date_of_birth:
+          type: string
+          description: The cardholder's date of birth. <br/>Format – `YYYY-MM-DD`
+          format: date
+          example: '1985-05-15T00:00:00.0000000'
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/IssuingAddress'
+          description: The cardholder's billing address.
+        residency_address:
+          allOf:
+          - $ref: '#/components/schemas/IssuingAddress'
+          description: The cardholder's residential address. If this value is not provided, the cardholder's billing address is used instead, by default.
+    IssuingScheduledActivationDate:
+      type: string
+      description: 'Date scheduling the card''s first activation. Only applies to the initial activation of a card. Two formats are supported:
+
+
+        - Date only: `YYYY-MM-DD` (treated as midnight UTC)
+
+        - Date with round hour: `YYYY-MM-DDTHH:mmZ` (UTC) or `YYYY-MM-DDTHH:mm±HH:mm` (offset)
+
+
+        Only round hours are allowed when a time is provided (`HH:00`). The value must be at least the next round hour after the request time.
+
+        '
+      example: 2026-06-01T10:00Z
+    IssuingCardholder:
+      required:
+      - id
+      - client_id
+      - entity_id
+      - type
+      - first_name
+      - last_name
+      - billing_address
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingCardholderId'
+        type:
+          type: string
+          description: The cardholder type. Currently `individual` is the only supported value.
+          example: individual
+        first_name:
+          maxLength: 40
+          minLength: 1
+          pattern: ^[a-zA-Z'\- ]{1,40}$
+          type: string
+          description: The cardholder's first name.
+          example: John
+        middle_name:
+          maxLength: 40
+          minLength: 1
+          pattern: ^[a-zA-Z'\- ]{1,40}$
+          type: string
+          description: The cardholder's middle name.
+          example: Fitzgerald
+        last_name:
+          maxLength: 40
+          minLength: 1
+          pattern: ^[a-zA-Z'\- ]{1,40}$
+          type: string
+          description: The cardholder's last name.
+          example: Kennedy
+        email:
+          allOf:
+          - $ref: '#/components/schemas/IssuingEmail'
+          description: The cardholder's email address.
+        phone_number:
+          allOf:
+          - $ref: '#/components/schemas/IssuingPhoneNumber'
+        date_of_birth:
+          type: string
+          description: The cardholder's date of birth. <br/>Format – `YYYY-MM-DD`
+          format: date
+          example: '1985-05-28T00:00:00.0000000'
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/IssuingAddress'
+          description: The cardholder's billing address.
+        residency_address:
+          allOf:
+          - $ref: '#/components/schemas/IssuingAddress'
+          description: The cardholder's residential address. If this value is not provided, the cardholder's billing address is used instead, by default.
+        reference:
+          $ref: '#/components/schemas/IssuingReference'
+        client_id:
+          $ref: '#/components/schemas/IssuingClientId'
+        account_entity_id:
+          allOf:
+          - $ref: '#/components/schemas/IssuingEntityId'
+          description: The unique identifier of the entity that holds the cardholder's currency account.
+        parent_sub_entity_id:
+          allOf:
+          - $ref: '#/components/schemas/IssuingEntityId'
+          description: The unique identifier of the cardholder's parent sub-entity, if they have one.
+        entity_id:
+          allOf:
+          - $ref: '#/components/schemas/IssuingEntityId'
+          description: The unique identifier of the cardholder's root client entity.
+        status:
+          enum:
+          - active
+          - pending
+          - restricted
+          - requirements_due
+          - inactive
+          - rejected
+          - draft
+          - suspended
+          type: string
+          description: The cardholder's status.
+          example: active
+        created_date:
+          type: string
+          format: date-time
+          example: '2019-09-10T10:11:12.0000000+00:00'
+        last_modified_date:
+          type: string
+          format: date-time
+          example: '2019-09-11T10:11:12.0000000+00:00'
+        _links:
+          $ref: '#/components/schemas/IssuingCardholderLinks'
+    IssuingCurrency:
+      maxLength: 3
+      minLength: 3
+      pattern: ^[a-zA-Z]{3}$
+      type: string
+      description: The issuing currency, as a three-letter <a href="https://docs.checkout.com/docs/currency-codes" target="blank">ISO currency code</a>.
+      format: ISO4217
+      example: USD
+    get-card-response:
+      required:
+      - id
+      - client_id
+      - entity_id
+      - cardholder_id
+      - card_product_id
+      - last_four
+      - expiry_month
+      - expiry_year
+      - status
+      - type
+      - billing_currency
+      - issuing_country
+      - scheme
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/get-virtual-card-response'
+      - $ref: '#/components/schemas/get-physical-card-response'
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingCardId'
+        client_id:
+          $ref: '#/components/schemas/IssuingClientId'
+        entity_id:
+          $ref: '#/components/schemas/IssuingEntityId'
+        cardholder_id:
+          $ref: '#/components/schemas/IssuingCardholderId'
+        card_product_id:
+          $ref: '#/components/schemas/IssuingCardProductId'
+        user_id:
+          $ref: '#/components/schemas/IssuingUserId'
+        last_four:
+          $ref: '#/components/schemas/LastFour'
+        expiry_month:
+          $ref: '#/components/schemas/ExpiryMonth'
+        expiry_year:
+          $ref: '#/components/schemas/ExpiryYear'
+        status:
+          $ref: '#/components/schemas/IssuingStatus'
+        display_name:
+          $ref: '#/components/schemas/DisplayName'
+        type:
+          $ref: '#/components/schemas/IssuingType'
+        billing_currency:
+          $ref: '#/components/schemas/IssuingCurrency'
+        issuing_country:
+          $ref: '#/components/schemas/IssuingCountry'
+        reference:
+          $ref: '#/components/schemas/IssuingReference'
+        metadata:
+          $ref: '#/components/schemas/IssuingCardMetadata'
+        scheduled_revocation_date:
+          $ref: '#/components/schemas/IssuingScheduledRevocationDate'
+        revocation_date:
+          allOf:
+          - $ref: '#/components/schemas/IssuingRevocationDate'
+          description: Deprecated. Use `scheduled_revocation_date` instead.
+          deprecated: true
+        scheduled_activation_date:
+          $ref: '#/components/schemas/IssuingScheduledActivationDate'
+        last_activated_on:
+          $ref: '#/components/schemas/LastActivatedOn'
+        root_card_id:
+          $ref: '#/components/schemas/IssuingRootCardId'
+        parent_card_id:
+          $ref: '#/components/schemas/IssuingParentCardId'
+        scheme:
+          $ref: '#/components/schemas/Scheme'
+        created_date:
+          $ref: '#/components/schemas/Datetime'
+        last_modified_date:
+          $ref: '#/components/schemas/Datetime'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/CardLinks'
+      discriminator:
+        propertyName: type
+        mapping:
+          virtual: '#/components/schemas/get-virtual-card-response'
+          physical: '#/components/schemas/get-physical-card-response'
+    cko-request-id:
+      type: string
+      description: ID to correlate requests.
+      example: 3729b06b-5a63-4425-bc34-23dfc158ddfe
+    add-cardholder-response:
+      required:
+      - id
+      - client_id
+      - entity_id
+      - type
+      - status
+      - _links
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingCardholderId'
+        client_id:
+          $ref: '#/components/schemas/IssuingClientId'
+        entity_id:
+          $ref: '#/components/schemas/IssuingEntityId'
+        type:
+          enum:
+          - individual
+          type: string
+          description: The cardholder's type.
+        status:
+          enum:
+          - active
+          - pending
+          - restricted
+          - requirements_due
+          - inactive
+          - rejected
+          type: string
+          description: The cardholder's status, after creation.
+        reference:
+          $ref: '#/components/schemas/IssuingReference'
+        created_date:
+          type: string
+          format: date-time
+        last_modified_date:
+          type: string
+          format: date-time
+          example: '2019-09-10T10:11:12.0000000+00:00'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/IssuingCardholderLinks'
+    update-cardholder-request:
+      type: object
+      properties:
+        first_name:
+          maxLength: 40
+          minLength: 1
+          type: string
+          description: The cardholder's first name.
+          example: John
+        middle_name:
+          maxLength: 40
+          minLength: 1
+          type: string
+          description: The cardholder's middle name. To set this field to null, pass `null` in your request.
+          example: Fitzgerald
+        last_name:
+          maxLength: 40
+          minLength: 1
+          type: string
+          description: The cardholder's last name.
+          example: Kennedy
+        date_of_birth:
+          type: string
+          description: The cardholder's date of birth in the YYYY-MM-DD format. To set this field to null, pass `null` in your request.
+          format: date
+          example: '1985-05-15T00:00:00.0000000'
+        phone_number:
+          allOf:
+          - $ref: '#/components/schemas/IssuingPhoneNumber'
+        email:
+          allOf:
+          - $ref: '#/components/schemas/IssuingEmail'
+          description: The cardholder's email address. To set this field to null, pass `null` in your request.
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/IssuingAddress'
+          description: The  cardholder's billing address.
+        residency_address:
+          allOf:
+          - $ref: '#/components/schemas/IssuingAddress'
+          description: The cardholder's residency address. To set this field to null, pass `null` in your request.
+      description: The cardholder's fields to update.
+    get-cardholder-cards-response:
+      required:
+      - cards
+      type: object
+      properties:
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/get-card-response'
+          description: The list of cards associated with the specified cardholder.
+    IssuingClientId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^cli_[a-z0-9]{26}$
+      type: string
+      description: The client's unique identifier.
+      example: cli_vkuhvk4vjn2edkps7dfsq6emqm
+    IssuingRootCardId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^crd_[a-z0-9]{26}$
+      type: string
+      description: When a card is renewed, the unique identifier of the first card in the renewal history.
+      example: crd_fa6psq242dcd6fdn5gifcq1491
+    IssuingRevocationDate:
+      type: string
+      description: 'Deprecated. Use `scheduled_revocation_date` instead.
+
+
+        Date scheduling the card''s automatic revocation.
+
+
+        - Supported format: `YYYY-MM-DD` (time is midnight UTC)
+
+        '
+      format: date
+      example: '2027-03-12T00:00:00.0000000'
+      deprecated: true
+    add-cardholder-request:
+      required:
+      - type
+      - entity_id
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/add-individual-cardholder-request'
+      properties:
+        type:
+          type: string
+          description: The type of cardholder to create.
+          example: individual
+        reference:
+          $ref: '#/components/schemas/IssuingReference'
+        entity_id:
+          $ref: '#/components/schemas/IssuingEntityId'
+      description: The cardholder to create.
+      discriminator:
+        propertyName: type
+        mapping:
+          individual: '#/components/schemas/add-individual-cardholder-request'
+    IssuingEntityId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^ent_[a-z0-9]{26}$
+      type: string
+      description: The entity's unique identifier.
+      example: ent_fa6psq242dcd6fdn5gifcq1491
+    update-cardholder-response:
+      required:
+      - last_modified_date
+      - _links
+      type: object
+      properties:
+        last_modified_date:
+          type: string
+          format: date-time
+          example: '2019-09-10T10:11:12.0000000+00:00'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/IssuingUpdateCardholderLinks'
+    Datetime:
+      type: string
+      format: UTC
+      example: '2021-09-09T19:41:39Z'
+    IssuingUserId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^usr_[a-z0-9]{26}$
+      type: string
+      description: The Dashboard user's unique identifier.
+      example: usr_fa6psq242dcd6fdn5gifcq1491
+    IssuingCardMetadata:
+      type: object
+      properties:
+        udf1:
+          pattern: ^.{0,255}$
+          type: string
+          description: User defined field 1
+          example: metadata1
+        udf2:
+          pattern: ^.{0,255}$
+          type: string
+          description: User defined field 2
+          example: metadata2
+        udf3:
+          pattern: ^.{0,255}$
+          type: string
+          description: User defined field 3
+          example: metadata3
+        udf4:
+          pattern: ^.{0,255}$
+          type: string
+          description: User defined field 4
+          example: metadata4
+        udf5:
+          pattern: ^.{0,255}$
+          type: string
+          description: User defined field 5
+          example: metadata5
+      description: 'User''s metadata.
+
+        '
+    LastActivatedOn:
+      type:
+      - string
+      - 'null'
+      description: 'The date and time the card was last activated.
+
+
+        If the card has never been activated, this field returns `null`.
+
+        '
+      format: date-time
+      readOnly: true
+      example: '2019-09-10T10:11:12.0000000+00:00'
+    IssuingStatus:
+      enum:
+      - active
+      - inactive
+      - revoked
+      - suspended
+      type: string
+      description: 'The card''s status, which determines whether it can approve incoming authorizations:
+
+
+        - `inactive`: the default state - authorizations will be declined until the card is activated
+
+        - `active`: authorization requests can be approved
+
+        - `suspended`: incoming authorization requests will be declined - the card can be reactivated to accept new authorizations
+
+        - `revoked`: incoming authorization requests will be permanently declined - the card cannot be reactivated from this state
+
+        '
+      example: active
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

@@ -1,0 +1,770 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Agentic Commerce Protocol API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Agentic Commerce Protocol
+  description: 'Beta
+
+
+    Enable AI platforms to create scoped, single-use payment tokens to securely process agentic commerce transactions. This implementation follows the Agentic Commerce Protocol (ACP) delegated payment specification.
+
+
+    To onboard your AI platform, contact us.'
+paths:
+  /agentic_commerce/delegate_payment:
+    post:
+      tags:
+      - Agentic Commerce Protocol
+      summary: Create a delegated payment token
+      description: 'Creates a delegated payment token to securely enable Checkout.com merchants to process agentic payments.
+
+
+        The token secures cardholder credentials for use in agentic commerce transactions. You must provide:
+
+        - The card details
+
+        - The spending constraints (allowance)
+
+        - The Billing address
+
+        - The risk signals
+
+
+        The request must include a valid HMAC-SHA256 signature in the `Signature` header and a timestamp in the `Timestamp` header to verify the request integrity.'
+      operationId: delegatePayment
+      parameters:
+      - name: Signature
+        in: header
+        description: 'A Base64-encoded HMAC-SHA256 signature used for request body integrity verification.
+
+
+          Compute the signature as follows:
+
+          1. Concatenate the `Timestamp` header value (as a UTF-8 string) with the raw JSON request body (as a UTF-8 string).
+
+          2. Compute the HMAC-SHA256 hash of the concatenated string using your shared HMAC signing key.
+
+          3. Base64-encode the resulting hash.
+
+
+          Example: `Base64(HMAC-SHA256(key, Timestamp + RequestBody))`
+
+          '
+        required: true
+        schema:
+          type: string
+        example: eyJtZX...
+      - name: Timestamp
+        in: header
+        description: 'The timestamp of the request, in RFC 3339 format (for example, `2026-03-11T10:30:00Z`).
+
+
+          The timestamp must be within 5 minutes of the server time. Requests with a timestamp outside this window are rejected with a `401` response.
+
+          '
+        required: true
+        schema:
+          type: string
+          format: date-time
+        example: '2025-09-25T10:30:00.0000000+00:00'
+      - $ref: '#/components/parameters/ckoIdempotencyKey'
+      - name: API-Version
+        in: header
+        description: 'The API version to use for the request. If not specified, the default version (`2026-01-30`) is used.
+
+          '
+        schema:
+          type: string
+        example: '2025-09-29'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DelegatedPaymentRequest'
+      responses:
+        '201':
+          description: Delegated payment token created successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DelegatedPaymentResponse'
+        '400':
+          description: Malformed JSON or unreadable request body
+        '401':
+          description: Missing or invalid API key, or signature validation failure
+        '403':
+          description: Merchant not enabled for the authenticated platform
+        '409':
+          description: Idempotency key reused with a different request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DelegatedPaymentErrorResponse'
+        '422':
+          description: Unprocessable entity. One or more fields failed validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DelegatedPaymentErrorResponse'
+        '500':
+          description: An unexpected error occurred while processing the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DelegatedPaymentErrorResponse'
+      security:
+      - ApiSecretKey: []
+components:
+  schemas:
+    DelegatedPaymentAllowance:
+      required:
+      - reason
+      - max_amount
+      - currency
+      - merchant_id
+      - checkout_session_id
+      - expires_at
+      type: object
+      properties:
+        reason:
+          enum:
+          - one_time
+          type: string
+          description: The reason for the allowance.
+          example: one_time
+        max_amount:
+          type: integer
+          description: 'The maximum amount that can be charged using the delegated payment token.
+
+
+            Provide the amount in the <a href="https://www.checkout.com/docs/resources/calculating-the-amount" target="_blank">minor currency unit</a>.
+
+            '
+          example: 10000
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The three-letter <a href="https://www.checkout.com/docs/resources/codes/currency-codes" target="_blank">ISO 4217 currency code</a>.
+          example: USD
+        merchant_id:
+          maxLength: 256
+          type: string
+          description: The unique identifier of the merchant that will process the payment.
+          example: cli_vkuhvk4vjn2edkps7dfsq6emqm
+        checkout_session_id:
+          type: string
+          description: The identifier of the checkout session associated with this delegated payment.
+          example: 1PQrsT
+        expires_at:
+          type: string
+          description: 'The expiry time of the delegated payment token, in RFC 3339 format. Must be a time in the future.
+
+            '
+          format: date-time
+          example: '2025-10-09T07:20:50.5200000+00:00'
+      description: The spending constraints that define what the delegated payment token is authorized for.
+    DelegatedPaymentMethodCard:
+      required:
+      - type
+      - card_number_type
+      - number
+      - metadata
+      type: object
+      properties:
+        type:
+          enum:
+          - card
+          type: string
+          description: The payment method type.
+          example: card
+        card_number_type:
+          enum:
+          - fpan
+          - network_token
+          type: string
+          description: 'The type of card number provided.
+
+
+            - `fpan` – a Funding Primary Account Number. The card number printed on the card.
+
+            - `network_token` – a provisioned network token that represents the underlying card.
+
+            '
+          example: fpan
+        number:
+          type: string
+          description: 'The full card number.
+
+            '
+          example: '4242424242424242'
+        exp_month:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The card expiry month, in two-digit format (MM).
+          example: '11'
+        exp_year:
+          maxLength: 4
+          minLength: 4
+          type: string
+          description: The card expiry year, in four-digit format (YYYY).
+          example: '2026'
+        name:
+          type: string
+          description: The name of the cardholder as it appears on the card.
+          example: Jane Doe
+        cvc:
+          maxLength: 4
+          minLength: 3
+          type: string
+          description: The card verification code (CVC/CVV).
+          example: '223'
+        cryptogram:
+          type: string
+          description: The cryptogram associated with a network token transaction. Required when `card_number_type` is `network_token`.
+          example: gXc5UCLnM6ckD7pjM1TdPA==
+        eci_value:
+          type: string
+          description: The Electronic Commerce Indicator (ECI) or Security Level Indicator (SLI) value for network token transactions.
+          example: '07'
+        checks_performed:
+          type: array
+          items:
+            type: string
+          description: A list of verification checks that have been performed on the card.
+          example:
+          - avs
+          - cvv
+          - ani
+          - auth0
+        iin:
+          maxLength: 6
+          minLength: 6
+          type: string
+          description: The Issuer Identification Number (IIN), also known as the Bank Identification Number (BIN). This is typically the first 6 digits of the card number.
+          example: '123456'
+        display_card_funding_type:
+          enum:
+          - credit
+          - debit
+          - prepaid
+          type: string
+          description: The funding type of the card, used for display purposes.
+          example: credit
+        display_wallet_type:
+          type: string
+          description: The wallet type associated with the card, used for display purposes (for example, Apple Pay or Google Pay).
+          example: wallet
+        display_brand:
+          type: string
+          description: The card brand, used for display purposes (for example, Visa, Mastercard).
+          example: Visa
+        display_last4:
+          maxLength: 4
+          minLength: 4
+          type: string
+          description: The last four digits of the card number, used for display purposes.
+          example: '4242'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: A set of key-value pairs containing additional payment method metadata.
+          example:
+            issuing_bank: temp
+      description: The card details for a delegated payment.
+    DelegatedPaymentResponse:
+      required:
+      - id
+      - created
+      - metadata
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the provisioned payment token.
+          example: vt_abc123def456ghi789
+        created:
+          type: string
+          description: The date and time the token was created, in RFC 3339 format.
+          format: date-time
+          example: '2026-03-11T10:30:00.0000000+00:00'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: A set of key-value pairs containing response metadata.
+          example:
+            psp: checkout.com
+      description: The response returned when a delegated payment token is successfully created.
+    DelegatedPaymentBillingAddress:
+      required:
+      - name
+      - line_one
+      - city
+      - postal_code
+      - country
+      type: object
+      properties:
+        name:
+          maxLength: 256
+          type: string
+          description: The full name of the customer.
+          example: John Doe
+        line_one:
+          maxLength: 60
+          type: string
+          description: The first line of the street address.
+          example: 123 Fake St.
+        line_two:
+          maxLength: 60
+          type: string
+          description: The second line of the street address.
+          example: Unit 1
+        city:
+          maxLength: 60
+          type: string
+          description: The city of the billing address.
+          example: San Francisco
+        state:
+          type: string
+          description: The state, county, province, or region of the billing address.
+          example: CA
+        postal_code:
+          maxLength: 20
+          type: string
+          description: The postal code or ZIP code of the billing address.
+          example: '12345'
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The two-letter <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="_blank">ISO 3166-1 alpha-2 country code</a>.
+          example: US
+      description: The customer billing address associated with the delegated payment.
+    DelegatedPaymentErrorResponse:
+      type: object
+      properties:
+        type:
+          enum:
+          - invalid_request
+          - rate_limit_exceeded
+          - processing_error
+          - service_unavailable
+          type: string
+          description: 'The error category.
+
+            '
+          example: invalid_request
+        code:
+          type: string
+          description: A machine-readable error code identifying the specific error.
+          example: invalid_card
+        message:
+          type: string
+          description: A human-readable description of the error.
+          example: Missing/malformed field
+        param:
+          type:
+          - string
+          - 'null'
+          description: A JSONPath-style reference to the request field that caused the error, or null if not applicable.
+          example: $.payment_method.number
+      description: The error response returned when a delegated payment request fails.
+    DelegatedPaymentRiskSignal:
+      required:
+      - type
+      - score
+      - action
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of risk signal.
+          example: card_testing
+        score:
+          type: integer
+          description: The risk score associated with this signal.
+          example: 10
+        action:
+          type: string
+          description: The action taken based on the risk assessment.
+          example: blocked
+      description: A risk assessment signal provided by the platform to support fraud decisioning.
+    DelegatedPaymentRequest:
+      required:
+      - payment_method
+      - allowance
+      - risk_signals
+      - metadata
+      type: object
+      properties:
+        payment_method:
+          allOf:
+          - $ref: '#/components/schemas/DelegatedPaymentMethodCard'
+          description: The card payment method details.
+        allowance:
+          allOf:
+          - $ref: '#/components/schemas/DelegatedPaymentAllowance'
+          description: The spending constraints for the delegated payment token.
+        billing_address:
+          allOf:
+          - $ref: '#/components/schemas/DelegatedPaymentBillingAddress'
+          description: The customer billing address.
+        risk_signals:
+          type: array
+          items:
+            $ref: '#/components/schemas/DelegatedPaymentRiskSignal'
+          description: An array of risk assessment signals provided by the platform.
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: 'A set of key-value pairs to attach to the delegated payment request.
+
+
+            The `metadata` object only supports string values.
+
+            '
+          example:
+            campaign: q4
+      description: '<span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176, 97); border-radius: 4px; padding: 2px 6px" >Beta</span><p></p>
+
+        The request body for creating a delegated payment token.
+
+        '
+  parameters:
+    ckoIdempotencyKey:
+      name: Cko-Idempotency-Key
+      in: header
+      description: An optional idempotency key for safely retrying payment requests
+      schema:
+        type: string
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

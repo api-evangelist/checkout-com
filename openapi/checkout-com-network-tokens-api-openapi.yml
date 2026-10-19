@@ -1,0 +1,941 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Network Tokens API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Network Tokens
+  description: Provision network tokens and cryptograms.
+paths:
+  /network-tokens:
+    post:
+      tags:
+      - Network Tokens
+      summary: Provision a Network Token
+      description: 'Beta
+
+
+        Provisions a network token synchronously. If the merchant stores their cards with Checkout.com, then source ID can be used to request a network token for the given card. If the merchant does not store their cards with Checkout.com, then card details have to be provided.'
+      operationId: provisionNetworkToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NetworkTokensRequest'
+            examples:
+              id:
+                value:
+                  source:
+                    type: id
+                    id: src_wmlfc3zyhqzehihu7giusaaawu
+              card:
+                value:
+                  source:
+                    type: card
+                    number: 4539467987109256
+                    expiry_month: 10
+                    expiry_year: 2027
+      responses:
+        '200':
+          description: Responding with existing network token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkTokensResponse'
+        '201':
+          description: Network token provisioned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkTokensResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '415':
+          description: Unsupported Media Type
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal Server Error
+        '502':
+          description: Bad Gateway
+        '504':
+          description: Gateway Timeout
+      security:
+      - OAuth:
+        - vault:network-tokens
+  /network-tokens/{network_token_id}:
+    get:
+      tags:
+      - Network Tokens
+      summary: Get Network Token
+      description: 'Beta
+
+
+        Given network token ID, this endpoint returns network token details: DPAN, expiry date, state, TRID and also card
+
+        details like last four and expiry date.'
+      operationId: getNetworkToken
+      parameters:
+      - name: network_token_id
+        in: path
+        description: Unique token ID assigned by Checkout.com for each token
+        required: true
+        schema:
+          type: string
+        example: nt_xgu3isllqfyu7ktpk5z2yxbwna
+      responses:
+        '200':
+          description: Network Token details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkTokensRetrieveResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Network Token not found
+        '500':
+          description: Internal Server Error
+        '502':
+          description: Bad Gateway
+        '504':
+          description: Gateway Timeout
+      security:
+      - OAuth:
+        - vault:network-tokens
+  /network-tokens/{network_token_id}/cryptograms:
+    post:
+      tags:
+      - Network Tokens
+      summary: Request a cryptogram
+      description: 'Beta
+
+
+        Using network token ID as an input, this endpoint returns token cryptogram.'
+      operationId: provisionCryptogram
+      parameters:
+      - name: network_token_id
+        in: path
+        description: Unique token ID assigned by Checkout.com for each token
+        required: true
+        schema:
+          type: string
+        example: nt_xgu3isllqfyu7ktpk5z2yxbwna
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NetworkTokensCryptogramRequest'
+      responses:
+        '201':
+          description: Cryptogram from the network token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkTokensCryptogramResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Network Token not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal Server Error
+        '502':
+          description: Bad Gateway
+        '504':
+          description: Gateway Timeout
+      security:
+      - OAuth:
+        - vault:network-tokens
+  /network-tokens/{network_token_id}/delete:
+    patch:
+      tags:
+      - Network Tokens
+      summary: Permanently deletes a network token
+      description: 'Beta
+
+
+        This endpoint is for permanently deleting a network token. A network token should be deleted when a payment instrument it is associated with is removed from file or if the security of the token has been compromised.'
+      operationId: deleteNetworkToken
+      parameters:
+      - name: network_token_id
+        in: path
+        description: Unique token ID assigned by Checkout.com for each token
+        required: true
+        schema:
+          type: string
+        example: nt_xgu3isllqfyu7ktpk5z2yxbwna
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NetworkTokensRequestDelete'
+      responses:
+        '204':
+          description: Ok
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Network token not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal Server Error
+        '502':
+          description: Bad Gateway. Error from scheme
+        '504':
+          description: Timeout while waiting for a scheme response
+      security:
+      - OAuth:
+        - vault:network-tokens
+components:
+  schemas:
+    NetworkTokensCard:
+      required:
+      - last4
+      - expiry_month
+      - expiry_year
+      type: object
+      properties:
+        last4:
+          pattern: ^[0-9]{4}$
+          type: string
+          description: The last four digits of the card number.
+          example: '6378'
+        expiry_month:
+          maximum: 12
+          minimum: 1
+          pattern: ^[0-9]{1,2}$
+          type: string
+          description: The card's expiration month.
+          example: '5'
+        expiry_year:
+          pattern: ^[0-9]{4}$
+          type: string
+          description: The card's expiration year.
+          example: '2025'
+      description: The card details.
+    NetworkTokensRequest:
+      required:
+      - source
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/NetworkTokensRequestSource'
+    NetworkTokensRequestDelete:
+      required:
+      - initiated_by
+      - reason
+      type: object
+      properties:
+        initiated_by:
+          enum:
+          - cardholder
+          - token_requestor
+          type: string
+          description: Who initiated/requested the deletion of the token.
+          example: token_requestor
+        reason:
+          enum:
+          - fraud
+          - other
+          type: string
+          description: The reason for deleting the token.
+          example: other
+    NetworkTokensRequestSource:
+      required:
+      - type
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/NetworkTokensRequestSourceInstrument'
+      - $ref: '#/components/schemas/NetworkTokensRequestSourceCard'
+      description: The source object
+      discriminator:
+        propertyName: type
+        mapping:
+          id: '#/components/schemas/NetworkTokensRequestSourceInstrument'
+          card: '#/components/schemas/NetworkTokensRequestSourceCard'
+    NetworkTokensResponseLinks:
+      type: object
+      properties:
+        self:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          description: Link to access network token
+        cryptogram:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          description: Link to request cryptogram
+        card-art:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          description: 'Link to request card art image.
+
+
+            The URL returned contains an image of a non-PCI, digital representation of the cardholder''s card.
+
+            '
+      example:
+        self:
+          href: https://{prefix}.api.checkout.com/network-tokens/nt_xgu3isllqfyu7ktpk5z2yxbwna
+        cryptogram:
+          href: https://{prefix}.api.checkout.com/network-tokens/nt_xgu3isllqfyu7ktpk5z2yxbwna/cryptograms
+        card-art:
+          href: https://card-art.checkout.com/00340aa7bd3de35cb1048369450d8df4
+    NetworkTokensRequestSourceCard:
+      title: card
+      required:
+      - type
+      - number
+      - expiry_month
+      - expiry_year
+      type: object
+      properties:
+        type:
+          type: string
+          description: The source type
+          example: card
+        number:
+          maxLength: 19
+          minLength: 12
+          pattern: ^[0-9]+$
+          type: string
+          description: The card number.
+          example: '5436031030606378'
+        cvv:
+          maximum: 9999
+          minimum: 1
+          type: string
+          description: The CVV number for the card
+          example: '123'
+        expiry_month:
+          maximum: 12
+          minimum: 1
+          pattern: ^[0-9]{1,2}$
+          type: string
+          description: The expiry month of the card.
+          example: '5'
+        expiry_year:
+          pattern: ^[0-9]{4}$
+          type: string
+          description: The four-digit expiry year of the card.
+          example: '2025'
+      description: Card details
+    Link:
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          description: The link URL
+      additionalProperties: false
+    NetworkTokensRetrieveResponse:
+      required:
+      - card
+      - network_token
+      type: object
+      properties:
+        card:
+          $ref: '#/components/schemas/NetworkTokensCard'
+        network_token:
+          required:
+          - id
+          - state
+          - type
+          - created_on
+          - modified_on
+          type: object
+          properties:
+            id:
+              type: string
+              description: The unique identifier for the network token.
+              example: nt_xgu3isllqfyu7ktpk5z2yxbwna
+            state:
+              enum:
+              - active
+              - suspended
+              - inactive
+              - declined
+              - requested
+              type: string
+              description: The token's status.
+              example: active
+            number:
+              pattern: ^[0-9]+$
+              type: string
+              description: 'The network token number.
+
+                This field is only returned when the network token `status` is one of the following:
+
+
+                - `active`
+
+                - `suspended`
+
+                - `inactive`
+
+                '
+              example: '5436424242424242'
+            expiry_month:
+              pattern: ^[0-9]{1,2}$
+              type: string
+              description: 'The network token''s expiration month.
+
+
+                This field is only returned when the network token `status` is one of the following:
+
+
+                - `active`
+
+                - `suspended`
+
+                - `inactive`
+
+                '
+              example: '5'
+            expiry_year:
+              pattern: ^[0-9]{4}$
+              type: string
+              description: 'The network token''s expiration year.
+
+
+                This field is only returned when the network token `status` is one of the following:
+
+
+                - `active`
+
+                - `suspended`
+
+                - `inactive`
+
+                '
+              example: '2025'
+            type:
+              enum:
+              - vts
+              - mdes
+              type: string
+              description: The network token type.
+              example: vts
+            payment_account_reference:
+              type: string
+              description: 'The unique reference assigned to the payment account.
+
+
+                All payment tokens and underlying PANs associated with a payment account share the same `payment_account_reference`.
+
+                '
+              example: 5001a9f027e5629d11e3949a0800a
+            created_on:
+              type: string
+              description: The UTC date and time the network token was created.
+              format: date-time
+              example: '2020-02-11T15:57:32.4350000+00:00'
+            modified_on:
+              type: string
+              description: The UTC date and time the network token was modified.
+              format: date-time
+              example: '2020-02-11T15:57:32.4350000+00:00'
+          description: Network token details.
+        token_requestor_id:
+          type: string
+          description: The unique identifier for the token requestor.
+          example: '1234567890'
+        token_scheme_id:
+          type: string
+          description: "The scheme-specific identifier for the network token. \n\nFor Visa, this is equivalent to the `vProvisionedTokenID`. For Mastercard, this is equivalent to the `tokenUniqueReference`.\n"
+          example: scheme_visa_001
+        _links:
+          $ref: '#/components/schemas/NetworkTokensResponseLinks'
+    NetworkTokensCryptogramRequest:
+      required:
+      - transaction_type
+      type: object
+      properties:
+        transaction_type:
+          enum:
+          - ecom
+          - recurring
+          - pos
+          - aft
+          type: string
+          description: Transaction type the cryptogram is requested for.
+          example: ecom
+    NetworkTokensCryptogramResponse:
+      required:
+      - cryptogram
+      type: object
+      properties:
+        cryptogram:
+          type: string
+          description: The cryptogram from the network token. Will only be refreshed for active network tokens and returned when the network token isn't declined or pending
+          example: AhJ3hnYAoAbVz5zg1e17MAACAAA=
+        eci:
+          type: string
+          description: Electronic Commerce Indicator (ECI) from the issuer.
+          example: '7'
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              allOf:
+              - $ref: '#/components/schemas/Link'
+              description: Link to request a new cryptogram
+              example:
+                href: https://{prefix}.api.checkout.com/network-tokens/nt_xgu3isllqfyu7ktpk5z2yxbwna/cryptograms
+            network-token:
+              type: object
+              allOf:
+              - $ref: '#/components/schemas/Link'
+              description: Link to access network token
+              example:
+                href: https://{prefix}.api.checkout.com/network-tokens/nt_xgu3isllqfyu7ktpk5z2yxbwna
+    NetworkTokensRequestSourceInstrument:
+      title: id
+      required:
+      - type
+      - id
+      type: object
+      properties:
+        type:
+          type: string
+          description: The source type
+          example: id
+        id:
+          pattern: ^(src)_(\w{26})$
+          type: string
+          description: The card instrument
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+      description: An existing payment source
+    NetworkTokensResponse:
+      required:
+      - card
+      - network_token
+      type: object
+      properties:
+        card:
+          $ref: '#/components/schemas/NetworkTokensCard'
+        network_token:
+          required:
+          - id
+          - state
+          - number
+          - expiry_month
+          - expiry_year
+          - type
+          - created_on
+          - modified_on
+          type: object
+          properties:
+            id:
+              type: string
+              description: Unique token ID assigned by Checkout.com for each token
+              example: nt_xgu3isllqfyu7ktpk5z2yxbwna
+            state:
+              enum:
+              - active
+              - suspended
+              - inactive
+              type: string
+              description: Token status
+              example: active
+            number:
+              pattern: ^[0-9]+$
+              type: string
+              description: The network token number.
+              example: '5436424242424242'
+            expiry_month:
+              pattern: ^[0-9]{1,2}$
+              type: string
+              description: The network token's expiration month.
+              example: '5'
+            expiry_year:
+              pattern: ^[0-9]{4}$
+              type: string
+              description: The network token's expiration year.
+              example: '2025'
+            type:
+              enum:
+              - vts
+              - mdes
+              type: string
+              description: The type of token
+              example: vts
+            payment_account_reference:
+              type: string
+              description: Unique Payment account reference value assigned to payment account. All affiliated payment tokens, as well as the underlying PAN, have the same PAR.
+              example: 5001a9f027e5629d11e3949a0800a
+            created_on:
+              type: string
+              description: When the network token was created
+              format: date-time
+              example: '2020-02-11T15:57:32.4350000+00:00'
+            modified_on:
+              type: string
+              description: When the network token was modified
+              format: date-time
+              example: '2020-02-11T15:57:32.4350000+00:00'
+          description: Network token details
+        token_requestor_id:
+          type: string
+          description: Token requestor ID
+          example: '1234567890'
+        token_scheme_id:
+          type: string
+          description: "The scheme-specific identifier for the network token. \n\nFor Visa, this is equivalent to the `vProvisionedTokenID`. For Mastercard, this is equivalent to the `tokenUniqueReference`.\n"
+          example: scheme_visa_001
+        _links:
+          $ref: '#/components/schemas/NetworkTokensResponseLinks'
+    ValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HL80RJLS76I7
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: payment_source_required
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

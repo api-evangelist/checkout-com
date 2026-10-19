@@ -1,0 +1,627 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Digital cards API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Digital cards
+paths:
+  /issuing/digital-cards/{digitalCardId}:
+    get:
+      tags:
+      - Digital cards
+      summary: Get digital card details
+      description: Retrieves the details for a digital card.
+      operationId: getDigitalCard
+      parameters:
+      - name: digitalCardId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingDigitalCardId'
+      responses:
+        '200':
+          description: Digital card retrieved successfully
+          headers:
+            cko-request-id:
+              schema:
+                $ref: '#/components/schemas/cko-request-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-digital-card-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Digital card not found
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:card-management-read
+components:
+  schemas:
+    IssuingLink:
+      required:
+      - href
+      - actions
+      - types
+      type: object
+      properties:
+        href:
+          maxLength: 100
+          pattern: ^https:\/.*$
+          type: string
+          description: The link URL.
+        actions:
+          maxItems: 20
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^(GET|POST|PUT|DELETE|PATCH)$
+            enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            type: string
+          additionalProperties: false
+          description: The HTTP Methods that can be performed on the link.
+        types:
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^application\/.*$
+            type: string
+          additionalProperties: false
+          description: The Content Types for the link to the resource
+      additionalProperties: false
+    IssuingDigitalCardId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^dcr_[a-z0-9]{26}$
+      type: string
+      description: The digital card's unique identifier.
+      example: dcr_5ngxzsynm2me3oxf73esbhda6q
+    IssuingRequestor:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The requestor ID.
+          example: '501103353211'
+        name:
+          type: string
+          description: The requestor name.
+          example: APPLE PAY
+    LastFour:
+      maximum: 4
+      minimum: 4
+      pattern: ^[0-9]{4}$
+      type: string
+      description: The last four digits of the card number, also known as the PAN.
+      example: '1234'
+    IssuingCardId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^crd_[a-z0-9]{26}$
+      type: string
+      description: The card's unique identifier.
+      example: crd_fa6psq242dcd6fdn5gifcq1491
+    IssuingDevice:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The device ID.
+          example: 04431C7B514E80018306224737548585F11415F67C4E2EB6
+        type:
+          enum:
+          - host_card_emulation
+          - samsung_phone
+          - samsung_tablet
+          - samsung_watch
+          - samsung_tv
+          - iphone
+          - iwatch
+          - ipad
+          - mac_book
+          - android_phone
+          - android_tablet
+          - android_watch
+          - mobile_phone
+          - tablet
+          - watch
+          - mobile_phone_or_tablet
+          - bracelet
+          - unknown
+          type: string
+          description: The device type.
+          example: iphone
+        manufacturer:
+          type: string
+          description: The device manufacturer.
+          example: ios
+        brand:
+          type: string
+          description: The device brand.
+        model:
+          type: string
+          description: The device model.
+        os_version:
+          type: string
+          description: The device operating system version.
+          example: '13'
+        firmware_version:
+          type: string
+          description: The device firmware version.
+        phone_number:
+          type: string
+          description: The device phone number.
+          example: '447505551234'
+        device_name:
+          type: string
+          description: The device name.
+          example: John's iPhone
+        device_parent_id:
+          type: string
+          description: The device parent ID.
+        language:
+          type: string
+          description: The device language.
+        serial_number:
+          type: string
+          description: The device serial number.
+        time_zone:
+          type: string
+          description: The device time zone.
+        time_zone_setting:
+          enum:
+          - network_set
+          - consumer_set
+          type: string
+          description: The device time zone setting.
+          example: network_set
+        sim_serial_number:
+          type: string
+          description: The device SIM serial number.
+        imei:
+          type: string
+          description: The device International Mobile Equipment Identity (IMEI) number.
+          example: '000000000000024'
+        network_operator:
+          type: string
+          description: The device network operator.
+        network_type:
+          enum:
+          - cellular
+          - wifi
+          type: string
+          description: The device network type.
+          example: wifi
+    cko-request-id:
+      type: string
+      description: ID to correlate requests.
+      example: 3729b06b-5a63-4425-bc34-23dfc158ddfe
+    IssuingSchemeCardId:
+      maxLength: 128
+      type: string
+      description: The ID that the card scheme’s token service provider (TSP) assigns to the PAN at the first tokenization.
+      example: FAPLMC00002572060f2b2213c3964c44b218665ef9dd0d72
+    IssuingEntityId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^ent_[a-z0-9]{26}$
+      type: string
+      description: The entity's unique identifier.
+      example: ent_fa6psq242dcd6fdn5gifcq1491
+    Datetime:
+      type: string
+      format: UTC
+      example: '2021-09-09T19:41:39Z'
+    DigitalCardType:
+      enum:
+      - secure_element
+      - host_card_emulation
+      - card_on_file
+      - e_commerce
+      - qr_code
+      type: string
+      description: 'The type of digital card
+
+        '
+      example: secure_element
+    IssuingDigitalStatus:
+      enum:
+      - active
+      - inactive
+      - deleted
+      type: string
+      description: 'The digital card''s current status, which determines whether it can approve incoming authorizations:
+
+
+        - `inactive`: the default state - authorizations will be declined until the card is activated
+
+        - `active`: authorization requests can be approved
+
+        - `deleted`: incoming authorization requests will be declined, permanently — the card cannot be reactivated from this state
+
+        '
+      example: active
+    get-digital-card-response:
+      required:
+      - id
+      - card_id
+      - client_id
+      - entity_id
+      - last_four
+      - status
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingDigitalCardId'
+        card_id:
+          $ref: '#/components/schemas/IssuingCardId'
+        client_id:
+          $ref: '#/components/schemas/IssuingClientId'
+        entity_id:
+          $ref: '#/components/schemas/IssuingEntityId'
+        last_four:
+          $ref: '#/components/schemas/LastFour'
+        status:
+          $ref: '#/components/schemas/IssuingDigitalStatus'
+        type:
+          $ref: '#/components/schemas/DigitalCardType'
+        scheme_card_id:
+          $ref: '#/components/schemas/IssuingSchemeCardId'
+        requestor:
+          $ref: '#/components/schemas/IssuingRequestor'
+        device:
+          $ref: '#/components/schemas/IssuingDevice'
+        provisioned_on:
+          $ref: '#/components/schemas/Datetime'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/DigitalCardLinks'
+    DigitalCardLinks:
+      minItems: 1
+      required:
+      - self
+      type: object
+      properties:
+        self:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to retrieve the digital card's details.
+      description: The links related to the digital card.
+      example:
+        self:
+          href: https://{prefix}.api.checkout.com/issuing/digital-cards/dcr_5ngxzsynm2me3oxf73esbhda6q
+          actions:
+          - GET
+          types:
+          - application/json
+    IssuingClientId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^cli_[a-z0-9]{26}$
+      type: string
+      description: The client's unique identifier.
+      example: cli_vkuhvk4vjn2edkps7dfsq6emqm
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

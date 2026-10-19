@@ -1,0 +1,941 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Control groups API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Control groups
+  description: Group multiple spending controls together and specify how to apply the combined outcome.
+paths:
+  /issuing/controls/control-groups:
+    post:
+      tags:
+      - Control groups
+      summary: Create a control group
+      description: Creates a control group and applies it to the specified target.
+      operationId: createControlGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add-control-group-request'
+        required: true
+      responses:
+        '201':
+          description: Control group created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/add-control-group-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Target not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      security:
+      - OAuth:
+        - issuing:controls-write
+    get:
+      tags:
+      - Control groups
+      summary: Get a target's control groups
+      description: Retrieves a list of control groups applied to the specified target.
+      operationId: getControlGroupByTarget
+      parameters:
+      - name: target_id
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingTargetId'
+      responses:
+        '200':
+          description: Target's control groups retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-control-groups-array-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Target not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:controls-read
+  /issuing/controls/control-groups/{controlGroupId}:
+    get:
+      tags:
+      - Control groups
+      summary: Get control group details
+      description: Retrieves the details of a control group you created previously.
+      operationId: getControlGroup
+      parameters:
+      - name: controlGroupId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingControlGroupId'
+      responses:
+        '200':
+          description: Control group retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/add-control-group-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Control group not found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:controls-read
+    delete:
+      tags:
+      - Control groups
+      summary: Remove a control group
+      description: 'Removes the control group and all the controls it contains.
+
+
+        If you want to reapply an equivalent control group to the card, you''ll need to create a new control group.'
+      operationId: deleteControlGroup
+      parameters:
+      - name: controlGroupId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingControlGroupId'
+      responses:
+        '200':
+          description: Control group deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/remove-control-group-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Control group not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      security:
+      - OAuth:
+        - issuing:controls-write
+components:
+  schemas:
+    IssuingTargetIdForAdd:
+      maxLength: 30
+      minLength: 30
+      pattern: ^(crd|cpr)_[a-z0-9]{26}$
+      type: string
+      description: The ID of the card or control profile to apply the control to. Note that control profiles cannot be a target for `velocity_limit` controls.
+      example: crd_fa6psq42dcdd6fdn5gifcq1491
+    IssuingControlGroupId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^cgr_[a-z0-9]{26}$
+      type: string
+      description: The control group's unique identifier.
+      example: cgr_oemoyd3otivelkhf4zcnimwdva
+    add-control-group-mid-limit-request:
+      title: mid_limit
+      required:
+      - control_type
+      - mid_limit
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: mid_limit
+        mid_limit:
+          $ref: '#/components/schemas/MidLimit'
+    get-control-groups-array-response:
+      required:
+      - control_groups
+      type: object
+      properties:
+        control_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/get-control-group-response'
+          description: The list of control groups applied to the specified target.
+          example:
+          - id: cgr_oemoyd3otivelkhf4zcnimwdva
+            description: Block grocery shopping except Walmart
+            target_id: crd_dba7tjsh7utufgid7yety4gnxq
+            fail_if: all_fail
+            controls:
+            - mcc_limit:
+                type: block
+                mcc_list:
+                - 5422
+              description: Block the card being used for groceries
+              control_type: mcc_limit
+            - mid_limit:
+                type: allow
+                mid_list:
+                - 1234
+              description: Allow the card to be used at Walmart
+              control_type: mid_limit
+            is_editable: true
+            created_date: '2023-12-06T14:01:31.7155085+00:00'
+            last_modified_date: '2023-12-06T14:01:31.7155085+00:00'
+          - id: cgr_xvrszbgkaifuflnslzkt2uimkm
+            description: Allow restaurants except McDonalds
+            target_id: crd_dba7tjsh7utufgid7yety4gnxq
+            fail_if: all_fail
+            controls:
+            - mcc_limit:
+                type: allow
+                mcc_list:
+                - 6789
+              description: Allow the card being used for restaurants
+              control_type: mcc_limit
+            - mid_limit:
+                type: block
+                mid_list:
+                - 9876
+              description: Block the card to be used at McDonalds
+              control_type: mid_limit
+            is_editable: true
+            created_date: '2023-12-06T14:01:31.7155085+00:00'
+            last_modified_date: '2023-12-06T14:01:31.7155085+00:00'
+      description: The list of control groups applied to the specified target.
+    IssuingControlType:
+      enum:
+      - velocity_limit
+      - mcc_limit
+      - mid_limit
+      type: string
+      description: 'The control''s type.
+
+
+        A `velocity_limit` determines how much can be spent over a given period of time. An `mcc_limit` determines the types of businesses from which transactions can be processed. A `mid_limit` specifies the merchants from whom transactions can be processed.
+
+        '
+      example: velocity_limit
+    MidLimit:
+      required:
+      - mid_list
+      - type
+      type: object
+      properties:
+        type:
+          enum:
+          - allow
+          - block
+          type: string
+          description: Sets whether to allow or block the list of MIDs supplied.
+          example: allow
+        mid_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/MidCode'
+          description: The list of merchant identification (MID) codes to allow or block transactions from.
+          example:
+          - 593278
+          - 541114
+      description: The merchant identification (MID) code rule, which determines the merchants from whom transactions can be processed.
+    ControlGroupIsEditable:
+      type: boolean
+      description: Indicates whether the control group is set to readonly. Control groups marked as non-editable are predefined by Checkout and are not modifiable by clients.
+      example: true
+    MccLimit:
+      required:
+      - mcc_list
+      - type
+      type: object
+      properties:
+        type:
+          enum:
+          - allow
+          - block
+          type: string
+          description: Sets whether to allow or block the list of MCCs supplied.
+          example: allow
+        mcc_list:
+          type: array
+          items:
+            type: string
+          description: The list of <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">MCCs</a> to allow or block transactions from, as 4-digit ISO 18245 codes.
+          example:
+          - '5932'
+          - '5411'
+      description: The <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">merchant category code (MCC)</a> rule, which determines the types of businesses transactions can be processed from.
+    VelocityLimit:
+      required:
+      - velocity_window
+      - amount_limit
+      type: object
+      properties:
+        amount_limit:
+          minimum: 0
+          type: integer
+          description: The amount the target can spend, in minor units.
+          format: int64
+          example: 50000
+        velocity_window:
+          $ref: '#/components/schemas/VelocityWindow'
+        mcc_list:
+          type: array
+          items:
+            type: string
+          description: The list of <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">merchant category codes</a> (MCCs) that the velocity limit applies to, as four-digit ISO 18245 codes.
+        mid_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/MidCode'
+          description: The list of merchant identification (MID) codes to allow or block transactions from. <br/> You can provide either `mcc_list` or `mid_list`, but not both.
+          example:
+          - 1234567890
+      description: The velocity limit, which determines how much a target card can spend over a given timeframe.
+    add-control-group-response:
+      required:
+      - id
+      - target_id
+      - fail_if
+      - controls
+      - is_editable
+      - created_date
+      - last_modified_date
+      - _links
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlGroupId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control group.
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        fail_if:
+          $ref: '#/components/schemas/ControlGroupCondition'
+        controls:
+          type: array
+          items:
+            $ref: '#/components/schemas/add-control-group-request-control'
+          description: The controls that belong to the group.
+        is_editable:
+          $ref: '#/components/schemas/ControlGroupIsEditable'
+        created_date:
+          type: string
+          format: date-time
+        last_modified_date:
+          type: string
+          format: date-time
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/ControlGroupLinks'
+      description: The control group's details.
+      example:
+        id: cgr_oemoyd3otivelkhf4zcnimwdva
+        description: Block grocery shopping except Walmart
+        target_id: crd_dba7tjsh7utufgid7yety4gnxq
+        fail_if: all_fail
+        controls:
+        - mcc_limit:
+            type: block
+            mcc_list:
+            - 5422
+          description: Block the card being used for groceries
+          control_type: mcc_limit
+        - mid_limit:
+            type: allow
+            mid_list:
+            - 1234
+          description: Allow the card to be used at Walmart
+          control_type: mid_limit
+        is_editable: true
+        created_date: '2023-12-06T14:01:31.7155085+00:00'
+        last_modified_date: '2023-12-06T14:01:31.7155085+00:00'
+        _links:
+          self:
+            href: https://{prefix}.api.checkout.com/issuing/controls/control-groups/cgr_oemoyd3otivelkhf4zcnimwdva
+            actions:
+            - GET
+            types:
+            - application/json
+    MidCode:
+      maxLength: 15
+      minLength: 1
+      pattern: ^[A-Za-z0-9{}\[\] ,+\-=.();'\/&@*]{1,15}$
+      type: string
+    IssuingValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HLHPN8802NUF:00000003
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          maxItems: 20
+          type: array
+          items:
+            type: string
+            example: request_body_malformed
+      additionalProperties: false
+    add-control-group-request-control:
+      required:
+      - control_type
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/add-control-group-velocity-limit-request'
+      - $ref: '#/components/schemas/add-control-group-mcc-limit-request'
+      - $ref: '#/components/schemas/add-control-group-mid-limit-request'
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+        control_type:
+          $ref: '#/components/schemas/IssuingControlType'
+      description: The control to create.
+      discriminator:
+        propertyName: control_type
+        mapping:
+          velocity_limit: '#/components/schemas/add-control-group-velocity-limit-request'
+          mcc_limit: '#/components/schemas/add-control-group-mcc-limit-request'
+          mid_limit: '#/components/schemas/add-control-group-mid-limit-request'
+    IssuingLink:
+      required:
+      - href
+      - actions
+      - types
+      type: object
+      properties:
+        href:
+          maxLength: 100
+          pattern: ^https:\/.*$
+          type: string
+          description: The link URL.
+        actions:
+          maxItems: 20
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^(GET|POST|PUT|DELETE|PATCH)$
+            enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            type: string
+          additionalProperties: false
+          description: The HTTP Methods that can be performed on the link.
+        types:
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^application\/.*$
+            type: string
+          additionalProperties: false
+          description: The Content Types for the link to the resource
+      additionalProperties: false
+    add-control-group-mcc-limit-request:
+      title: mcc_limit
+      required:
+      - control_type
+      - mcc_limit
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: mcc_limit
+        mcc_limit:
+          $ref: '#/components/schemas/MccLimit'
+    add-control-group-velocity-limit-request:
+      title: velocity_limit
+      required:
+      - control_type
+      - velocity_limit
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: velocity_limit
+        velocity_limit:
+          $ref: '#/components/schemas/VelocityLimit'
+    ControlGroupCondition:
+      enum:
+      - all_fail
+      - any_fail
+      type: string
+      description: Sets how to determine the result of the group.
+      example: all_fail
+    IssuingTargetId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^(crd|cpr)_[a-z0-9]{26}$
+      type: string
+      description: The ID of the card or control profile.
+      example: crd_fa6psq42dcdd6fdn5gifcq1491
+    add-control-group-request:
+      required:
+      - target_id
+      - fail_if
+      - controls
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control group.
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetIdForAdd'
+        fail_if:
+          $ref: '#/components/schemas/ControlGroupCondition'
+        controls:
+          type: array
+          items:
+            $ref: '#/components/schemas/add-control-group-request-control'
+          description: The controls that belong to the group.
+      description: The control group to create.
+      example:
+        description: Block grocery shopping except Walmart
+        fail_if: all_fail
+        target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+        controls:
+        - description: Block the card being used for groceries
+          control_type: mcc_limit
+          mcc_limit:
+            type: block
+            mcc_list:
+            - 5422
+        - description: Allow the card to be used at Walmart
+          control_type: mid_limit
+          mid_limit:
+            type: allow
+            mid_list:
+            - 1234
+    ControlGroupLinks:
+      minItems: 1
+      required:
+      - self
+      type: object
+      properties:
+        self:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to retrieve the control group's details.
+      description: The links related to the control group.
+      example:
+        self:
+          href: https://{prefix}.api.checkout.com/issuing/controls/control-groups/cgr_oemoyd3otivelkhf4zcnimwdva
+          actions:
+          - GET
+          types:
+          - application/json
+    get-control-group-response:
+      required:
+      - id
+      - target_id
+      - fail_if
+      - controls
+      - is_editable
+      - created_date
+      - last_modified_date
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlGroupId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control group.
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        fail_if:
+          $ref: '#/components/schemas/ControlGroupCondition'
+        controls:
+          type: array
+          items:
+            $ref: '#/components/schemas/add-control-group-request-control'
+          description: The controls that belong to the group.
+        is_editable:
+          $ref: '#/components/schemas/ControlGroupIsEditable'
+        created_date:
+          type: string
+          format: date-time
+        last_modified_date:
+          type: string
+          format: date-time
+      description: The control group's details.
+    remove-control-group-response:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlGroupId'
+      description: The control groups's details.
+    VelocityWindow:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          enum:
+          - daily
+          - weekly
+          - monthly
+          - all_time
+          type: string
+          description: The velocity window's unit of time.
+          example: weekly
+      description: The period of time over which the specified `amount_limit` can be spent.
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

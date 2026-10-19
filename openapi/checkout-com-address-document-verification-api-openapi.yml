@@ -1,0 +1,1304 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Address Document Verification API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Address Document Verification
+  description: Verify your users' addresses by checking their address documents.
+paths:
+  /address-document-verifications:
+    servers:
+    - url: https://identity-verification.checkout.com
+      description: Production environment
+    - url: https://identity-verification.sandbox.checkout.com
+      description: Sandbox environment
+    post:
+      tags:
+      - Address Document Verification
+      summary: Create an address document verification
+      description: 'Beta
+
+
+        Create an address document verification for an applicant.'
+      operationId: create_address_document_verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvAddressDocumentVerification'
+            examples:
+              address_document_verification_creation_request_body:
+                $ref: '#/components/examples/adv_address_document_verification_creation_request_body'
+        required: true
+      responses:
+        '201':
+          description: Address document verification created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvAddressDocumentVerificationOutput'
+              examples:
+                address_document_verification_creation_response_body:
+                  $ref: '#/components/examples/adv_address_document_verification_creation_response_body'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdvIdentityVerificationError'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Unprocessable Content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdvIdentityVerificationError'
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      security:
+      - OAuth:
+        - identity-verification
+      - ApiSecretKey: []
+  /address-document-verifications/{address_document_verification_id}:
+    servers:
+    - url: https://identity-verification.checkout.com
+      description: Production environment
+    - url: https://identity-verification.sandbox.checkout.com
+      description: Sandbox environment
+    get:
+      tags:
+      - Address Document Verification
+      summary: Get an address document verification
+      description: 'Beta
+
+
+        Get the details of an existing address document verification.'
+      operationId: retrieve_address_document_verification
+      parameters:
+      - name: address_document_verification_id
+        in: path
+        description: The address document verification's unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/AdvAddressDocumentVerificationId'
+      responses:
+        '200':
+          description: Address document verification retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvAddressDocumentVerificationOutput'
+              examples:
+                address_document_verification_response_body:
+                  $ref: '#/components/examples/adv_address_document_verification_response_body'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - identity-verification
+      - ApiSecretKey: []
+  /address-document-verifications/{address_document_verification_id}/anonymize:
+    servers:
+    - url: https://identity-verification.checkout.com
+      description: Production environment
+    - url: https://identity-verification.sandbox.checkout.com
+      description: Sandbox environment
+    post:
+      tags:
+      - Address Document Verification
+      summary: Anonymize an address document verification
+      description: 'Beta
+
+
+        Remove the personal data from an address document verification.'
+      operationId: anonymize_address_document_verification
+      parameters:
+      - name: address_document_verification_id
+        in: path
+        description: The address document verification's unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/AdvAddressDocumentVerificationId'
+      responses:
+        '200':
+          description: Personal data removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvAddressDocumentVerificationOutput'
+              examples:
+                address_document_verification_response_body_anonymized:
+                  $ref: '#/components/examples/adv_address_document_verification_response_body_anonymized'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - identity-verification
+      - ApiSecretKey: []
+  /address-document-verifications/{address_document_verification_id}/attempts:
+    servers:
+    - url: https://identity-verification.checkout.com
+      description: Production environment
+    - url: https://identity-verification.sandbox.checkout.com
+      description: Sandbox environment
+    post:
+      tags:
+      - Address Document Verification
+      summary: Create an address document verification attempt
+      description: 'Beta
+
+
+        Create an address document verification attempt.
+
+
+        If you''ve previously created an attempt for this verification, the verification status must be one of the following:
+
+
+        - `created`
+
+        - `retry_required`
+
+
+        If you create a new attempt while the status is any other value, you receive a `409 Conflict` response.
+
+
+        Images must not exceed 10MB in size and must be in one of the following formats:
+
+
+        - `JPEG`
+
+        - `PDF`
+
+        - `PNG`'
+      operationId: create_address_document_verification_attempt
+      parameters:
+      - name: address_document_verification_id
+        in: path
+        description: The address document verification's unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/AdvAddressDocumentVerificationId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdvAttemptRequest'
+            examples:
+              attempt_creation_request_body:
+                $ref: '#/components/examples/adv_attempt_creation_request_body'
+      responses:
+        '201':
+          description: Address document verification attempt created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvAttemptResponse'
+              examples:
+                attempt_creation_response_body:
+                  $ref: '#/components/examples/adv_attempt_creation_response_body'
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - identity-verification
+      - ApiSecretKey: []
+    get:
+      tags:
+      - Address Document Verification
+      summary: Get address document verification attempts
+      description: 'Beta
+
+
+        Get the details of all attempts for a specific address document verification.'
+      operationId: list_attempts_address_document_verification
+      parameters:
+      - name: address_document_verification_id
+        in: path
+        description: The address document verification's unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/AdvAddressDocumentVerificationId'
+      - name: skip
+        in: query
+        description: The number of attempts to skip.
+        schema:
+          type: integer
+          default: 0
+      - name: limit
+        in: query
+        description: The maximum number of attempts to return.
+        schema:
+          type: integer
+          default: 10
+      responses:
+        '200':
+          description: Address document verification attempts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvAttemptResponseList'
+              examples:
+                attempt_list_response_body:
+                  $ref: '#/components/examples/adv_attempt_list_response_body'
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - identity-verification
+      - ApiSecretKey: []
+  /address-document-verifications/{address_document_verification_id}/attempts/{attempt_id}:
+    servers:
+    - url: https://identity-verification.checkout.com
+      description: Production environment
+    - url: https://identity-verification.sandbox.checkout.com
+      description: Sandbox environment
+    get:
+      tags:
+      - Address Document Verification
+      summary: Get an address document verification attempt
+      description: 'Beta
+
+
+        Get the details of a specific attempt for an address document verification.'
+      operationId: get_address_document_verification_attempt
+      parameters:
+      - name: address_document_verification_id
+        in: path
+        description: The address document verification's unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/AdvAddressDocumentVerificationId'
+      - name: attempt_id
+        in: path
+        description: The attempt's unique identifier.
+        required: true
+        schema:
+          pattern: ^adva_\w+$
+          type: string
+        example: adva_tkoi5db4hryu5cei5vwoabr7we
+      responses:
+        '200':
+          description: Address document verification attempt retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvAttemptResponse'
+              examples:
+                attempt_get_response_body:
+                  $ref: '#/components/examples/adv_attempt_get_response_body'
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - identity-verification
+      - ApiSecretKey: []
+  /address-document-verifications/{address_document_verification_id}/attempts/{attempt_id}/assets:
+    servers:
+    - url: https://identity-verification.checkout.com
+      description: Production environment
+    - url: https://identity-verification.sandbox.checkout.com
+      description: Sandbox environment
+    get:
+      tags:
+      - Address Document Verification
+      summary: Get address document verification attempt assets
+      description: 'Beta
+
+
+        Get the assets (the document image) uploaded for an address document verification attempt.
+
+
+        Results are paginated. Use the `skip` and `limit` query parameters to navigate through pages.'
+      operationId: get_address_document_verification_attempt_assets
+      parameters:
+      - name: address_document_verification_id
+        in: path
+        description: The address document verification's unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/AdvAddressDocumentVerificationId'
+      - name: attempt_id
+        in: path
+        description: The attempt's unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/AdvAttemptId'
+      - name: skip
+        in: query
+        description: The number of assets to skip.
+        schema:
+          type: integer
+          default: 0
+      - name: limit
+        in: query
+        description: The maximum number of assets to return.
+        schema:
+          type: integer
+          default: 10
+      responses:
+        '200':
+          description: Address document verification attempt assets retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvAttemptAssets'
+              examples:
+                adv_attempt_assets_response_body:
+                  $ref: '#/components/examples/adv_attempt_assets_response_body'
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - identity-verification
+      - ApiSecretKey: []
+  /address-document-verifications/{address_document_verification_id}/pdf-report:
+    servers:
+    - url: https://identity-verification.checkout.com
+      description: Production environment
+    - url: https://identity-verification.sandbox.checkout.com
+      description: Sandbox environment
+    get:
+      tags:
+      - Address Document Verification
+      summary: Get address document verification report
+      description: 'Beta
+
+
+        Get the report for an address document verification in PDF format.
+
+
+        The report is only available when the verification status is `approved` or `declined`, and you''ve received an address document verification report created webhook.'
+      operationId: pdf_address_document_verification
+      parameters:
+      - name: address_document_verification_id
+        in: path
+        description: The address document verification's unique identifier.
+        required: true
+        schema:
+          $ref: '#/components/schemas/AdvAddressDocumentVerificationId'
+      responses:
+        '200':
+          description: Address document verification report retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdvPdf'
+              examples:
+                address_document_verification_pdf_response_body:
+                  $ref: '#/components/examples/adv_address_document_verification_pdf_response_body'
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      security:
+      - OAuth:
+        - identity-verification
+      - ApiSecretKey: []
+components:
+  schemas:
+    AdvAttemptAssets:
+      required:
+      - total_count
+      - skip
+      - limit
+      - data
+      - _links
+      type: object
+      properties:
+        total_count:
+          type: integer
+          description: The total number of assets.
+        skip:
+          type: integer
+          description: The number of assets you want to skip. <br/>Example – There are 10 assets. If you provide `6`, the first six assets are skipped.
+        limit:
+          type: integer
+          description: The maximum number of assets you want returned. <br/>Example – There are 10 assets. If you set `limit` to `5`, but skip the first six, four assets are returned.
+        data:
+          minItems: 0
+          type: array
+          items:
+            $ref: '#/components/schemas/AdvAttemptAsset'
+          description: The list of assets for the current page.
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/IdvSelfLink'
+          - $ref: '#/components/schemas/IdvNextLink'
+          - $ref: '#/components/schemas/IdvPreviousLink'
+          description: The details of links to the previous, current, and next resources.
+          readOnly: true
+    DatedObject:
+      required:
+      - created_on
+      - modified_on
+      type: object
+      properties:
+        created_on:
+          type: string
+          description: The date and time when the resource was created, in UTC. <br/>Format – `yyyy-mm-ddThh:mm:ss.sss`
+          format: date-time
+          readOnly: true
+          example: '2025-07-21T17:32:28.0000000+00:00'
+        modified_on:
+          type: string
+          description: The date and time when the resource was modified, in UTC. <br/>Format – `yyyy-mm-ddThh:mm:ss.sss`
+          format: date-time
+          readOnly: true
+          example: '2025-07-21T17:40:32.0000000+00:00'
+    AdvAttemptResponse:
+      required:
+      - id
+      - status
+      - response_codes
+      - _links
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/DatedObject'
+      properties:
+        id:
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/AdvAttemptId'
+        status:
+          type: string
+          allOf:
+          - $ref: '#/components/schemas/AdvAttemptStates'
+        response_codes:
+          minItems: 0
+          type: array
+          items:
+            $ref: '#/components/schemas/IdvResponseCode'
+          description: One or more [response codes](https://www.checkout.com/docs/developer-resources/codes/identities-codes#Response_codes) that provide more information about the status.
+          readOnly: true
+        _links:
+          $ref: '#/components/schemas/IdvSelfLink'
+    IdvUserJourneyId:
+      pattern: ^usj_[a-z2-7]{26}$
+      type: string
+      description: Your configuration ID.
+      readOnly: true
+      example: usj_tkoi5db4hryu5cei5vwoabr7we
+    IdvResponseCode:
+      required:
+      - code
+      - summary
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/IdvResponseCodeCode'
+        summary:
+          $ref: '#/components/schemas/IdvResponseCodeSummary'
+      description: The [response code](https://www.checkout.com/docs/developer-resources/codes/identities-codes#Response_codes) that provides more information about the identity verification status.
+      readOnly: true
+    AdvAddressDocumentResult:
+      type: object
+      properties:
+        document_type:
+          type: string
+          description: The type of address document submitted.
+          example: utility_bill
+        issuer:
+          type: string
+          description: The issuer of the address document.
+          example: EDF Energy
+        full_names:
+          type: array
+          items:
+            type: string
+            description: The full name of a person named on the document.
+          description: The full names of the people named on the document. This can contain more than one name, for example if the document lists joint account holders.
+          example:
+          - Hannah Bret
+        issue_date:
+          type: string
+          description: The date the document was issued.
+          format: date
+          example: '2024-01-15T00:00:00.0000000'
+        address:
+          $ref: '#/components/schemas/AdvAddress'
+      description: The result of the address document check.
+      readOnly: true
+    IdvResponseCodes:
+      minItems: 0
+      type: array
+      items:
+        $ref: '#/components/schemas/IdvResponseCode'
+      description: One or more [response codes](https://www.checkout.com/docs/developer-resources/codes/identities-codes#Response_codes) that provide more information about the status.
+      readOnly: true
+    AdvAttemptId:
+      pattern: ^adva_\w+$
+      type: string
+      description: The unique identifier for the address document verification attempt.
+      readOnly: true
+      example: adva_tkoi5db4hryu5cei5vwoabr7we
+    IdvDeclaredData:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 255
+          minLength: 2
+          type: string
+          description: The applicant's name.
+          example: Hannah Bret
+        birth_date:
+          type: string
+          description: The applicant's birth date. <br/>Format – `YYYY-MM-DD`
+          format: date
+          example: '1994-10-15T00:00:00.0000000'
+      description: The personal details provided by the applicant.
+    IdvRiskLabels:
+      minItems: 0
+      type: array
+      items:
+        $ref: '#/components/schemas/IdvRiskLabel'
+      description: One or more codes that provide more information about risks associated with the verification.
+      readOnly: true
+    IdvResponseCodeCode:
+      maximum: 69999
+      minimum: 10000
+      type: integer
+      description: The [response code](https://www.checkout.com/docs/developer-resources/codes/identities-codes#Response_codes).
+      readOnly: true
+    AdvAttemptAsset:
+      required:
+      - type
+      - _links
+      type: object
+      properties:
+        type:
+          enum:
+          - document
+          type: string
+          description: The type of asset.
+        _links:
+          required:
+          - asset_url
+          type: object
+          properties:
+            asset_url:
+              allOf:
+              - $ref: '#/components/schemas/IdvHalLink'
+    IdvApplicantLink:
+      required:
+      - applicant
+      type: object
+      properties:
+        applicant:
+          $ref: '#/components/schemas/IdvHalLink'
+      description: The URL to the applicant's profile.
+    IdvRiskLabel:
+      enum:
+      - multiple_faces_detected
+      - mcc_not_confident
+      - risky_document_format
+      type: string
+      description: A code that provides more information about a risk associated with the verification.
+      readOnly: true
+    AdvAddressDocumentVerificationOutput:
+      required:
+      - id
+      - applicant_id
+      - user_journey_id
+      - status
+      - response_codes
+      - _links
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/DatedObject'
+      - $ref: '#/components/schemas/AdvAddressDocumentVerificationBase'
+      properties:
+        id:
+          $ref: '#/components/schemas/AdvAddressDocumentVerificationId'
+        status:
+          $ref: '#/components/schemas/AdvVerificationStatuses'
+        address_document:
+          $ref: '#/components/schemas/AdvAddressDocumentResult'
+        response_codes:
+          $ref: '#/components/schemas/IdvResponseCodes'
+        risk_labels:
+          $ref: '#/components/schemas/IdvRiskLabels'
+        _links:
+          $ref: '#/components/schemas/IdvIdentityVerificationLinks'
+    IdvNextLink:
+      required:
+      - next
+      type: object
+      properties:
+        next:
+          $ref: '#/components/schemas/IdvHalLink'
+      readOnly: true
+    IdvSelfLink:
+      required:
+      - self
+      type: object
+      properties:
+        self:
+          allOf:
+          - $ref: '#/components/schemas/IdvHalLink'
+          description: The URL to the resource.
+      description: The details of links related to the resource.
+      readOnly: true
+    AdvAddressDocumentVerification:
+      required:
+      - applicant_id
+      - user_journey_id
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/AdvAddressDocumentVerificationBase'
+    IdvPreviousLink:
+      required:
+      - previous
+      type: object
+      properties:
+        previous:
+          $ref: '#/components/schemas/IdvHalLink'
+      readOnly: true
+    IdvPdf:
+      required:
+      - pdf_report
+      type: object
+      properties:
+        pdf_report:
+          allOf:
+          - $ref: '#/components/schemas/IdvPreSignedUrl'
+          description: The pre-signed URL to the PDF report.
+      readOnly: true
+    AdvAddressDocumentVerificationId:
+      pattern: ^adv_\w+$
+      type: string
+      description: The address document verification's unique identifier.
+      readOnly: true
+      example: adv_tkoi5db4hryu5cei5vwoabr7we
+    AdvAttemptStates:
+      enum:
+      - checks_in_progress
+      - checks_inconclusive
+      - completed
+      - quality_checks_aborted
+      - quality_checks_in_progress
+      - terminated
+      type: string
+      description: The [status](https://www.checkout.com/docs/developer-resources/codes/identities-codes#Attempt_statuses) of the address document verification attempt.
+    IdvHalLink:
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          format: uri
+      description: The URL to the applicant profile resource.
+    AdvAttemptRequest:
+      required:
+      - document
+      type: object
+      properties:
+        document:
+          type: string
+          description: The address document image to upload.
+          format: binary
+    IdvIdentityVerificationError:
+      required:
+      - error_type
+      - error_codes
+      type: object
+      properties:
+        error_type:
+          enum:
+          - unprocessable_entity
+          - request_invalid
+          type: string
+          description: The type of error.
+        error_codes:
+          type: array
+          items:
+            type: string
+          description: The error codes.
+    AdvAddressDocumentVerificationBase:
+      type: object
+      properties:
+        applicant_id:
+          allOf:
+          - $ref: '#/components/schemas/ApplicantId'
+        user_journey_id:
+          allOf:
+          - $ref: '#/components/schemas/IdvUserJourneyId'
+        declared_data:
+          $ref: '#/components/schemas/IdvDeclaredData'
+    AdvVerificationStatuses:
+      enum:
+      - created
+      - quality_checks_in_progress
+      - checks_in_progress
+      - approved
+      - declined
+      - retry_required
+      - inconclusive
+      type: string
+      description: The address document [verification status](https://www.checkout.com/docs/developer-resources/codes/identities-codes#Check_statuses).
+    ApplicantId:
+      pattern: ^aplt_\w+$
+      type: string
+      description: The applicant's unique identifier.
+      readOnly: true
+      example: aplt_tkoi5db4hryu5cei5vwoabr7we
+    AdvAddress:
+      type: object
+      properties:
+        address_line1:
+          maxLength: 250
+          type: string
+          description: The first line of the address.
+          example: 123 Main Street
+        address_line2:
+          maxLength: 250
+          type: string
+          description: The second line of the address.
+          example: Apt 4B
+        city:
+          maxLength: 50
+          type: string
+          description: The city or town.
+          example: London
+        state:
+          maxLength: 50
+          type: string
+          description: The state, county, or province.
+          example: Greater London
+        zip:
+          maxLength: 50
+          type: string
+          description: The postal or ZIP code.
+          example: SW1A 1AA
+        country:
+          maxLength: 2
+          type: string
+          description: The two-letter <a href="https://www.checkout.com/docs/resources/codes/country-codes" target="_blank">ISO country code</a> of the address.
+          example: GB
+      description: The address extracted from the document.
+    IdvResponseCodeSummary:
+      type: string
+      description: The description of the [response code](https://www.checkout.com/docs/developer-resources/codes/identities-codes#Response_codes).
+      readOnly: true
+      example: document_front_not_captured
+    IdvIdentityVerificationLinks:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IdvSelfLink'
+      - $ref: '#/components/schemas/IdvApplicantLink'
+      description: The details of links related to the resource.
+    AdvAttemptResponseList:
+      required:
+      - total_count
+      - skip
+      - limit
+      - data
+      - _links
+      type: object
+      properties:
+        total_count:
+          type: integer
+          description: The total number of attempts.
+        skip:
+          type: integer
+          description: The number of attempts skipped.
+        limit:
+          type: integer
+          description: The maximum number of attempts returned.
+        data:
+          minItems: 0
+          type: array
+          items:
+            $ref: '#/components/schemas/AdvAttemptResponse'
+          description: The details of the attempts.
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/IdvSelfLink'
+          - $ref: '#/components/schemas/IdvNextLink'
+          - $ref: '#/components/schemas/IdvPreviousLink'
+          description: The details of links to the previous, current, and next resources.
+          readOnly: true
+    IdvPreSignedUrl:
+      type: string
+      description: The pre-signed URL to the captured image of the document.
+      format: uri
+      example: https://storage-b.ubble.ai/ubble-ai/NDYOOVHGZPAQ/a54b3393-f02a-47c9-a9c5-2f6ee73560e1/bb603e2f-5de9-40f2-9631-8285a33c24c0/live_face/bb603e2f-5de9-40f2-9631-8285a33c24c0-1679921946714.png?response-content-type=image%2Fpng&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=V9jgOdpOdeVSFTkA4ZsG%2F20230327%2Feu-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230327T163223Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=2b7d87fec4f11f0df949da7beade2519cf1a51ce70fe9cc1cf0470d73f5340e4
+  examples:
+    adv_attempt_creation_request_body:
+      value:
+        document: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD…
+
+          '
+    adv_attempt_assets_response_body:
+      value:
+        total_count: '1'
+        skip: '0'
+        limit: '10'
+        data:
+        - type: document
+          _links:
+            asset_url:
+              href: https://storage-b.env.ubble.ai/ubble-ai/NDYOOVHGZPAQ/a54b3393-f02a-47c9-a9c5-2f6ee73560e1/bb603e2f-5de9-40f2-9631-8285a33c24c0/address_document.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600
+        _links:
+          self:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts/adva_tkoi5db4hryu5cei5vwoabr7we/assets
+          next:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts/adva_tkoi5db4hryu5cei5vwoabr7we/assets?...
+          previous:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts/adva_tkoi5db4hryu5cei5vwoabr7we/assets?...
+    adv_address_document_verification_response_body_anonymized:
+      value:
+        id: adv_tkoi5db4hryu5cei5vwoabr7we
+        created_on: '2025-07-21T17:32:28Z'
+        modified_on: '2025-07-21T17:40:32Z'
+        applicant_id: aplt_tkoi5db4hryu5cei5vwoabr7we
+        user_journey_id: usj_tkoi5db4hryu5cei5vwoabr7we
+        status: approved
+        response_codes:
+        - code: '10000'
+          summary: approved
+        _links:
+          self:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we
+          applicant:
+            href: https://identity-verification.checkout.com/applicants/aplt_tkoi5db4hryu5cei5vwoabr7we
+    adv_attempt_get_response_body:
+      value:
+        id: adva_tkoi5db4hryu5cei5vwoabr7we
+        created_on: '2025-07-21T17:32:28Z'
+        modified_on: '2025-07-21T17:40:32Z'
+        status: completed
+        response_codes:
+        - code: '10000'
+          summary: approved
+        _links:
+          self:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts/adva_tkoi5db4hryu5cei5vwoabr7we
+    adv_address_document_verification_pdf_response_body:
+      value:
+        pdf_report: https://www.example.com/reports/adv_tkoi5db4hryu5cei5vwoabr7we.pdf
+    adv_address_document_verification_creation_request_body:
+      value:
+        applicant_id: aplt_tkoi5db4hryu5cei5vwoabr7we
+        user_journey_id: usj_tkoi5db4hryu5cei5vwoabr7we
+        declared_data:
+          name: Hannah Bret
+    adv_address_document_verification_creation_response_body:
+      value:
+        id: adv_tkoi5db4hryu5cei5vwoabr7we
+        created_on: '2025-07-21T17:32:28Z'
+        modified_on: '2025-07-21T17:40:32Z'
+        applicant_id: aplt_tkoi5db4hryu5cei5vwoabr7we
+        user_journey_id: usj_tkoi5db4hryu5cei5vwoabr7we
+        declared_data:
+          name: Hannah Bret
+        status: created
+        response_codes: []
+        _links:
+          self:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we
+          applicant:
+            href: https://identity-verification.checkout.com/applicants/aplt_tkoi5db4hryu5cei5vwoabr7we
+    adv_attempt_list_response_body:
+      value:
+        total_count: '1'
+        skip: '0'
+        limit: '10'
+        data:
+        - id: adva_tkoi5db4hryu5cei5vwoabr7we
+          created_on: '2025-07-21T17:32:28Z'
+          modified_on: '2025-07-21T17:40:32Z'
+          status: completed
+          response_codes:
+          - code: '10000'
+            summary: approved
+          _links:
+            self:
+              href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts/adva_tkoi5db4hryu5cei5vwoabr7we
+        _links:
+          self:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts?skip=0&limit=10
+          next:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts?skip=10&limit=10
+          previous:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts?skip=0&limit=10
+    adv_address_document_verification_response_body:
+      value:
+        id: adv_tkoi5db4hryu5cei5vwoabr7we
+        created_on: '2025-07-21T17:32:28Z'
+        modified_on: '2025-07-21T17:40:32Z'
+        applicant_id: aplt_tkoi5db4hryu5cei5vwoabr7we
+        user_journey_id: usj_tkoi5db4hryu5cei5vwoabr7we
+        declared_data:
+          name: Hannah Bret
+        status: approved
+        response_codes:
+        - code: '10000'
+          summary: approved
+        risk_labels:
+        - risky_document_format
+        address_document:
+          document_type: utility_bill
+          issuer: EDF Energy
+          full_names:
+          - Hannah Bret
+          issue_date: '2025-01-15'
+          address:
+            address_line1: 123 Main Street
+            address_line2: Apt 4B
+            city: London
+            state: Greater London
+            zip: SW1A 1AA
+            country: GB
+        _links:
+          self:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we
+          applicant:
+            href: https://identity-verification.checkout.com/applicants/aplt_tkoi5db4hryu5cei5vwoabr7we
+    adv_attempt_creation_response_body:
+      value:
+        id: adva_tkoi5db4hryu5cei5vwoabr7we
+        created_on: '2025-07-21T17:32:28Z'
+        modified_on: '2025-07-21T17:40:32Z'
+        status: quality_checks_in_progress
+        response_codes: []
+        _links:
+          self:
+            href: https://identity-verification.checkout.com/address-document-verifications/adv_tkoi5db4hryu5cei5vwoabr7we/attempts/adva_tkoi5db4hryu5cei5vwoabr7we
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

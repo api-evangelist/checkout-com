@@ -1,0 +1,1899 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Disputes API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Disputes
+  description: Keep track of and act on your open disputes (also known as chargebacks) to submit the best possible response.
+paths:
+  /disputes:
+    get:
+      tags:
+      - Disputes
+      summary: Get disputes
+      description: Returns a list of all disputes against your business. The results will be returned in reverse chronological order, showing the last modified dispute (for example, where you've recently added a piece of evidence) first. You can use the optional parameters below to skip or limit results.
+      operationId: getDisputes
+      parameters:
+      - name: limit
+        in: query
+        description: The numbers of results to return
+        schema:
+          maximum: 250
+          minimum: 1
+          type: integer
+          default: 50
+      - name: skip
+        in: query
+        description: The number of results to skip
+        schema:
+          minimum: 0
+          type: integer
+          default: 0
+      - name: from
+        in: query
+        description: The date and time from which to filter disputes, based on the dispute's `last_update` field
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        description: The date and time until which to filter disputes, based on the dispute's `last_update` field
+        schema:
+          type: string
+          format: date-time
+      - name: id
+        in: query
+        description: The unique identifier of the dispute
+        schema:
+          type: string
+      - name: entity_ids
+        in: query
+        description: One or more comma-separated client entities. This works like a logical *OR* operator
+        schema:
+          type: string
+          example: ent_wxglze3wwywujg4nna5fb7ldli,ent_vkb5zcy64zoe3cwfmaqvqyqyku
+      - name: sub_entity_ids
+        in: query
+        description: One or more comma-separated sub-entities. This works like a logical *OR* operator
+        schema:
+          type: string
+          example: ent_uzm3uxtssvmuxnyrfdffcyjxeu,ent_hy5wtzwzeuwefmsnjtdhw4scfi
+      - name: processing_channel_ids
+        in: query
+        description: One or more comma-separated processing channels. This works like a logical *OR* operator.
+        schema:
+          type: string
+          example: pc_uzm3uxtssvmuxnyrfdffcyjxeu,pc_hy5wtzwzeuwefmsnjtdhw4scfi
+      - name: segment_ids
+        in: query
+        description: One or more comma-separated segments. This works like a logical *OR* operator.
+        schema:
+          type: string
+      - name: statuses
+        in: query
+        description: One or more comma-separated statuses. This works like a logical *OR* operator
+        schema:
+          type: string
+          example: evidence_required,evidence_under_review
+      - name: payment_id
+        in: query
+        description: The unique identifier of the payment
+        schema:
+          type: string
+      - name: payment_reference
+        in: query
+        description: An optional reference (such as an order ID) that you can use later to identify the payment. Previously known as `TrackId`
+        schema:
+          type: string
+      - name: payment_arn
+        in: query
+        description: The acquirer reference number (ARN) that you can use to query the issuing bank
+        schema:
+          type: string
+      - name: payment_mcc
+        in: query
+        description: The merchant category code (MCC) of the payment (ISO 18245)
+        schema:
+          type: string
+      - name: this_channel_only
+        in: query
+        description: If `true`, only returns disputes of the specific channel that the secret key is associated with. Otherwise, returns all disputes for that business
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Disputes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisputePaged'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Unprocessable paging
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagingError'
+      security:
+      - OAuth:
+        - disputes
+        - disputes:view
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Disputes;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\nDisputesQueryFilter request = new DisputesQueryFilter\n{\n    Limit = 250,\n    To = DateTime.Now,\n};\n\ntry\n{\n    DisputesQueryResponse response = await api.DisputesClient().Query(request);\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/disputes\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Disputes}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nquery := disputes.QueryFilter{\n\tLimit:            10,\n\tSkip:             5,\n\tFrom:             time.Parse(\"2006-01-02T15:04:05Z\", time.Now().AddDate(0, -1, 0).Format(\"2006-01-02T15:04:05Z\")),\n\tTo:               time.Parse(\"2006-01-02T15:04:05Z\", time.Now().Format(\"2006-01-02T15:04:05Z\")),\n\tStatuses:         strings.Join([]string{disputes.EvidenceRequired, disputes.Accepted}[:], \",\"),\n\tPaymentId:        \"payment_id\",\n\tPaymentReference: \"payment_reference\",\n\tPaymentArn:       \"payment_arn\",\n}\n\nresponse, err := api.Disputes.Query(query)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.disputes.DisputeStatus;\nimport com.checkout.disputes.DisputesQueryFilter;\nimport com.checkout.disputes.DisputesQueryResponse;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.DISPUTES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\nDisputesQueryFilter query = DisputesQueryFilter.builder()\n    .paymentId(\"payment_id\")\n    .from(LocalDateTime.now().minusMonths(2).toInstant(ZoneOffset.UTC))\n    .to(Instant.now())\n    .paymentArn(\"payment_arn\")\n    .paymentReference(\"payment_reference\")\n    .statuses(String.join(\",\", DisputeStatus.EVIDENCE_UNDER_REVIEW.getStatus(), DisputeStatus.ARBITRATION_WON.getStatus()))\n    .limit(10)\n    .skip(5)\n    .build();\n\ntry {\n    DisputesQueryResponse response = api.disputesClient().query(query).get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst disputes = await cko.disputes.get({\n\t\tlimit: 5,\n\t\tid: 'dsp_bc94ebda8d275i461229',\n\t});\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Disputes\\DisputesQueryFilter;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Gateway])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\n$query = new DisputesQueryFilter();\n$query->payment_id = \"payment_id\";\n$query->payment_arn = \"payment_arn\";\n$query->payment_reference = \"payment_reference\";\n$query->statuses = \"comma,separated,list,statuses\";\n$query->limit = 10;\n$query->skip = 5;\n$query->to = new DateTime(); // UTC, now\n\n$from = new DateTime();\n$from->setTimezone(new DateTimeZone(\"America/Mexico_City\"));\n$from->sub(new DateInterval(\"P1M\"));\n$query->from = $from;\n\ntry {\n    $response = $api->getDisputesClient()->query($query);\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.disputes.disputes import DisputesQueryFilter\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder() \n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.DISPUTES, OAuthScopes.DISPUTES_VIEW]) \n    .build()\n)\n\nquery = DisputesQueryFilter()\nnow = datetime.now(timezone.utc)\nquery.from_ = now - relativedelta(months=6)\nquery.to = now\nquery.payment_arn = 'payment_arn'\nquery.payment_reference = 'payment_reference'\nquery.limit = 10\nquery.skip = 5\n\ntry:\n    response = api.disputes.query(query)\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+  /disputes/{dispute_id}:
+    get:
+      tags:
+      - Disputes
+      summary: Get dispute details
+      description: Returns all the details of a dispute using the dispute identifier.
+      operationId: getDisputeDetails
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier
+        required: true
+        schema:
+          pattern: ^(dsp)_(\\w{22,26})$
+          type: string
+      responses:
+        '200':
+          description: Dispute retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dispute'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dispute not found
+      security:
+      - OAuth:
+        - disputes
+        - disputes:view
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Disputes;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    DisputeDetailsResponse response = await api.DisputesClient().GetDisputeDetails(\"disputes_id\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Disputes}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Disputes.GetDisputeDetails(\"dispute_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.disputes.DisputeDetailsResponse;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.DISPUTES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\ntry {\n    DisputeDetailsResponse response = api.disputesClient().getDisputeDetails(\"dispute_id\").get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst disputeDetails = await cko.disputes.getDetails('dsp_bc94ebda8d275i461229');\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Disputes])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\ntry {\n    $response = $api->getDisputesClient()->getDisputeDetails(\"dispute_id\");\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder() \n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.DISPUTES, OAuthScopes.DISPUTES_VIEW]) \n    .build()\n)\n\ntry:\n    response = api.disputes.get_dispute_details('dispute_id')\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+  /disputes/{dispute_id}/accept:
+    post:
+      tags:
+      - Disputes
+      summary: Accept dispute
+      description: If a dispute is legitimate, you can choose to accept it. This will close it for you and remove it from your list of open disputes. There are no further financial implications.
+      operationId: acceptDispute
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier
+        required: true
+        schema:
+          pattern: ^(dsp)_(\w{26})$
+          type: string
+      responses:
+        '204':
+          description: Dispute accepted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dispute not found
+      security:
+      - OAuth:
+        - disputes
+        - disputes:accept
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    EmptyResponse response = await api.DisputesClient().Accept(\"disputes_id\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\"github.com/checkout/checkout-sdk-go\"\n\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Disputes}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Disputes.Accept(\"dispute_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.EmptyResponse;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.DISPUTES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\ntry {\n    EmptyResponse response = api.disputesClient().accept(\"dispute_id\").get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}\n"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst accept = await cko.disputes.accept('dsp_bc94ebda8d275i461229');\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Disputes])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\ntry {\n    $response = $api->getDisputesClient()->accept(\"dispute_id\");\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder() \n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.DISPUTES, OAuthScopes.DISPUTES_ACCEPT]) \n    .build()\n)\n\ntry:\n    response = api.disputes.accept('dispute_id')\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization\n"
+  /disputes/{dispute_id}/evidence:
+    put:
+      tags:
+      - Disputes
+      summary: Provide dispute evidence
+      description: Adds supporting evidence to a dispute. Before using this endpoint, you first need to upload your files using the file uploader. You will receive a file id (prefixed by `file_`) which you can then use in your request. Note that this only attaches the evidence to the dispute, it does not send it to us. Once ready, you will need to submit it. **You must provide at least one evidence type in the body of your request.**
+      operationId: provideDisputeEvidence
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier.
+        required: true
+        schema:
+          pattern: ^(dsp)_(\w{26})$
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvideEvidenceRequest'
+      responses:
+        '204':
+          description: Dispute evidence provided successfully
+        '400':
+          description: Unprocessable
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dispute not found
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                properties:
+                  request_id:
+                    type: string
+                    description: The request identifier.
+                  error_type:
+                    type: string
+                    description: The error type.
+                  error_codes:
+                    type: array
+                    items:
+                      type: string
+                    description: "The error codes returned from the validation.\n  * `invoice_or_receipt_file_id_invalid`\n  * `invoice_or_receipt_text_invalid`\n  * `invoice_showing_distinct_transactions_file_id_invalid`\n  * `invoice_showing_distinct_transactions_text_invalid`\n  * `customer_communication_file_id_invalid`\n  * `customer_communication_text_invalid`\n  * `refund_or_cancellation_policy_file_id_invalid`\n  * `refund_or_cancellation_policy_text_invalid`\n  * `recurring_transaction_agreement_file_id_invalid`\n  * `proof_of_delivery_or_service_date_file_id_invalid`\n  * `proof_of_delivery_or_service_date_text_invalid`\n  * `additional_evidence_file_id_invalid`\n  * `additional_evidence_text_invalid`\n  * `proof_of_delivery_or_service_text_invalid`\n  * `proof_of_delivery_or_service_text_invalid`\n  * `dispute_not_found`\n  * `should_be_merchandise_or_service`\n  * `should_be_merchandise_or_service_required`\n  * `merchandise_or_service_desc_required`\n  * `merchandise_or_service_desc_invalid`\n  * `delivery_status_invalid`\n  * `tracking_information_required`\n  * `tracking_information_invalid`\n  * `historical_arn_required`\n  * `historical_arn_invalid`\n  * `historical_transaction_date_invalid`\n  * `historical_transaction_address_required`\n  * `historical_transaction_address_invalid`\n  * `historical_transaction_city_required`\n  * `historical_transaction_city_invalid`\n  * `historical_transaction_state_region_required`\n  * `historical_transaction_state_region_invalid_length_2`\n  * `historical_transaction_postalcode_required`\n  * `historical_transaction_postalcode_invalid`\n  * `historical_transaction_country_required`\n  * `historical_transaction_country_invalid`\n  * `historical_transaction_country_should_be_only_numbers`\n  * `not_valid_compelling_evidence_candidate`\n  * `ip_address_and_device_id_is_required`\n  * `ip_address_is_invalid`\n  * `device_id_minimum_15_length`\n  * `two_historical_transactions_required`\n  * `two_core_properties_in_historical_transactions_required`\n  * `historical_transactions_should_be_different`\n  * `merchandise_or_service_provided_date_required`\n"
+      security:
+      - OAuth:
+        - disputes
+        - disputes:provide-evidence
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Disputes;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\nDisputeEvidenceRequest request = new DisputeEvidenceRequest\n{\n    ProofOfDeliveryOrServiceFile = \"file_xxxxxx\",\n    ProofOfDeliveryOrServiceText = \"proof of delivery or service text\",\n    InvoiceOrReceiptFile = \"file_xxxxxx\",\n    InvoiceOrReceiptText = \"Copy of the invoice\",\n    CustomerCommunicationFile = \"file_xxxxxx\",\n    CustomerCommunicationText = \"Copy of an email exchange with the cardholder\",\n    AdditionalEvidenceFile = \"file_xxxxxx\",\n    AdditionalEvidenceText = \"Scanned document\",\n    InvoiceShowingDistinctTransactionsFile = \"file_xxxxxx\",\n    InvoiceShowingDistinctTransactionsText = \"Copy of invoice #1244 showing two transactions\",\n    RefundOrCancellationPolicyFile = \"file_xxxxxx\",\n    RefundOrCancellationPolicyText = \"Copy of the refund policy\",\n    RecurringTransactionAgreementFile = \"file_xxxxxx\",\n    RecurringTransactionAgreementText = \"Copy of the recurring transaction agreement\",\n    ProofOfDeliveryOrServiceDateFile = \"file_xxxxxx\",\n    ProofOfDeliveryOrServiceDateText = \"Copy of the customer receipt showing the merchandise was delivered\"\n};\n\ntry\n{\n    EmptyResponse response = await api.DisputesClient().PutEvidence(\"disputes_id\", request);\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/disputes\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Disputes}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nrequest := disputes.Evidence{\n\tProofOfDeliveryOrServiceFile:           \"file_id\",\n\tProofOfDeliveryOrServiceText:           \"proof of delivery or service text\",\n\tInvoiceOrReceiptFile:                   \"file_id\",\n\tInvoiceOrReceiptText:                   \"proof of receipt text\",\n\tInvoiceShowingDistinctTransactionsFile: \"file_id\",\n\tInvoiceShowingDistinctTransactionsText: \"invoice showing distinct transactions text\",\n\tCustomerCommunicationFile:              \"file_id\",\n\tCustomerCommunicationText:              \"customer communication text\",\n\tRefundOrCancellationPolicyFile:         \"file_id\",\n\tRefundOrCancellationPolicyText:         \"refund or cancellation policy text\",\n\tRecurringTransactionAgreementFile:      \"file_id\",\n\tRecurringTransactionAgreementText:      \"recurring transaction agreement text\",\n\tAdditionalEvidenceFile:                 \"file_id\",\n\tAdditionalEvidenceText:                 \"additional evidence text\",\n\tProofOfDeliveryOrServiceDateFile:       \"file_id\",\n\tProofOfDeliveryOrServiceDateText:       \"proof of delivery or service date text\",\n}\n\nresponse, err := api.Disputes.PutEvidence(\"dispute_id\", request)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.EmptyResponse;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.disputes.DisputeEvidenceRequest;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.DISPUTES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\nDisputeEvidenceRequest evidenceRequest = DisputeEvidenceRequest.builder()\n    .proofOfDeliveryOrServiceFile(\"file_id\")\n    .proofOfDeliveryOrServiceText(\"proof of delivery or service text\")\n    .invoiceOrReceiptFile(\"file_id\")\n    .invoiceOrReceiptText(\"Copy of the invoice\")\n    .invoiceShowingDistinctTransactionsFile(\"file_id\")\n    .invoiceShowingDistinctTransactionsText(\"Copy of invoice #1244 showing two transactions\")\n    .customerCommunicationFile(\"file_id\")\n    .customerCommunicationText(\"Copy of an email exchange with the cardholder\")\n    .refundOrCancellationPolicyFile(\"file_id\")\n    .refundOrCancellationPolicyText(\"Copy of the refund policy\")\n    .recurringTransactionAgreementFile(\"file_id\")\n    .recurringTransactionAgreementText(\"Copy of the recurring transaction agreement\")\n    .additionalEvidenceFile(\"file_id\")\n    .additionalEvidenceText(\"Scanned document\")\n    .proofOfDeliveryOrServiceDateFile(\"file_id\")\n    .proofOfDeliveryOrServiceDateText(\"Copy of the customer receipt showing the merchandise was delivered on 2018-12-20\")\n    .build();\n\ntry {\n    EmptyResponse response = api.disputesClient().putEvidence(\"dispute_id\", evidenceRequest).get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst evidence = await cko.disputes.provideEvidence('dsp_bc94ebda8d275i461229', {\n\t\tproof_of_delivery_or_service_text: 'http://checkout.com/document.pdf',\n\t});\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Disputes\\DisputeEvidenceRequest;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Disputes])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\n$request = new DisputeEvidenceRequest();\n$request->proof_of_delivery_or_service_file = \"file_id\";\n$request->proof_of_delivery_or_service_text = \"proof of delivery or service text\";\n$request->invoice_or_receipt_file = \"file_id\";\n$request->invoice_or_receipt_text = \"Copy of the invoice\";\n$request->customer_communication_file = \"file_id\";\n$request->customer_communication_text = \"Copy of an email exchange with the cardholder\";\n$request->additional_evidence_file = \"file_id\";\n$request->additional_evidence_text = \"Scanned document\";\n\ntry {\n    $api->getDisputesClient()->putEvidence(\"dispute_id\", $request);\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.disputes.disputes import DisputeEvidenceRequest\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder() \n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.DISPUTES, OAuthScopes.DISPUTES_PROVIDE_EVIDENCE]) \n    .build()\n)\n\nevidence_request = DisputeEvidenceRequest()\nevidence_request.proof_of_delivery_or_service_file = 'proof_of_delivery_or_service_file'\nevidence_request.proof_of_delivery_or_service_text = 'proof of delivery or service text'\nevidence_request.invoice_or_receipt_file = 'invoice_or_receipt_file'\nevidence_request.invoice_or_receipt_text = 'invoice_or_receipt_text'\nevidence_request.customer_communication_file = 'customer_communication_file'\nevidence_request.customer_communication_text = 'customer_communication_text'\nevidence_request.additional_evidence_file = 'additional_evidence_file'\nevidence_request.additional_evidence_text = 'additional_evidence_text'\n\ntry:\n    response = api.disputes.put_evidence('dispute_id', evidence_request)\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+    get:
+      tags:
+      - Disputes
+      summary: Get dispute evidence
+      description: Retrieves a list of the evidence submitted in response to a specific dispute.
+      operationId: getDisputeEvidence
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier.
+        required: true
+        schema:
+          pattern: ^(dsp)_(\w{26})$
+          type: string
+      responses:
+        '200':
+          description: Dispute evidence retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dispute not found
+      security:
+      - OAuth:
+        - disputes
+        - disputes:view
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Disputes;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    DisputeEvidenceResponse response = await api.DisputesClient().GetEvidence(\"disputes_id\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Disputes}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Disputes.GetEvidence(\"dispute_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.disputes.DisputeEvidenceResponse;\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.DISPUTES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\ntry {\n    DisputeEvidenceResponse response = api.disputesClient().getEvidence(\"dispute_id\").get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst getEvidence = await cko.disputes.getEvidence('dsp_bc94ebda8d275i461229');\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Disputes])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\ntry {\n    $response = $api->getDisputesClient()->getEvidence(\"dispute_id\");\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.DISPUTES, OAuthScopes.DISPUTES_VIEW]) \n    .build()\n)\n\ntry:\n    response = api.disputes.get_evidence('dispute_id')\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+    post:
+      tags:
+      - Disputes
+      summary: Submit dispute evidence
+      description: With this final request, you can submit the evidence that you have previously provided. Make sure you have provided all the relevant information before using this request. You will not be able to amend your evidence once you have submitted it.
+      operationId: submitDisputeEvidence
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier.
+        required: true
+        schema:
+          pattern: ^(dsp)_(\w{26})$
+          type: string
+      responses:
+        '204':
+          description: Dispute evidence submitted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dispute not found
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                properties:
+                  request_id:
+                    type: string
+                    description: The request identifier.
+                  error_type:
+                    type: string
+                    description: The error type.
+                  error_codes:
+                    type: array
+                    items:
+                      type: string
+                    description: "The error codes returned from the validation. Each error code indicates the transaction with the problem.\n  * `two_core_properties_in_historical_transactions_required` - When using compelling evidence you need to provide at least two of the following properties: `ip_address`, `device_id`, `shipping_address` or `user_id`.\n  * `two_historical_transactions_required` - When using compelling evidence you need to provide at least two historical transactions.\n  * `ip_address_and_device_id_is_required` - When using compelling evidence you need to provide `ip_address` or `device_id`.\n  * `historical_transactions_should_be_different` - When using compelling evidence you need to provide different historical transactions.\n  * `historical_transaction_{transaction_index}_fraud_report` - The ARN provided has a fraud report related.\n  * `historical_transaction_{transaction_index}_active_dispute` - The ARN provided has an active dispute related.\n  * `historical_transaction_{transaction_index}_fraud_dispute` - The ARN provided has a fraud dispute related.\n  * `historical_transaction_{transaction_index}_not_found` - The ARN provided was not found.\n  * `historical_transaction_{transaction_index}_age_invalid` - The historical transaction must be between 120 and 365 days.\n  * `historical_transaction_{transaction_index}_bin_and_caid_not_exact_match` - The BIN and CAID from the transaction provided does not match with the disputed transaction.\n  * `historical_transaction_{transaction_index}_billing_descriptor_does_not_match` - The billing descriptor from the transaction provided does not match with the disputed transaction.\n  * `historical_transaction_{transaction_index}_card_does_not_match` - The card from the transaction provided does not match with the disputed transaction.\n"
+      security:
+      - OAuth:
+        - disputes
+        - disputes:provide-evidence
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    EmptyResponse response = await api.DisputesClient().SubmitEvidence(\"disputes_id\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Disputes}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Disputes.SubmitEvidence(\"dispute_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.EmptyResponse;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.DISPUTES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\ntry {\n    EmptyResponse response = api.disputesClient().submitEvidence(\"dispute_id\").get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst submitEvidence = await cko.disputes.submit('dsp_bc94ebda8d275i461229');\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Disputes])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\ntry {\n    $response = $api->getDisputesClient()->submitEvidence(\"dispute_id\");\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.DISPUTES, OAuthScopes.DISPUTES_VIEW]) \n    .build()\n)\n\ntry:\n    response = api.disputes.submit_evidence('dispute_id')\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+  /disputes/{dispute_id}/evidence/arbitration:
+    post:
+      tags:
+      - Disputes
+      summary: Submit dispute arbitration evidence
+      description: 'Submits the previously provided arbitration evidence to the scheme.
+
+
+        You cannot amend evidence after you submit with this endpoint. Ensure you have provided all of the required information.'
+      operationId: submitDisputeArbitrationEvidence
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier.
+        required: true
+        schema:
+          pattern: ^(dsp)_(\w{26})$
+          type: string
+      responses:
+        '204':
+          description: Dispute arbitration evidence submitted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dispute not found
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                properties:
+                  request_id:
+                    type: string
+                    description: The request identifier.
+                  error_type:
+                    type: string
+                    description: The error type.
+                  error_codes:
+                    type: array
+                    items:
+                      type: string
+                    description: 'The error codes returned from the validation.
+
+                      '
+      security:
+      - OAuth:
+        - disputes
+        - disputes:provide-evidence
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    EmptyResponse response = await api.DisputesClient().SubmitArbitrationEvidence(\"disputes_id\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Disputes}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Disputes.SubmitArbitrationEvidence(\"dispute_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.EmptyResponse;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.DISPUTES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\ntry {\n    EmptyResponse response = api.disputesClient().submitArbitrationEvidence(\"dispute_id\").get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst submitEvidence = await cko.disputes.submitArbitration('dsp_bc94ebda8d275i461229');\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Disputes])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\ntry {\n    $response = $api->getDisputesClient()->submitArbitrationEvidence(\"dispute_id\");\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# OAuth\noauth = (\n    CheckoutSdk.builder()\n    .oauth()\n    .client_credentials('client_id', 'client_secret')\n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.DISPUTES, OAuthScopes.DISPUTES_VIEW])\n    .build()\n)\n\ntry:\n    response = api.disputes.submit_arbitration_evidence('dispute_id')\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+  /disputes/{dispute_id}/evidence/arbitration/submitted:
+    get:
+      tags:
+      - Disputes
+      summary: Get dispute submitted arbitration evidence
+      description: 'Retrieves the unique identifier of the PDF file containing all of the evidence submitted to escalate the dispute to arbitration.
+
+
+        To retrieve the file''s download link, call the `GET /files/{file_id}` endpoint with the returned file ID.'
+      operationId: getDisputeSubmittedArbitrationEvidence
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier.
+        required: true
+        schema:
+          pattern: ^(dsp)_(\w{22,26})$
+          type: string
+      responses:
+        '200':
+          description: Dispute retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmittedEvidenceResponse'
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal error
+      security:
+      - OAuth:
+        - disputes
+        - disputes:view
+      - ApiSecretKey: []
+  /disputes/{dispute_id}/evidence/submitted:
+    get:
+      tags:
+      - Disputes
+      summary: Get dispute submitted evidence
+      description: 'Retrieves the unique identifier of the PDF file containing all the evidence submitted to represent the dispute case.
+
+
+        To retrieve the file''s download link, call the `GET /files/{file_id}` endpoint with the returned file ID.
+
+
+        Evidence submitted before February 2024 cannot be retrieved using this endpoint.'
+      operationId: getDisputeSubmittedEvidence
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier.
+        required: true
+        schema:
+          pattern: ^(dsp)_(\w{22,26})$
+          type: string
+      responses:
+        '200':
+          description: Dispute retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmittedEvidenceResponse'
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal error
+      security:
+      - OAuth:
+        - disputes
+        - disputes:view
+      - ApiSecretKey: []
+  /disputes/{dispute_id}/schemefiles:
+    get:
+      tags:
+      - Disputes
+      summary: Get dispute scheme files
+      description: Returns all of the scheme files of a dispute using the dispute identifier. Currently available only for VISA disputes.
+      operationId: getDisputeSchemeFiles
+      parameters:
+      - name: dispute_id
+        in: path
+        description: The dispute identifier
+        required: true
+        schema:
+          pattern: ^(dsp)_(\w{22,26})$
+          type: string
+      responses:
+        '200':
+          description: Dispute retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemeFileResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dispute not found
+      security:
+      - OAuth:
+        - disputes
+        - disputes:scheme-files
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Disputes}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Disputes.GetDisputeSchemeFiles(\"dispute_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+  /files:
+    post:
+      tags:
+      - Disputes
+      summary: Upload file
+      description: Upload a file to use as evidence in a dispute. Your file must be in either JPEG/JPG, PNG or PDF format, and be no larger than 4MB.
+      operationId: uploadFile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/File'
+      responses:
+        '201':
+          description: File uploaded successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUploadResponse'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Unprocessable
+        '429':
+          description: Too many requests
+      security:
+      - OAuth:
+        - disputes
+        - disputes:provide-evidence
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Common;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    IdResponse response = await api.DisputesClient().SubmitFile(\"file_path\", \"dispute_evidence\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/common\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Files}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nrequest := common.File{\n\tFile:    \"evidence.pdf\",\n\tPurpose: common.DisputesEvidence,\n}\n\nresponse, err := api.Disputes.UploadFile(request)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.common.FilePurpose;\nimport com.checkout.common.FileRequest;\nimport com.checkout.common.IdResponse;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.FILES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\nFile file = new File(\"evidence.pdf\");\nFileRequest fileRequest = FileRequest.builder()\n    .file(file)\n    .contentType(ContentType.create(\"application/pdf\"))\n    .purpose(FilePurpose.DISPUTE_EVIDENCE)\n    .build();\n\ntry {\n    IdResponse response = api.disputesClient().uploadFile(fileRequest).get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst file = await cko.files.upload({\n\t\tpath: fs.createReadStream('./test/files/evidence.jpg'),\n\t\tpurpose: 'dispute_evidence',\n\t});\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\Files\\FileRequest;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Disputes])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\n$fileRequest = new FileRequest();\n$fileRequest->file = \"path/to/file\";\n$fileRequest->purpose = \"dispute_evidence\";\n\ntry {\n    $response = $api->getDisputesClient()->uploadFile($fileRequest);\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.files.files import FileRequest\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder() \n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.FILES, OAuthScopes.FILES_UPLOAD]) \n    .build()\n)\n\nrequest = FileRequest()\nrequest.file = 'path/to/file'\nrequest.purpose = 'dispute_evidence'\n\ntry:\n    response = api.disputes.upload_file(request)\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+  /files/{file_id}:
+    get:
+      tags:
+      - Disputes
+      summary: Get file information
+      description: Retrieve information about a file that was previously uploaded.
+      operationId: getFileInformation
+      parameters:
+      - name: file_id
+        in: path
+        description: The file identifier. It is always prefixed by `file_`.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: File information retrieved successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileResult'
+        '401':
+          description: Unauthorized
+        '404':
+          description: File not found
+        '429':
+          description: Too many requests or duplicate request detected
+      security:
+      - OAuth:
+        - disputes
+        - disputes:view
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Files;\n\n//API keys\nICheckoutApi api = CheckoutSdk.Builder().StaticKeys()\n    .SecretKey(\"secret_key\")\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n//OAuth\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Disputes)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\ntry\n{\n    FileDetailsResponse response = await api.DisputesClient().GetFileDetails(\"file_id\");\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Files}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Disputes.GetFileDetails(\"file_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.common.FileDetailsResponse;\n\n// API Keys\nCheckoutApi api = CheckoutSdk.builder()\n    .staticKeys()\n    .secretKey(\"secret_key\")\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.FILES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\ntry {\n    FileDetailsResponse response = api.disputesClient().getFileDetails(\"file_id\").get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: Node
+        source: "import { Checkout } from 'checkout-sdk-node';\n\nlet cko = new Checkout('your_client_secret_here', {\n\tclient: 'ack_XXXXXXXXXXXX',\n\tscope: ['gateway'], // array of scopes\n\tenvironment: 'sandbox', // or \"production\"\n        subdomain: '{prefix}', // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints., // or \"production\"\n});\n\n// Or if you use api keys:\n// const cko = new Checkout('sk_sbox_XXX', { pk: 'pk_sbox_XXX'}});\n\ntry {\n\tconst getFile = await cko.files.getFile('file_zna32sccqbwevd3ldmejtplbhu');\n} catch (err) {\n\tconsole.log(err.name);\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n//API Keys\n$api = CheckoutSdk::builder()->staticKeys()\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->secretKey(\"secret_key\")\n    ->build();\n\n//OAuth\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Disputes])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\ntry {\n    $response = $api->getDisputesClient()->getFileDetails(\"file_id\");\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "# For more information please refer to https://github.com/checkout/checkout-sdk-python\nimport checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\n\n# API Key\napi_key = (\n    CheckoutSdk.builder() \n    .secret_key('secret_key') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build()\n)\n\n# OAuth\noauth = (\n    CheckoutSdk.builder() \n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.FILES]) \n    .build()\n)\n\ntry:\n    response = api.disputes.get_file_details(\"file_id\")\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+components:
+  schemas:
+    SubmittedEvidenceResponse:
+      type: object
+      properties:
+        file_id:
+          pattern: ^(file)_(\w{26})$
+          type: string
+          description: The unique identifier for the PDF file containing all of the submitted evidence.
+          example: file_iweu3nxyt6zund3gwhg7wo4fhq
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: https://{prefix}.api.checkout.com/disputes/dsp_f28bcafe073z72ad4a18/evidence/submitted
+              description: The endpoint you can use to retrieve the unique identifier of the PDF file containing all of the submitted dispute evidence.
+    File:
+      required:
+      - file
+      - purpose
+      type: object
+      properties:
+        file:
+          type: string
+          description: The path of the file to upload, and its type. <br><i>This must be a local path.</i>
+          example: file=@/path/receipt.png;type=image/png
+        purpose:
+          type: string
+          description: "The purpose of the file upload. \n\nIf the file is a supporting document for a dispute, set this to `dispute_evidence`. If the file is a supporting document for arbitration, set this to `arbitration_evidence`.\n"
+          example: dispute_evidence
+    FileUploadResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The file identifier
+          example: file_6lbss42ezvoufcb2beo76rvwly
+        _links:
+          type: object
+          properties:
+            self:
+              properties:
+                href:
+                  example: https://{prefix}.api.checkout.com/files/file_6lbss42ezvoufcb2beo76rvwly
+              description: The file information retrieval URL
+      description: File uploaded successfully
+    ProvideEvidenceRequest:
+      type: object
+      properties:
+        proof_of_delivery_or_service_file:
+          type: string
+          description: A file containing proof of delivery of goods or services.
+          example: file_jmbfgkjromvcrn9t4qu4
+        proof_of_delivery_or_service_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `proof_of_delivery_or_service_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: 'Description of evidence available at: http://checkout.com/evidenceDocument.pdf'
+        proof_of_delivery_or_service_date_file:
+          type: string
+          description: A file showing the delivery date of the provided service or merchandise.
+          example: file_jmbfgkjromvcrn9t4qu4
+        proof_of_delivery_or_service_date_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `proof_of_delivery_or_service_date_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of the customer receipt showing the merchandise was delivered on 2018-12-20
+        invoice_or_receipt_file:
+          type: string
+          description: A file containing an invoice or receipt.
+          example: file_jmbfgkjromvcrn9t4qu4
+        invoice_or_receipt_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `invoice_or_receipt_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of the invoice
+        invoice_showing_distinct_transactions_file:
+          type: string
+          description: A file containing invoice showing two distinct transactions.
+          example: file_jmbfgkjromvcrn9t4qu4
+        invoice_showing_distinct_transactions_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `invoice_showing_distinct_transactions_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: 'Copy of invoice #1244 showing two transactions'
+        customer_communication_file:
+          type: string
+          description: A file containing customer communication.
+          example: file_jmbfgkjromvcrn9t4qu4
+        customer_communication_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `customer_communication_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of an email exchange with the cardholder
+        refund_or_cancellation_policy_file:
+          type: string
+          description: A file containing refund/cancellation policy
+          example: file_jmbfgkjromvcrn9t4qu4
+        refund_or_cancellation_policy_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `refund_or_cancellation_policy_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of the refund policy
+        recurring_transaction_agreement_file:
+          type: string
+          description: A file containing the recurring transaction agreement
+          example: file_jmbfgkjromvcrn9t4qu4
+        recurring_transaction_agreement_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `recurring_transaction_agreement_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of the recurring transaction agreement
+        additional_evidence_file:
+          type: string
+          description: A file containing additional supporting documents.
+          example: file_jmbfgkjromvcrn9t4qu4
+        additional_evidence_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `additional_evidence_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Scanned document
+        arbitration_no_review_files:
+          type: array
+          items:
+            type: string
+          description: 'The evidence to submit directly to the scheme when you escalate the dispute to arbitration.
+
+
+            Evidence you provide with this field is submitted directly to the scheme.
+
+            '
+          example:
+          - file_jmbfgkjromvcrn9t4qu4
+          - file_kmbfgkjromvcrn9t4qu5
+        arbitration_no_review_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `arbitration_no_review_files`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Evidence for arbitration
+        arbitration_review_required_files:
+          type: array
+          items:
+            type: string
+          description: "The evidence to submit to the Checkout.com Dispute Resolution team for review. \n\nYou'll be advised on the likelihood of success if you choose to escalate the dispute to arbitration.\n"
+          example:
+          - file_jmbfgkjromvcrn9t4qu4
+          - file_kmbfgkjromvcrn9t4qu5
+        arbitration_review_required_text:
+          maximum: 500
+          type: string
+          description: "A brief description of the file provided in `arbitration_review_required_files`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Evidence for arbitration
+        compelling_evidence:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/CompellingEvidence'
+          description: Used to resolve friendly fraud with merchant historical transactions.
+        _links:
+          type: object
+          properties:
+            self:
+              properties:
+                href:
+                  example: https://{prefix}.api.checkout.com/disputes/dsp_rbhwd2qrg13uhrp2newf12/evidence
+              description: The evidence retrieval endpoint.
+            parent:
+              properties:
+                href:
+                  example: https://{prefix}.api.checkout.com/disputes/dsp_rbhwd2qrg13uhrp2newf12
+              description: The dispute retrieval endpoint.
+    Link:
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          description: The link URL
+      additionalProperties: false
+    Evidence:
+      type: object
+      properties:
+        proof_of_delivery_or_service_file:
+          type: string
+          description: A file containing proof of delivery of goods or services.
+          example: file_jmbfgkjromvcrn9t4qu4
+        proof_of_delivery_or_service_text:
+          type: string
+          description: "A brief description of the file provided in `proof_of_delivery_or_service_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: 'Description of evidence available at: http://checkout.com/evidenceDocument.pdf'
+        proof_of_delivery_or_service_date_file:
+          type: string
+          description: A file showing the delivery date of the provided service or merchandise.
+          example: file_jmbfgkjromvcrn9t4qu4
+        proof_of_delivery_or_service_date_text:
+          type: string
+          description: "A brief description of the file provided in `proof_of_delivery_or_service_date_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of the customer receipt showing the merchandise was delivered on 2018-12-20
+        invoice_or_receipt_file:
+          type: string
+          description: A file containing an invoice or receipt.
+          example: file_jmbfgkjromvcrn9t4qu4
+        invoice_or_receipt_text:
+          type: string
+          description: "A brief description of the file provided in `invoice_or_receipt_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of the invoice
+        invoice_showing_distinct_transactions_file:
+          type: string
+          description: A file containing an invoice which shows two distinct transactions.
+          example: file_jmbfgkjromvcrn9t4qu4
+        invoice_showing_distinct_transactions_text:
+          type: string
+          description: "A brief description of the file provided in `invoice_showing_distinct_transactions_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: 'Copy of invoice #1244 showing two transactions'
+        customer_communication_file:
+          type: string
+          description: A file containing proof of communication with the customer.
+          example: file_jmbfgkjromvcrn9t4qu4
+        customer_communication_text:
+          type: string
+          description: "A brief description of the file provided in `customer_communication_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of an email exchange with the cardholder
+        refund_or_cancellation_policy_file:
+          type: string
+          description: A file containing the refund or cancellation policy.
+          example: file_jmbfgkjromvcrn9t4qu4
+        refund_or_cancellation_policy_text:
+          type: string
+          description: "A brief description of the file provided in `refund_or_cancellation_policy_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of the refund policy
+        recurring_transaction_agreement_file:
+          type: string
+          description: A file containing the recurring transaction agreement.
+          example: file_jmbfgkjromvcrn9t4qu4
+        recurring_transaction_agreement_text:
+          type: string
+          description: "A brief description of the file provided in `recurring_transaction_agreement_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Copy of the recurring transaction agreement
+        additional_evidence_file:
+          type: string
+          description: A file containing additional supporting documents.
+          example: file_jmbfgkjromvcrn9t4qu4
+        additional_evidence_text:
+          type: string
+          description: "A brief description of the file provided in `additional_evidence_file`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Scanned document
+        arbitration_no_review_files:
+          type: array
+          items:
+            type: string
+          description: 'The evidence to submit directly to the scheme when you escalate the dispute to arbitration.
+
+
+            Evidence you provide with this field is submitted directly to the scheme.
+
+            '
+          example:
+          - file_jmbfgkjromvcrn9t4qu4
+          - file_kmbfgkjromvcrn9t4qu5
+        arbitration_no_review_text:
+          type: string
+          description: "A brief description of the file provided in `arbitration_no_review_files`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Evidence for arbitration
+        arbitration_review_required_files:
+          type: array
+          items:
+            type: string
+          description: "The evidence to submit to the Checkout.com Dispute Resolution team for review. \n\nYou'll be advised on the likelihood of success if you choose to escalate the dispute to arbitration.\n"
+          example:
+          - file_jmbfgkjromvcrn9t4qu4
+          - file_kmbfgkjromvcrn9t4qu5
+        arbitration_review_required_text:
+          type: string
+          description: "A brief description of the file provided in `arbitration_review_required_files`. \n\nAlternatively, you can provide a link to an externally-hosted file containing the description.\n"
+          example: Evidence for arbitration
+        compelling_evidence:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/CompellingEvidence'
+          description: Used to resolve friendly fraud with merchant historical transactions.
+    FilePurpose:
+      enum:
+      - dispute_evidence
+      - arbitration_evidence
+      - submitted_evidence
+      type: string
+      description: "The purpose of the file. \n\nThe value `submitted_evidence` represents the finalized evidence which was uploaded to the scheme portals.\n"
+      example: dispute_evidence
+    Dispute:
+      type: object
+      properties:
+        id:
+          pattern: ^(dsp)_(\w{22,26})$
+          type: string
+          description: The dispute identifier. This is the same as the payment action ID.
+          example: dsp_rbhwd2qrg13uhrp2newfarfder
+        entity_id:
+          type: string
+          description: The client entity linked to this dispute.
+          example: ent_wxglze3wwywujg4nna5fb7ldli
+        sub_entity_id:
+          type: string
+          description: The sub-entity linked to this dispute.
+          example: ent_uzm3uxtssvmuxnyrfdffcyjxeu
+        reference:
+          type: string
+          description: An optional reference to identify the dispute.
+          example: dispute-09
+        category:
+          enum:
+          - fraudulent
+          - unrecognized
+          - canceled_recurring
+          - product_service_not_received
+          - not_as_described
+          - credit_not_issued
+          - duplicate
+          - incorrect_amount
+          - general
+          type: string
+          description: The reason for the dispute. [Find out more](https://www.checkout.com/docs/risk-management/disputes/responding-to-disputes/dispute-reasons-and-recommended-evidence)
+          example: fraudulent
+        amount:
+          type: number
+          description: The amount that is being disputed, in the processing currency. This amount can be positive or negative depending on the type of transaction the dispute is received against.
+          example: 999
+        currency:
+          type: string
+          description: The processing currency.
+          example: GBP
+        reason_code:
+          type: string
+          description: The reason code provided by the card scheme.
+          example: '10.4'
+        status:
+          enum:
+          - evidence_required
+          - evidence_under_review
+          - resolved
+          - won
+          - lost
+          - canceled
+          - expired
+          - accepted
+          - arb_evidence_submitted
+          - arbitration_under_review
+          - arbitration_won
+          - arbitration_lost
+          type: string
+          description: The current status of the dispute.
+          example: evidence_required
+        resolved_reason:
+          enum:
+          - rapid_dispute_resolution
+          - negative_amount
+          - already_refunded
+          type: string
+          description: If the dispute is automatically resolved, `resolved_reason` will contain the reason why it was resolved.
+          example: already_refunded
+        relevant_evidence:
+          type: array
+          items:
+            type: array
+            items:
+              enum:
+              - proof_of_delivery_or_service
+              - invoice_or_receipt
+              - invoice_showing_distinct_transactions
+              - customer_communication
+              - refund_or_cancellation_policy
+              - recurring_transaction_agreement
+              - proof_of_delivery_or_service_date additional_evidence
+              - compelling_evidence
+              type: string
+            example:
+            - proof_of_delivery_or_service
+            - compelling_evidence
+          description: <i>This list and the dispute categories will change over time. Your evidence logic should be informed by this field, not hard coded.</i>
+        evidence_required_by:
+          type: string
+          description: "The deadline by which you must respond to the dispute. \n\nThis is equal to the `received_on` date + `n` calendar days, where `n` is the number of days set by the scheme or acquirer.\n"
+          format: date-time
+          example: '2018-08-21T00:00:00.0000000+00:00'
+        received_on:
+          type: string
+          description: The date and time at which the dispute was issued.
+          format: date-time
+          example: '2018-08-01T04:00:10.0000000+00:00'
+        last_update:
+          type: string
+          description: The date and time at which the dispute was last updated.
+          format: date-time
+          example: '2018-08-04T10:53:13.0000000+00:00'
+        is_ce_candidate:
+          type: boolean
+          description: Indicates whether the dispute is eligible for compelling evidence.
+          example: true
+        payment:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/PaymentData'
+          description: Provides details for the payment linked to the dispute.
+        evidence_list:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+                description: The file's unique identifier.
+              text:
+                type: string
+                description: A description for the evidence file.
+              type:
+                enum:
+                - proof_of_delivery_or_service
+                - invoice_or_receipt
+                - invoice_showing_distinct_transactions
+                - customer_communication
+                - refund_or_cancellation_policy
+                - recurring_transaction_agreement
+                - proof_of_delivery_or_service_date
+                - additional_evidence
+                - compelling_evidence
+                - arbitration_no_review
+                - arbitration_review_required
+                type: string
+                description: The type of evidence the file is intended to support.
+                example: proof_of_delivery_or_service
+              dispute_id:
+                type: string
+          description: List of evidence files provided for the dispute.
+        evidence_bundle:
+          type: array
+          items:
+            type: object
+            properties:
+              dispute_id:
+                type: string
+                description: The unique identifier of the dispute associated with the bundle.
+                example: dsp_rbhwd2qrg13uhrp2newfab
+              filename:
+                type: string
+                description: The name of the bundled evidence file.
+              file_size:
+                type: number
+                description: The file size of the bundled evidence file, in KB.
+              is_file_oversized:
+                type: boolean
+                description: Specifies whether the bundled file exceeded the maximum file size limit.
+              created_at:
+                type: string
+                description: The date and time the file was created, in UTC format.
+                format: date-time
+              modified_at:
+                type: string
+                description: The date and time the file was last modified, in UTC format.
+                format: date-time
+          description: The bundled evidence file sent to the scheme.
+        segment_id:
+          type: string
+          description: The unique identifier of the business segment that the payment belongs to.
+        _links:
+          type: object
+          properties:
+            self:
+              properties:
+                href:
+                  example: https://{prefix}.api.checkout.com/disputes/dsp_rbhwd2qrg13uhrp2newf
+              description: The dispute retrieval endpoint.
+            evidence:
+              properties:
+                href:
+                  example: https://{prefix}.api.checkout.com/disputes/dsp_rbhwd2qrg13uhrp2newf/evidence
+              description: The dispute evidence retrieval endpoint.
+    SchemeFileResponse:
+      type: object
+      properties:
+        id:
+          pattern: ^dsp_(\w{22,26})$
+          type: string
+          description: The dispute identifier
+          example: dsp_rbhwd2qrg13uhrp2newfab
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              dispute_status:
+                type: string
+                description: The dispute status of the scheme file
+                example: dispute_lost
+              file:
+                type: string
+                description: The scheme file identifier
+                example: file_6lbss42ezvoufcb2beo76rvwly
+          description: The scheme files of a dispute
+        _links:
+          type: object
+          properties:
+            self:
+              allOf:
+              - $ref: '#/components/schemas/Link'
+              description: The dispute scheme files retrieval endpoint
+              example:
+                href: https://{prefix}.api.checkout.com/disputes/dsp_rbhwd2qrg13uhrp2newf/schemefiles
+    DisputePaged:
+      type: object
+      properties:
+        limit:
+          type: integer
+          description: The numbers of items to return.
+          example: 10
+        skip:
+          type: integer
+          description: The number of results to skip.
+          example: 10
+        from:
+          type: string
+          description: The date and time from which to filter disputes, based on the dispute's `last_update` field.
+          format: date-time
+          example: '2018-08-12T01:15:56.0000000+00:00'
+        to:
+          type: string
+          description: The date and time until which to filter disputes, based on the dispute's `last_update` field.
+          format: date-time
+          example: '2018-08-13T11:09:01.0000000+00:00'
+        id:
+          pattern: ^(dsp)_(\w{22,26})$
+          type: string
+          description: The unique identifier of the dispute.
+          example: dsp_rbhwd2qrg13uhrp2newfcd
+        entity_ids:
+          type: string
+          description: One or more comma-separated client entities. This works like a logical *OR* operator.
+          example: ent_wxglze3wwywujg4nna5fb7ldli,ent_vkb5zcy64zoe3cwfmaqvqyqyku
+        sub_entity_ids:
+          type: string
+          description: One or more comma-separated sub-entities. This works like a logical *OR* operator.
+          example: ent_uzm3uxtssvmuxnyrfdffcyjxeu,ent_hy5wtzwzeuwefmsnjtdhw4scfi
+        processing_channel_ids:
+          type: string
+          description: One or more comma-separated processing channels. This works like a logical *OR* operator.
+          example: pc_uzm3uxtssvmuxnyrfdffcyjxeu,pc_hy5wtzwzeuwefmsnjtdhw4scfi
+        segment_ids:
+          type: string
+          description: One or more comma-separated segments. This works like a logical *OR* operator.
+        statuses:
+          type: string
+          description: One or more comma-separated statuses. This works like a logical *OR* operator.
+          example: evidence_required,evidence_under_review
+        payment_id:
+          pattern: ^pay_(\w{26})$
+          type: string
+          description: The unique identifier of the payment.
+          example: pay_lzmo6p0i3612judj754w1ngtil
+        payment_reference:
+          type: string
+          description: An optional reference (such as an order ID) that you can use later to identify the payment. Previously known as `TrackId`.
+          example: th7zxa1kcnqmes8
+        payment_arn:
+          type: string
+          description: The acquirer reference number (ARN) that you can use to query the issuing bank.
+          example: '74548998294293193445538'
+        payment_mcc:
+          type: string
+          description: The merchant category code (MCC) of the payment (ISO 18245).
+          example: '5021'
+        this_channel_only:
+          type: boolean
+          description: If `true`, only returns disputes of the specific channel that the secret key is associated with. Otherwise, returns all disputes for that business.
+          example: true
+        total_count:
+          type: integer
+          description: The total number of disputes retrieved (without taking into consideration skip and limit parameters).
+          example: 1
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisputeSummary'
+          description: The list of disputes.
+    CompellingEvidence:
+      required:
+      - merchandise_or_service
+      - merchandise_or_service_desc
+      - merchandise_or_service_provided_date
+      - historical_transactions
+      type: object
+      properties:
+        merchandise_or_service:
+          type: string
+          description: Value can be either "Merchandise" or "Services".
+          example: Merchandise
+        merchandise_or_service_desc:
+          maxLength: 5000
+          minLength: 1
+          type: string
+          description: Description of the merchandise or service that this transaction was for.
+          example: Subscription payment
+        merchandise_or_service_provided_date:
+          type: string
+          description: The date and time the merchandise or service was provided, in UTC format.
+          format: date-time
+          example: '2024-07-25T11:23:06.0000000+00:00'
+        shipping_delivery_status:
+          type: string
+          description: "Status of the order. Only valid if merchandise_or_services is equal to \"Merchandise”.\n  * `not_shipped`\n  * `back_ordered`\n  * `in_transit`\n  * `partial_shipped`\n  * `shipped`\n  * `cancelled`\n  * `shipping_exception`\n  * `picked_up_by_customer`\n  * `delivered`\n  * `other`\n"
+          example: shipped
+        tracking_information:
+          maxLength: 50
+          type: string
+          description: "Tracking of the order. Only valid if merchandise_or_services is equal to \"Merchandise”. Required if the shipping_delivery_status is any of the following:\n  * `in_transit`\n  * `partial_shipped`\n  * `shipped`\n  * `shipping_exception`\n  * `delivered`\n  * `other`\n"
+          example: '129481229312'
+        user_id:
+          maxLength: 50
+          type: string
+          description: User ID is synonymous to Customer Account/log in ID.
+          example: user@cko.com
+        ip_address:
+          type: string
+          description: IpAddress used in the transaction. Should be either IPV4 or IPV6.
+          example: 192.168.1.150
+        device_id:
+          maxLength: 64
+          minLength: 15
+          type: string
+          description: Device used in the transaction.
+          example: device_123_x_1220
+        shipping_address:
+          required:
+          - address
+          - city
+          - postal_code
+          - country
+          type: object
+          properties:
+            address:
+              maxLength: 50
+              type: string
+              description: It describes the main address.
+            address2:
+              maxLength: 50
+              type: string
+              description: Any additional information about the address.
+            city:
+              maxLength: 50
+              type: string
+              description: The name of the city.
+            state_region:
+              maxLength: 2
+              minLength: 2
+              type: string
+              description: The state for the address. Required if the country is "US" or "CA" (Canada).
+            postal_code:
+              maxLength: 9
+              type: string
+              description: The postal code of the address.
+            country:
+              maxLength: 3
+              minLength: 3
+              type: string
+              description: The three digit ISO code of the country.
+              example: '826'
+          description: The shipping address provided for this transaction.
+        historical_transactions:
+          type: array
+          items:
+            required:
+            - historical_arn
+            - merchandise_or_service_desc
+            type: object
+            properties:
+              historical_arn:
+                maxLength: 23
+                minLength: 22
+                type: string
+                description: The Acquirer reference number (ARN) of the capture transaction.
+              merchandise_or_service_desc:
+                maxLength: 5000
+                minLength: 1
+                type: string
+                description: Description of the merchandise or service that this transaction was for.
+          description: List of historical transactions. At least two transactions.
+    DisputeSummary:
+      type: object
+      properties:
+        id:
+          pattern: ^(dsp)_(\w{22,26})$
+          type: string
+          description: The dispute identifier. This is the same as the action ID in the reconciliation API or the charge ID in the Hub.
+          example: dsp_rbhwd2qrg13uhrp2newfafreds
+        entity_id:
+          type: string
+          description: The client entity linked to this dispute
+          example: ent_wxglze3wwywujg4nna5fb7ldli
+        sub_entity_id:
+          type: string
+          description: The sub-entity linked to this dispute
+          example: ent_uzm3uxtssvmuxnyrfdffcyjxeu
+        processing_channel:
+          type: string
+          description: The processing channel linked to the dispute.
+          example: pc_uzm3uxtssvmuxnyrfdffcyjxeu
+        segment_id:
+          type: string
+        category:
+          enum:
+          - fraudulent
+          - unrecognized
+          - canceled_recurring
+          - product_service_not_received
+          - not_as_described
+          - credit_not_issued
+          - duplicate
+          - incorrect_amount
+          - general
+          type: string
+          description: The reason for the dispute. [Find out more](https://www.checkout.com/docs/risk-management/disputes/responding-to-disputes/dispute-reasons-and-recommended-evidence)
+          example: fraudulent
+        status:
+          enum:
+          - evidence_required
+          - evidence_under_review
+          - resolved
+          - won
+          - lost
+          - canceled
+          - expired
+          - accepted
+          - arbitration_under_review
+          - arbitration_won
+          - arbitration_lost
+          type: string
+          description: The current status of the dispute
+          example: evidence_required
+        amount:
+          type: number
+          description: The amount that is being disputed, in the processing currency
+          example: 999
+        currency:
+          type: string
+          description: The currency the payment was made in
+          example: GBP
+        reason_code:
+          type: string
+          description: The reason code provided by the card scheme
+          example: '10.4'
+        payment_id:
+          type: string
+          description: The unique payment identifier
+          example: pay_88cb4e671m1da22e9bbbyx
+        payment_action_id:
+          type: string
+          description: The unique identifier of the payment action
+          example: act_mbabizu24mvu3mela5njyhpit4
+        payment_reference:
+          type: string
+          description: An optional reference (such as an order ID) a merchant can use to later identify the charge. Previously known as TrackId
+          example: th7zxa1kcnqmes8
+        payment_arn:
+          type: string
+          description: The acquirer reference number that can be used to query the issuing bank
+          example: '74548998294293193445538'
+        payment_mcc:
+          type: string
+          description: The merchant category code (MCC) of the payment (ISO 18245)
+          example: '5021'
+        payment_method:
+          type: string
+          description: The payment method/card scheme
+          example: VISA
+        evidence_required_by:
+          type: string
+          description: The deadline by which to respond to the dispute. This corresponds to `received_on` + `n`, where `n` is a number of calendar days set by the scheme/acquirer
+          format: date-time
+          example: '2018-08-22T00:00:00.0000000+00:00'
+        received_on:
+          type: string
+          description: The date and time at which the dispute was issued
+          format: date-time
+          example: '2018-08-01T01:15:56.0000000+00:00'
+        last_update:
+          type: string
+          description: The date and time at which the dispute was last updated
+          format: date-time
+          example: '2018-08-12T04:15:56.0000000+00:00'
+        resolved_reason:
+          enum:
+          - rapid_dispute_resolution
+          - negative_amount
+          - already_refunded
+          type: string
+          description: If the dispute is automatically resolved, `resolved_reason` will contain the reason it was resolved
+          example: already_refunded
+        is_ce_candidate:
+          type: boolean
+          description: 'Specifies whether the dispute is eligible for <a href="https://support.checkout.com/hc/en-us/articles/14323750143634-Visa-Compelling-Evidence-3-0-Overview">Visa Compelling Evidence</a>.
+
+            '
+          example: true
+        _links:
+          type: object
+          properties:
+            self:
+              properties:
+                href:
+                  example: https://{prefix}.api.checkout.com/disputes/dsp_rbhwd2qrg13uhrp2newf
+              description: The dispute retrieval endpoint
+    PagingError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HL80RJLS76I7
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: paging_limit_invalid
+    PaymentData:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The payment's unique identifier
+          example: pay_mbabizu24mvu3mela5njyhpit4
+        action_id:
+          type: string
+          description: The unique identifier of the payment action
+          example: act_mbabizu24mvu3mela5njyhpit4
+        processing_channel_id:
+          pattern: ^(pc)_(\w{26})$
+          type: string
+          description: The processing channel used for the payment.
+          example: pc_q4dbxom5jbgudnjzjpz7j2z6uq
+        amount:
+          type: number
+          description: The amount that is being disputed, in the processing currency
+          example: 999
+        currency:
+          type: string
+          description: The payment currency
+          example: GBP
+        reference:
+          type: string
+          description: An optional reference to identify the payment.
+        method:
+          type: string
+          description: The payment method used
+          example: Visa
+        acquirer_reference_number:
+          type: string
+          description: The acquirer reference number (ARN)
+          example: AA246873253573571073808
+        mcc:
+          type: string
+          description: The <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">merchant category code (MCC)</a> for the payment.
+          example: '5021'
+        3ds:
+          type: object
+          properties:
+            version:
+              type: string
+              description: The 3D Secure version used for authentication.
+              example: 2.1.0
+            enrolled:
+              type: string
+              description: "The issuer's 3D Secure (3DS) enrollment status:\n  - `Y`: issuer enrolled\n  - `N`: customer not enrolled\n  - `U`: enrollment status unknown\n"
+              example: Y
+          description: Specifies if the payment was authenticated with 3DS.
+        eci:
+          type: string
+          description: 'The final Electronic Commerce Indicator (ECI) security level used to authorize the payment.
+
+
+            The ECI indicator is applicable to 3D Secure (3DS) and network token payments.
+
+            '
+          example: '06'
+        has_refund:
+          type: boolean
+          description: Specifies whether there is a refund against the payment.
+        processed_on:
+          type: string
+          description: The date and time at which the payment was requested
+          format: date-time
+          example: '2018-08-01T08:18:10.0000000+00:00'
+    FileResult:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The file identifier
+          example: file_6lbss42ezvoufcb2beo76rvwly
+        filename:
+          type: string
+          description: The filename, including its extension
+          example: receipt.jpg
+        purpose:
+          $ref: '#/components/schemas/FilePurpose'
+        size:
+          type: integer
+          description: The size of the file upload object (in bytes)
+          example: 1024
+        uploaded_on:
+          type: string
+          description: The date and time file was uploaded (in UTC)
+          format: date-time
+          example: '2019-05-17T16:48:52.0000000+00:00'
+        _links:
+          type: object
+          properties:
+            self:
+              properties:
+                href:
+                  example: https://{prefix}.api.checkout.com/files/file_6lbss42ezvoufcb2beo76rvwly
+              description: The file information retrieval URL
+            download:
+              properties:
+                href:
+                  example: https://file-bucket.s3.eu-west-1.amazonaws.com/ucdac/ucdac/6lbss42ezvoufcb2beo76rvwly?X-Amz-Expires=3600&x-amz-security-token=FQoDYXdzENL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEa
+              description: The temporary file download URL. This expires after 60 minutes
+      description: File was retrieved successfully
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

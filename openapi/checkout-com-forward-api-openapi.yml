@@ -1,0 +1,1284 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Forward API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Forward
+paths:
+  /forward:
+    post:
+      tags:
+      - Forward
+      summary: Forward an API request
+      description: 'Forwards an API request to a third-party endpoint.
+
+
+        For example, you can forward payment credentials you''ve stored in our Vault to a third-party payment processor.'
+      operationId: forwardRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForwardRequest'
+        required: true
+      responses:
+        '200':
+          description: The request was successfully forwarded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForwardResponse'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Invalid data was sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForwardValidationError'
+        '500':
+          description: Internal Error
+      security:
+      - OAuth:
+        - forward
+      - ApiSecretKey: []
+      servers:
+      - url: https://forward.checkout.com
+        description: Production environment
+      - url: https://forward.sandbox.checkout.com
+        description: Sandbox environment
+  /forward/{id}:
+    get:
+      tags:
+      - Forward
+      summary: Get forward request
+      description: 'Retrieve the details of a successfully forwarded API request.
+
+
+        The details can be retrieved for up to 14 days after the request was initiated.'
+      operationId: getForwardRequest
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the forward request.
+        required: true
+        schema:
+          pattern: ^fwd_[A-Z0-9]{26}$
+          type: string
+      responses:
+        '200':
+          description: Forward request retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForwardRequestResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Forward request not found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - forward
+      - ApiSecretKey: []
+      servers:
+      - url: https://forward.checkout.com
+        description: Production environment
+      - url: https://forward.sandbox.checkout.com
+        description: Sandbox environment
+  /secrets:
+    post:
+      tags:
+      - Forward
+      summary: Create secret
+      description: 'Create a new secret with a plaintext value.
+
+
+        **Validation Rules:**
+
+        - `name`: 1-64 characters, alphanumeric + underscore
+
+        - `value`: max 8KB
+
+        - `entity_id` (optional): when provided, secret is scoped to this entity
+
+
+        **Response:**
+
+        Returns metadata.'
+      operationId: createSecret
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSecretPlaintextRequest'
+            examples:
+              plaintext:
+                summary: Plain text secret
+                value:
+                  name: secret_name
+                  value: plaintext
+                  entity_id: ent_12345
+        required: true
+      responses:
+        '201':
+          description: Secret created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecretResponse'
+              examples:
+                created_secret:
+                  summary: Created secret
+                  value:
+                    name: secret_name
+                    created_at: '2025-10-14T00:00:00.0000000+00:00'
+                    updated_at: '2025-10-14T00:00:00.0000000+00:00'
+                    version: 1
+                    entity_id: ent_123
+        '401':
+          description: Unauthorized
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                invalid_name:
+                  summary: Invalid secret name
+                  value:
+                    error_type: validation_error
+                    error_codes:
+                    - invalid_secret_name
+                value_too_large:
+                  summary: Value too large
+                  value:
+                    error_type: validation_error
+                    error_codes:
+                    - secret_value_too_large
+        '409':
+          description: Conflict - secret with this name already exists
+        '500':
+          description: Internal Error
+      security:
+      - OAuth:
+        - forward
+        - forward:secrets
+      - ApiSecretKey: []
+      servers:
+      - url: https://forward.checkout.com
+        description: Production environment
+      - url: https://forward.sandbox.checkout.com
+        description: Sandbox environment
+    get:
+      tags:
+      - Forward
+      summary: List secrets
+      description: Returns metadata for secrets scoped for client_id.
+      operationId: listSecrets
+      responses:
+        '200':
+          description: List of secrets
+          content:
+            application/json:
+              schema:
+                required:
+                - data
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SecretResponse'
+              examples:
+                list_secrets:
+                  summary: List of secrets
+                  value:
+                    data:
+                    - name: secret_name_1
+                      created_at: '2025-10-14T00:00:00.0000000+00:00'
+                      updated_at: '2025-10-14T00:00:00.0000000+00:00'
+                      version: 1
+                      entity_id: ent_123
+                    - name: secret_name_2
+                      created_at: '2025-10-14T01:00:00.0000000+00:00'
+                      updated_at: '2025-10-14T01:00:00.0000000+00:00'
+                      version: 2
+                      entity_id: ent_456
+                    - name: secret_name_3
+                      created_at: '2025-10-14T02:00:00.0000000+00:00'
+                      updated_at: '2025-10-14T02:00:00.0000000+00:00'
+                      version: 3
+                      entity_id: ent_789
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Error
+      security:
+      - OAuth:
+        - forward
+        - forward:secrets
+      - ApiSecretKey: []
+      servers:
+      - url: https://forward.checkout.com
+        description: Production environment
+      - url: https://forward.sandbox.checkout.com
+        description: Sandbox environment
+  /secrets/{name}:
+    patch:
+      tags:
+      - Forward
+      summary: Update secret
+      description: 'Update an existing secret. After updating, the version is automatically incremented.
+
+
+        **Validation Rules:**
+
+        - Only `value` and `entity_id` can be updated
+
+        - `value`: max 8KB
+
+
+        **Response:**
+
+        Returns updated metadata with incremented version.'
+      operationId: updateSecret
+      parameters:
+      - name: name
+        in: path
+        description: Secret name.
+        required: true
+        schema:
+          pattern: ^[a-zA-Z0-9_]{1,64}$
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSecretRequest'
+            examples:
+              update_value:
+                summary: Update with plaintext value.
+                value:
+                  entity_id: ent_1234
+                  value: NEW_VALUE_1
+              update_entity:
+                summary: Only updates the entity scope.
+                value:
+                  entity_id: ent_5678
+        required: true
+      responses:
+        '200':
+          description: Secret updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecretResponse'
+              examples:
+                updated_secret:
+                  summary: Updated secret
+                  value:
+                    name: secret_name_1
+                    created_at: '2025-10-14T00:00:00.0000000+00:00'
+                    updated_at: '2025-10-14T12:00:00.0000000+00:00'
+                    version: 2
+                    entity_id: ent_123
+        '401':
+          description: Unauthorized
+        '404':
+          description: Secret not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal Error
+      security:
+      - OAuth:
+        - forward
+        - forward:secrets
+      - ApiSecretKey: []
+      servers:
+      - url: https://forward.checkout.com
+        description: Production environment
+      - url: https://forward.sandbox.checkout.com
+        description: Sandbox environment
+    delete:
+      tags:
+      - Forward
+      summary: Delete secret
+      description: Permanently delete a secret by name.
+      operationId: deleteSecret
+      parameters:
+      - name: name
+        in: path
+        description: Secret name.
+        required: true
+        schema:
+          pattern: ^[a-zA-Z0-9_]{1,64}$
+          type: string
+      responses:
+        '204':
+          description: Secret deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Secret not found
+        '500':
+          description: Internal Error
+      security:
+      - OAuth:
+        - forward
+        - forward:secrets
+      - ApiSecretKey: []
+      servers:
+      - url: https://forward.checkout.com
+        description: Production environment
+      - url: https://forward.sandbox.checkout.com
+        description: Sandbox environment
+components:
+  schemas:
+    ForwardRequestSource:
+      required:
+      - type
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/ForwardRequestIdSource'
+      - $ref: '#/components/schemas/ForwardRequestTokenSource'
+      description: 'The payment source to enrich the forward request with.
+
+
+        You can provide <a href="https://www.checkout.com/docs/payments/manage-payments/forward-stored-payment-credentials#Placeholder_values" target="_blank\">placeholder values</a> in `destination_request.body`. The request will be enriched with the respective payment credentials from the token or payment instrument you specified. For example, `{{card_number}}`.
+
+        '
+      discriminator:
+        propertyName: type
+        mapping:
+          id: '#/components/schemas/ForwardRequestIdSource'
+          token: '#/components/schemas/ForwardRequestTokenSource'
+      example:
+        id: src_v5rgkf3gdtpuzjqesyxmyodnya
+        type: id
+    ForwardRequestSignature:
+      required:
+      - type
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/ForwardRequestSignatureDLocal'
+      - $ref: '#/components/schemas/ForwardRequestSignatureMastercard'
+      - $ref: '#/components/schemas/ForwardRequestSignatureVisa'
+      description: 'Optional configuration to add a signature to the forwarded HTTP request.
+
+        '
+      discriminator:
+        propertyName: type
+        mapping:
+          dlocal: '#/components/schemas/ForwardRequestSignatureDLocal'
+          mastercard: '#/components/schemas/ForwardRequestSignatureMastercard'
+          visa: '#/components/schemas/ForwardRequestSignatureVisa'
+      example:
+        type: dlocal
+        dlocal_parameters:
+          secret_key: 9f439fe1a9f96e67b047d3c1a28c33a2e
+    GetForwardRequestResponse:
+      required:
+      - request_id
+      - entity_id
+      - destination_request
+      - created_on
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: The unique identifier for the forward request.
+          example: fwd_01HK153X00VZ1K15Z3HYC0QGPN
+        reference:
+          type: string
+          description: The unique reference for the forward request.
+          example: ORD-5023-4E89
+        entity_id:
+          type: string
+          description: The client entity linked to the forward request.
+          example: ent_lp6h57qskk6ubewfk3pq4f2c2y
+        destination_request:
+          allOf:
+          - $ref: '#/components/schemas/GetForwardRequestDestinationRequest'
+          description: The parameters of the HTTP request forwarded to the destination.
+        destination_response:
+          allOf:
+          - $ref: '#/components/schemas/GetForwardRequestDestinationResponse'
+          description: "The HTTP response received from the destination. \n\nSensitive PCI data is not included in the response.\n"
+        created_on:
+          type: string
+          description: The date and time the forward request was created, in UTC.
+          format: date-time
+          example: '2024-01-02T15:04:05.0000000+00:00'
+      description: The response to the forward request.
+    ForwardRequestIdSource:
+      title: id
+      required:
+      - type
+      - id
+      type: object
+      properties:
+        type:
+          type: string
+          description: The payment source type.
+          example: id
+        id:
+          pattern: ^(src)_(\w{26})$
+          type: string
+          description: The unique identifier of the payment instrument.
+          example: src_wmlfc3zyhqzehihu7giusaaawu
+        cvv_token:
+          pattern: ^(tok)_(\w{26})$
+          type: string
+          description: "The unique token for the card's security code.\n\nCheckout.com does not store a card's Card Verification Value (CVV) with its associated payment instrument. \n\nTo pass a CVV with your forward request, use the Frames SDK for <a href=\"https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-mobile-app/accept-a-payment-on-your-android-app#Tokenize_a_CVV\">Android</a> or <a href=\"https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-mobile-app/accept-a-payment-on-your-ios-app#Tokenize_a_security_code\">iOS</a> to collect and tokenize the CVV and pass the value in this field.\n\nThe token will replace the placeholder `{{card_cvv}}` value in `destination_request.body`.\n"
+          example: tok_wnw2grxl4hbufp7q55tw2pb2t4
+        pin_token:
+          pattern: ^(tok)_(\w{26})$
+          type: string
+          description: "The unique token for the first 2 digits of the card's Personal Identification Number (PIN).  \n\nCheckout.com does not store a card's PIN with its associated payment instrument. \n\nIn specific regions, card holders must enter the first two digits of their 4-digit card PIN to confirm card ownership.  \n\nTo provide the first 2 digits of the PIN with your forward request:  \n\n1. Collect the PIN from the user.  \n2. tokenize it using the  `/tokens` [endpoint](/#operation/requestAToken) setting `type` to `pin`.  \n3. Pass the resulting  `token` value of the response in this field.  \n\nThis token replaces the `{{card_pin}}` placeholder value in `destination_request.body`.  \n"
+          example: tok_wnw2grxl4hbufp7q55tw2pb2t4
+      description: The payment instrument to enrich the forward request with.
+    ForwardRequest:
+      required:
+      - source
+      - destination_request
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/ForwardRequestSource'
+        reference:
+          maxLength: 80
+          type: string
+          description: The unique reference for the forward request.
+          example: ORD-5023-4E89
+        processing_channel_id:
+          pattern: ^(pc)_(\w{26})$
+          type: string
+          description: The processing channel ID to associate the billing for the forward request with.
+          example: pc_azsiyswl7bwe2ynjzujy7lcjca
+        network_token:
+          $ref: '#/components/schemas/ForwardRequestNetworkToken'
+        destination_request:
+          allOf:
+          - $ref: '#/components/schemas/ForwardDestinationRequest'
+          description: The parameters of the forward request.
+      description: 'The request template to forward to the third-party endpoint.
+
+
+        Template values will be replaced before the request is forwarded.
+
+        '
+    ForwardRequestSignatureVisa:
+      title: visa
+      required:
+      - type
+      - visa_parameters
+      type: object
+      properties:
+        type:
+          type: string
+          description: The identifier of the supported signature generation method or a specific third-party service.
+          example: visa
+        visa_parameters:
+          required:
+          - shared_secret
+          type: object
+          properties:
+            shared_secret:
+              type: string
+              description: 'The secret key used to generate the request signature; part of the Visa API credentials.
+
+                '
+            remove_resource_path_prefix:
+              type: string
+              description: "Some Visa APIs require a prefix to be removed from the resource path used to calculate the signature.<br/>\nBy default, only the leading slash is removed. </p>\n\nFor more information, see [Visa documentation](https://developer.visa.com/pages/working-with-visa-apis/x-pay-token). \n"
+              default: /
+          description: 'The parameters required to generate an HMAC-based request signature for the Visa APIs. For more information, see [Visa documentation](https://developer.visa.com/pages/working-with-visa-apis/x-pay-token).
+
+
+            This method requires you to provide the `apikey` query parameter value in the destination request.
+
+
+            When used, the Forward API appends the `X-PAY-TOKEN` header to the outgoing HTTP request before forwarding.
+
+            '
+    UpdateSecretRequest:
+      type: object
+      properties:
+        entity_id:
+          type: string
+          description: Update the entity scope.
+          example: ent_kf3pqe272lqevcpx5xtlndgcii
+        value:
+          maxLength: 8192
+          type: string
+          description: New plaintext secret value. Max 8KB.
+          example: NEW_VALUE_1
+      description: 'Request to update an existing secret. At least one of `value` or `entity_id` must be provided.
+
+        '
+    ForwardResponse:
+      required:
+      - request_id
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: The unique identifier for the forward request.
+          example: fwd_01HK153X00VZ1K15Z3HYC0QGPN
+        destination_response:
+          allOf:
+          - $ref: '#/components/schemas/ForwardBodyResponse'
+          description: The HTTP response received from the destination, if the forward request completed successfully. Sensitive PCI data will be removed from the response.
+        source:
+          required:
+          - bin
+          - last4
+          - fingerprint
+          type: object
+          properties:
+            id:
+              pattern: ^src_[a-z0-9]{26}$
+              type: string
+              description: 'The identifier of the payment instrument with the forwarded card credentials.
+
+
+                When `source.type` is `"token"`, only returned if the `source.store_for_future_use` is true.
+
+                '
+              example: src_evls5rkafabudm3x6gejc4bbo4
+            bin:
+              maxLength: 8
+              type: string
+              description: The card issuer's Bank Identification Number (BIN)
+              example: '45434748'
+            last4:
+              maxLength: 4
+              minLength: 4
+              type: string
+              description: The last four digits of the card number
+              example: '9996'
+            fingerprint:
+              maxLength: 64
+              minLength: 64
+              type: string
+              description: Uniquely identifies this particular card. You can use this to compare cards across customers.
+              example: B086A9386241A0BDCBEFAFC1E4FD5C3DD04684AAD21A126CB426C05555AC86A9
+          description: The metadata of the forwarded card credentials.
+      description: The response to the forward request.
+    ForwardBodyResponse:
+      required:
+      - status
+      - headers
+      - body
+      type: object
+      properties:
+        status:
+          type: number
+          description: The HTTP status code of the destination response.
+          example: 201
+        headers:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+            description: The header values.
+            x-additionalPropertiesName: <Header-Name>
+          description: The destination response's HTTP headers.
+          example:
+            Cko-Request-Id:
+            - 5fa7ee8c-f82d-4440-a6dc-e8c859b03235
+            Content-Type:
+            - application/json
+        body:
+          type: string
+          description: The destination response's HTTP message body.
+          example: '{"id": "pay_mbabizu24mvu3mela5njyhpit4", "action_id": "act_mbabizu24mvu3mela5njyhpit4", "amount": 6540, "currency": "USD", "approved": true, "status": "Authorized", "auth_code": "770687", "response_code": "10000", "response_summary": "Approved", "_links": {"self": {"href": "https://{prefix}.api.sandbox.checkout.com/payments/pay_mbabizu24mvu3mela5njyhpit4"}, "action": {"href": "https://{prefix}.api.sandbox.checkout.com/payments/pay_mbabizu24mvu3mela5njyhpit4/actions"}, "void": {"href": "https://{prefix}.api.sandbox.checkout.com/payments/pay_mbabizu24mvu3mela5njyhpit4/voids"}, "capture": {"href": "https://{prefix}.api.sandbox.checkout.com/payments/pay_mbabizu24mvu3mela5njyhpit4/captures"}}}'
+      description: The response returned by the third-party endpoint the forward request was sent to.
+    SecretResponse:
+      required:
+      - name
+      - created_at
+      - updated_at
+      - version
+      type: object
+      properties:
+        name:
+          pattern: ^[a-zA-Z0-9_]{1,64}$
+          type: string
+          description: Secret name (1-64 characters, alphanumeric and underscore)
+          example: secret_name
+        created_at:
+          type: string
+          description: Timestamp when the secret was created.
+          format: date-time
+          example: '2025-10-14T00:00:00.0000000+00:00'
+        updated_at:
+          type: string
+          description: Timestamp when the secret was last updated.
+          format: date-time
+          example: '2025-10-14T00:00:00.0000000+00:00'
+        version:
+          minimum: 1
+          type: integer
+          description: Version number.
+          example: 1
+        entity_id:
+          type: string
+          description: Entity ID if the secret is scoped to a specific entity.
+          example: ent_123
+      description: Secret response metadata. The secret value is never returned in responses.
+    ForwardValidationError:
+      required:
+      - request_id
+      - error_type
+      - error_codes
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: fwd_01HK153X00VZ1K15Z3HYC0QGPN
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: processing_channel_id_required
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+            description: The field's error messages.
+            x-additionalPropertiesName: <field_name>
+          example:
+            processing_channel_id:
+            - The processing_channel_id field is required
+    ForwardDestinationRequest:
+      required:
+      - url
+      - method
+      - headers
+      - body
+      type: object
+      properties:
+        url:
+          maxLength: 1024
+          type: string
+          description: The URL to forward the request to.
+          example: https://example.com/payments
+        method:
+          enum:
+          - GET
+          - HEAD
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+          - TRACE
+          - PATCH
+          type: string
+          description: The HTTP method to use for the forward request.
+          example: POST
+        headers:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/ForwardBodyHeadersRequest'
+          description: The HTTP headers to include in the forward request.
+        body:
+          maxLength: 16384
+          type: string
+          description: 'The HTTP message body to include in the forward request.
+
+
+            If you provide `source.id` or `source.token`, you can specify <a href="https://www.checkout.com/docs/payments/manage-payments/forward-stored-payment-credentials#Placeholder_values" target="_blank\">placeholder values</a> in the body. The request will be enriched with the respective payment details from the token or payment instrument you specified. For example, `{{card_number}}`.
+
+            '
+          example: '{"amount": 1000, "currency": "USD", "reference": "some_reference", "source": {"type": "card", "number": "{{card_number}}", "expiry_month": "{{card_expiry_month}}", "expiry_year": "{{card_expiry_year_yyyy}}", "card_pin": "{{card_pin}}", "name": "Ali Farid"}, "payment_type": "Regular", "authorization_type": "Final", "capture": true, "processing_channel_id": "pc_xxxxxxxxxxx", "risk": {"enabled": false}, "merchant_initiated": true}'
+        signature:
+          $ref: '#/components/schemas/ForwardRequestSignature'
+        variables:
+          maxItems: 10
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The variable name.
+                example: card_data
+              value:
+                type: string
+                description: The variable value.
+                example: '{"card_number":"{{card_number}}","expiry":"{{card_expiry_month}}"}'
+          description: "The variables used in the forward request body. \n\nYou can provide <a href=\"https://www.checkout.com/docs/payments/manage-payments/forward-stored-payment-credentials#Placeholder_values\" target=\"_blank\\\">placeholder values</a> in `destination_request.variables.value`. The request will be enriched with the payment credentials from the token or payment instrument you specified. For example, `{{card_number}}`. To reference variables, use `{{variable_name}}`. \n"
+          example:
+          - name: card_data
+            value: '{"card_number":"{{card_number}}","expiry":"{{card_expiry_month}}"}'
+          - name: public_key
+            value: '{"kty":"RSA","e":"AQAB","use":"enc","kid":"key-001"}'
+        query:
+          maxItems: 10
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The query parameter name.
+                example: api_key
+              value:
+                type: string
+                description: The query parameter value.
+                example: '1234567890'
+          description: 'The query parameters used in the forward request. These values are added to the destination URL as query parameters.
+
+            '
+          example:
+          - name: api_key
+            value: '1234567890'
+          - name: user_id
+            value: '1234567890'
+      description: The details of the request to forward.
+    ForwardRequestTokenSource:
+      title: token
+      required:
+      - type
+      - token
+      type: object
+      properties:
+        type:
+          type: string
+          description: The payment source type.
+          example: token
+        token:
+          pattern: ^(tok)_(\w{26})$
+          type: string
+          description: The unique Checkout.com token.
+          example: tok_ubfj2q76miwundwlk72vxt2i7q
+        store_for_future_use:
+          type: boolean
+          description: Specifies whether to store the tokenized credentials as a payment instrument and return its identifier in the response.
+          default: false
+      description: The token to enrich the forward request with.
+    ForwardRequestNetworkToken:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies whether to use a network token.
+          example: true
+        request_cryptogram:
+          type: boolean
+          description: 'Specifies whether to generate a cryptogram. For example, for customer-initiated transactions (CITs).
+
+
+            If you set `network_token.enabled` to `true`, you must provide this field.
+
+            '
+          example: false
+      description: Specifies if and how a network token should be used in the forward request.
+    GetForwardRequestDestinationRequest:
+      required:
+      - url
+      - method
+      - headers
+      - body
+      type: object
+      properties:
+        url:
+          type: string
+          description: The URL of the forward request.
+          example: https://example.com/payments
+        method:
+          type: string
+          description: The HTTP method of the forward request.
+          example: POST
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+            description: The header value.
+            x-additionalPropertiesName: <Header-Name>
+          description: "The HTTP headers of the forward request. \n\nEncrypted and sensitive header values are redacted.\n"
+          example:
+            Authorization: '***redacted***'
+            Idempotency-Key: xe4fad12367dfgrds
+            Content-Type: application/json
+        body:
+          type: string
+          description: "The HTTP message body of the forward request. \n\nThis is the original value used to initiate the request, with placeholder value text included. For example, `{{card_number}}` is not replaced with an actual card number.\n"
+          example: '{"amount": 1000, "currency": "USD", "reference": "some_reference", "source": {"type": "card", "number": "{{card_number}}", "expiry_month": "{{card_expiry_month}}", "expiry_year": "{{card_expiry_year_yyyy}}", "card_pin": "{{card_pin}}", "name": "Ali Farid"}, "payment_type": "Regular", "authorization_type": "Final", "capture": true, "processing_channel_id": "pc_xxxxxxxxxxx", "risk": {"enabled": false}, "merchant_initiated": true}'
+      description: The details of the request to forward.
+    ValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HL80RJLS76I7
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: payment_source_required
+    ForwardBodyHeadersRequest:
+      required:
+      - raw
+      type: object
+      properties:
+        encrypted:
+          maxLength: 8192
+          type: string
+          description: The encrypted headers to include in the forward request, as a JSON object with string values encrypted with JSON Web Encryption (JWE).
+          example: <JWE encrypted JSON object with string values>
+        raw:
+          maxProperties: 16
+          type: object
+          additionalProperties:
+            maxLength: 5120
+            type: string
+            description: The header value.
+            x-additionalPropertiesName: <Header-Name>
+          description: The raw headers to include in the forward request.
+          example:
+            Idempotency-Key: xe4fad12367dfgrds
+            Content-Type: application/json
+      description: The request headers to include in the forward request.
+    ForwardRequestSignatureMastercard:
+      title: mastercard
+      required:
+      - type
+      - mastercard_parameters
+      type: object
+      properties:
+        type:
+          type: string
+          description: The identifier of the supported signature generation method or a specific third-party service.
+          example: mastercard
+        mastercard_parameters:
+          required:
+          - consumer_key
+          - signing_key
+          type: object
+          properties:
+            consumer_key:
+              type: string
+              description: 'An identifier of the client application. Part of the Mastercard APIs credentials.
+
+                '
+            signing_key:
+              type: string
+              description: 'A 2048-bit private RSA key used to generate request signatures and confirming ownership of the consumer key. Part of the Mastercard APIs credentials.
+
+                '
+          description: 'The parameters required to generate an OAuth 1.0a authentication and request signature header for the Mastercard APIs. For more information, see [Mastercard documentation](https://developer.mastercard.com/platform/documentation/authentication/using-oauth-1a-to-access-mastercard-apis/).
+
+
+            When used, the Forward API appends the `Authorization` header to the outgoing HTTP request before forwarding.
+
+            '
+    ForwardRequestSignatureDLocal:
+      title: dlocal
+      required:
+      - type
+      - dlocal_parameters
+      type: object
+      properties:
+        type:
+          type: string
+          description: The identifier of the supported signature generation method or a specific third-party service.
+          example: dlocal
+        dlocal_parameters:
+          required:
+          - secret_key
+          type: object
+          properties:
+            secret_key:
+              type: string
+              description: 'The secret key used to generate the request signature. This is part of the dLocal API credentials.
+
+                '
+          description: "The parameters required to generate an HMAC signature for the dLocal API. See their [documentation](https://docs.dlocal.com/reference/payins-security) for details.\n\nThis method requires you to provide the `X-Login` header value in the destination request headers.\n\nWhen used, the Forward API appends the `X-Date` and `Authorization` headers to the outgoing HTTP request before forwarding.  \n"
+    GetForwardRequestDestinationResponse:
+      required:
+      - status
+      - headers
+      - body
+      type: object
+      properties:
+        status:
+          type: number
+          description: The HTTP status code returned with the destination response.
+          example: 201
+        headers:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+            description: The header values.
+            x-additionalPropertiesName: <Header-Name>
+          description: The destination response's HTTP headers.
+          example:
+            Cko-Request-Id:
+            - 5fa7ee8c-f82d-4440-a6dc-e8c859b03235
+            Content-Type:
+            - application/json
+        body:
+          type: string
+          description: The destination response's HTTP message body.
+          example: '{"id": "pay_mbabizu24mvu3mela5njyhpit4", "action_id": "act_mbabizu24mvu3mela5njyhpit4", "amount": 6540, "currency": "USD", "approved": true, "status": "Authorized", "auth_code": "770687", "response_code": "10000", "response_summary": "Approved", "_links": {"self": {"href": "https://{prefix}.api.sandbox.checkout.com/payments/pay_mbabizu24mvu3mela5njyhpit4"}, "action": {"href": "https://{prefix}.api.sandbox.checkout.com/payments/pay_mbabizu24mvu3mela5njyhpit4/actions"}, "void": {"href": "https://{prefix}.api.sandbox.checkout.com/payments/pay_mbabizu24mvu3mela5njyhpit4/voids"}, "capture": {"href": "https://{prefix}.api.sandbox.checkout.com/payments/pay_mbabizu24mvu3mela5njyhpit4/captures"}}}'
+      description: The response returned by the third-party endpoint the forward request was sent to.
+    CreateSecretPlaintextRequest:
+      required:
+      - name
+      - value
+      type: object
+      properties:
+        name:
+          maxLength: 64
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_]{1,64}$
+          type: string
+          description: 'Secret name. <br/>
+
+            Format – 1-64 characters. Alphanumeric and underscore.
+
+            '
+          example: secret_name
+        value:
+          maxLength: 8192
+          type: string
+          description: Plaintext secret value. Max 8KB.
+          example: my_secret_value
+        entity_id:
+          type: string
+          description: Optional.When provided, the secret is scoped to this entity
+          example: ent_svrxgarj6qru5pzx4m4movyney
+      description: Request to create a secret with plaintext value
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

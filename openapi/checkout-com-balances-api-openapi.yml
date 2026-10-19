@@ -1,0 +1,646 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Balances API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Balances
+  description: View the balances for sub-accounts in an entity, and retrieve the bank details used to top them up.
+paths:
+  /balances/{id}:
+    servers:
+    - url: https://balances.checkout.com
+      description: Production environment
+    - url: https://balances.sandbox.checkout.com
+      description: Sandbox environment
+    parameters:
+    - $ref: '#/components/parameters/EntityId'
+    - $ref: '#/components/parameters/Query'
+    get:
+      tags:
+      - Balances
+      summary: Retrieve entity balances
+      description: 'Use this endpoint to retrieve balances for each sub-account in an entity.
+
+        *Note:* The sub-account is referred to as _currency account_ in the API.'
+      operationId: getEntityBalances
+      parameters:
+      - name: withCurrencyAccountId
+        in: query
+        description: Specifies if the response should include the sub-account ID that corresponds to each set of balances.
+        schema:
+          type: boolean
+          default: false
+      - name: balancesAt
+        in: query
+        description: A UTC datetime to retrieve historical balances at a specific point in time, in the format `yyyy-MM-ddTHH:mm:ssZ` (e.g. `2026-05-06T13:59:59.9999999+00:00`). Must be in the past. If omitted, the response returns live balances.
+        schema:
+          type: string
+          format: date-time
+          example: '2026-05-06T13:59:59.9999999+00:00'
+      responses:
+        '200':
+          description: Balances retrieved successfully.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalancesResponse'
+        '400':
+          description: Invalid query parameter — for example, an unsupported `query` filter value, a non-boolean `withCurrencyAccountId`, or a malformed `balancesAt` value.
+        '401':
+          description: Unauthorized
+        '404':
+          description: Entity not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ValidationError'
+      security:
+      - OAuth:
+        - balances
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: C#
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-net\nusing Checkout.Balances;\nusing Checkout.Common;\n\nICheckoutApi api = CheckoutSdk.Builder().OAuth()\n    .ClientCredentials(\"client_id\", \"client_secret\")\n    .Scopes(OAuthScope.Balances)\n    .Environment(Environment.Sandbox)\n    .EnvironmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .HttpClientFactory(new DefaultHttpClientFactory())\n    .Build();\n\n\nBalancesQuery query = new BalancesQuery {Query = \"currency:\" + Currency.GBP};\n\ntry\n{\n    BalancesResponse balances = await api.BalancesClient()\n        .RetrieveEntityBalances(\"entitiy_id\", query);\n}\ncatch (CheckoutApiException e)\n{\n    // API error\n    string requestId = e.RequestId;\n    var statusCode = e.HttpStatusCode;\n    IDictionary<string, object> errorDetails = e.ErrorDetails;\n}\ncatch (CheckoutArgumentException e)\n{\n    // Bad arguments\n}\ncatch (CheckoutAuthorizationException e)\n{\n    // Invalid authorization\n}"
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"fmt\"\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/balances\"\n\t\"github.com/checkout/checkout-sdk-go/common\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Balances}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nquery := balances.QueryFilter{Query: fmt.Sprintf(\"currency:%s\", common.GBP)}\n\nresponse, err := api.Balances.RetrieveEntityBalances(\"entity_id\", query)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+      - lang: Java
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-java\nimport com.checkout.CheckoutApi;\nimport com.checkout.CheckoutApiException;\nimport com.checkout.CheckoutArgumentException;\nimport com.checkout.CheckoutAuthorizationException;\nimport com.checkout.CheckoutSdk;\nimport com.checkout.Environment;\nimport com.checkout.OAuthScope;\nimport com.checkout.balances.BalancesQuery;\nimport com.checkout.balances.BalancesResponse;\nimport com.checkout.common.Currency;\n\n// OAuth\nCheckoutApi api = CheckoutSdk.builder()\n    .oAuth()\n    .clientCredentials(\"client_id\", \"client_secret\")\n    .scopes(OAuthScope.BALANCES) // more scopes available\n    .environment(Environment.SANDBOX) // or Environment.PRODUCTION\n    .environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .build();\n\nBalancesQuery query = BalancesQuery.builder()\n    .query(\"currency:\" + Currency.EUR)\n    .build();\n\ntry {\n    BalancesResponse response = api.balancesClient().retrieveEntityBalances(\"balance_id\", query).get();\n} catch (CheckoutApiException e) {\n    // API error\n    String requestId = e.getRequestId();\n    int statusCode = e.getHttpStatusCode();\n    Map<String, Object> errorDetails = e.getErrorDetails();\n} catch (CheckoutArgumentException e) {\n    // Bad arguments\n} catch (CheckoutAuthorizationException e) {\n    // Invalid authorization\n}"
+      - lang: PHP
+        source: "<?php\n//For more information please refer to https://github.com/checkout/checkout-sdk-php\n\nuse Checkout\\Balances\\BalancesQuery;\nuse Checkout\\CheckoutApiException;\nuse Checkout\\CheckoutAuthorizationException;\nuse Checkout\\CheckoutSdk;\nuse Checkout\\Common\\Currency;\nuse Checkout\\Environment;\nuse Checkout\\OAuthScope;\n\n$api = CheckoutSdk::builder()->oAuth()\n    ->clientCredentials(\"client_id\", \"client_secret\")\n    ->scopes([OAuthScope::$Balances])\n    ->environment(Environment::sandbox())\n    ->environmentSubdomain(\"{prefix}\") // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    ->build();\n\n$query = new BalancesQuery();\n$query->query = \"currency:\" . Currency::$GBP;\n\ntry {\n    $response = $api->getBalancesClient()->retrieveEntityBalances(\"entity_id\", $query);\n} catch (CheckoutApiException $e) {\n    // API error\n    $error_details = $e->error_details;\n    $http_status_code = isset($e->http_metadata) ? $e->http_metadata->getStatusCode() : null;\n} catch (CheckoutAuthorizationException $e) {\n    // Bad Invalid authorization\n}"
+      - lang: Python
+        source: "import checkout_sdk\nfrom checkout_sdk.checkout_sdk import CheckoutSdk\nfrom checkout_sdk.environment import Environment\nfrom checkout_sdk.exception import CheckoutApiException, CheckoutArgumentException, CheckoutAuthorizationException\nfrom checkout_sdk.oauth_scopes import OAuthScopes\nfrom checkout_sdk.balances.balances import BalancesQuery\n\n# OAuth\noauth = (\n    CheckoutSdk.builder()\n    .oauth() \n    .client_credentials('client_id', 'client_secret') \n    .environment(Environment.sandbox())  # or Environment.production()\n    .environment_subdomain(\"{prefix}\")  # Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n    .scopes([OAuthScopes.BALANCES]) \n    .build()\n)\n\nquery = BalancesQuery()\nquery.query = \"string\"\n\ntry:\n    response = api.balances.retrieve_entity_balances(\"entity_id\", query)\nexcept CheckoutApiException as err:\n    # API error\n    request_id = err.request_id\n    status_code = err.http_status_code\n    error_details = err.error_details\n    http_response = err.http_response\nexcept CheckoutArgumentException as err:\n    # Bad arguments\n\nexcept CheckoutAuthorizationException as err:\n    # Invalid authorization"
+  /entities/{entityId}/currency-accounts/{currencyAccountId}/top-up-instructions:
+    servers:
+    - url: https://balances.checkout.com
+      description: Production environment
+    - url: https://balances.sandbox.checkout.com
+      description: Sandbox environment
+    parameters:
+    - name: entityId
+      in: path
+      description: The ID of the entity that owns the sub-account, or of an entity above it in your hierarchy. A platform can use its own entity ID to reach the sub-accounts of any entity beneath it.
+      required: true
+      style: simple
+      schema:
+        type: string
+      example: ent_w4jelhppmfiufdnatam37wrfc4
+    - name: currencyAccountId
+      in: path
+      description: The ID of the sub-account to retrieve top-up instructions for.
+      required: true
+      style: simple
+      schema:
+        type: string
+      example: ca_g5y7d6jo4e2urgforcbf2ey5jm
+    get:
+      tags:
+      - Balances
+      summary: Retrieve top-up instructions
+      description: 'Use this endpoint to retrieve the bank details required to top up a sub-account, along with the payment reference that attributes an incoming payment to that sub-account.
+
+        *Note:* The sub-account is referred to as _currency account_ in the API.'
+      operationId: getTopUpInstructions
+      responses:
+        '200':
+          description: Top-up instructions retrieved successfully.
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUpInstructionsResponse'
+        '400':
+          description: Invalid `entityId` or `currencyAccountId`.
+        '401':
+          description: Unauthorized
+        '403':
+          description: The credential lacks access to top-up instructions, or top-ups aren't enabled for the sub-account.
+        '404':
+          description: The specified sub-account could not be found, or has no top-up instructions available.
+        '502':
+          description: The request could not be completed. Try again later.
+      security:
+      - OAuth:
+        - balances
+        - balances:top-up-instructions
+      - ApiSecretKey: []
+components:
+  schemas:
+    Balance:
+      title: Balance values
+      type: object
+      properties:
+        pending:
+          type: number
+          description: The total incoming funds that will be added to the Available balance once cleared.
+          example: 23000
+        available:
+          type: number
+          description: The funds that are available for processing.
+          example: 50000
+        payable:
+          type: number
+          description: The funds reserved from the Available balance for outgoing transactions that are yet to clear.
+          example: 2700
+        collateral:
+          type: number
+          description: The funds held by Checkout.com to cover potential liabilities and risk events associated with your payment processing.
+          example: 6000
+        operational:
+          type: number
+          description: The funds held for processing Payouts and Issuing payments when the Available balance is insufficient.
+          example: 7000
+        collateral_breakdown:
+          title: Collateral breakdown
+          required:
+          - fixed_reserve
+          - rolling_reserve
+          type: object
+          properties:
+            fixed_reserve:
+              type: number
+              description: The portion of the `collateral` balance held as a fixed reserve.
+              example: 4000
+            rolling_reserve:
+              type: number
+              description: The portion of the `collateral` balance held as a rolling reserve.
+              example: 2000
+          description: A breakdown of the funds held in the `collateral` balance.
+      description: The respective balance values.
+    TopUpFundingDetails:
+      title: Top-up funding details
+      required:
+      - beneficiary_account_name
+      - bank_name
+      type: object
+      properties:
+        beneficiary_account_name:
+          type: string
+          description: The name of the account that receives the funds.
+          example: Acme Inc
+        beneficiary_address:
+          type: string
+          description: The address of the beneficiary, if the rail requires it.
+          example: 1 Example Street, Exampleville, EX, 00000, US
+        bank_name:
+          type: string
+          description: The name of the bank that receives the funds.
+          example: Example Bank
+        bank_address:
+          type: string
+          description: The address of the receiving bank, if the rail requires it.
+          example: 1 Example Street, Exampleville, EX, 00000, US
+        account_number:
+          type: string
+          description: The account number of the receiving account.
+          example: '1234567890'
+        sort_code:
+          type: string
+          description: The sort code of the receiving bank. Returned for United Kingdom domestic transfers.
+          example: '000000'
+        routing_number:
+          type: string
+          description: The routing number of the receiving bank. Returned for United States domestic transfers.
+          example: '000000000'
+        iban:
+          type: string
+          description: The International Bank Account Number of the receiving account.
+          example: GB00EXAM00000000000000
+        swift_code:
+          type: string
+          description: The SWIFT or BIC code of the receiving bank. Returned for international transfers.
+          example: TESTUS00XXX
+      description: The bank details for a single funding rail. `beneficiary_account_name` and `bank_name` are the only fields always returned. The remaining fields vary by rail and the receiving bank's jurisdiction, and are omitted when they do not apply.
+    TopUpInstructionsResponse:
+      title: Top-up instructions
+      required:
+      - currency_account_id
+      - currency
+      - payment_reference
+      - bank_details
+      type: object
+      properties:
+        currency_account_id:
+          type: string
+          description: The unique identifier of the sub-account that the instructions apply to.
+          example: ca_g5y7d6jo4e2urgforcbf2ey5jm
+        currency:
+          type: string
+          description: The currency that funds must be sent in, as a three-letter <a href="https://www.checkout.com/docs/resources/codes/currency-codes" target="_blank">ISO 4217 currency code</a>. <br/><br/> This is the sub-account's holding currency, returned as `holding_currency` by the <a href="https://api-reference.checkout.com/#operation/getEntityBalances">Retrieve entity balances</a> endpoint.
+          example: USD
+        payment_reference:
+          type: string
+          description: The reference that must be quoted on the payment. It is how an incoming payment is attributed to the sub-account. A payment sent without this reference may not be credited.
+          example: TP-ABC123
+        bank_details:
+          $ref: '#/components/schemas/TopUpBankDetails'
+      description: The bank details and payment reference used to top up a sub-account.
+    TopUpBankDetails:
+      title: Top-up bank details
+      type: object
+      properties:
+        domestic:
+          $ref: '#/components/schemas/TopUpFundingDetails'
+        international:
+          $ref: '#/components/schemas/TopUpFundingDetails'
+      description: The bank details for each available funding rail. Both `domestic` and `international` are optional, and their availability depends on the sub-account's holding currency, jurisdiction, and banking partner. Do not assume that both rails are always available.
+    BalancesResponse:
+      title: Balances response
+      type: object
+      properties:
+        data:
+          title: Balances
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrencyAccountBalance'
+          description: The list of requested balances.
+      description: A list of balances for each currency account returned from the request.
+    CurrencyAccountBalance:
+      title: Currency Account Balance
+      type: object
+      properties:
+        currency_account_id:
+          type: string
+          description: The unique identifier of the currency account (sub-account). Returned only when the request is made with `withCurrencyAccountId=true`.
+          example: ca_g5y7d6jo4e2urgforcbf2ey5jm
+        descriptor:
+          type: string
+          description: A descriptor for the currency account.
+          example: Revenue Account 1
+        holding_currency:
+          type: string
+          description: The holding currency of the currency account (the three character ISO 4217 code).
+          example: EUR
+        balances_as_of:
+          type: string
+          description: The UTC datetime reflecting when the balance values were fetched. If the request includes a `balancesAt` query parameter, this matches that value; otherwise, it is the time the request was processed.
+          format: date-time
+          example: '2026-05-06T13:59:59.9999999+00:00'
+        balances:
+          $ref: '#/components/schemas/Balance'
+      description: The currency account details and balance.
+    ValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HL80RJLS76I7
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: payment_source_required
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
+  parameters:
+    Query:
+      name: query
+      in: query
+      description: The query to apply to limit the currency accounts.
+      style: form
+      explode: false
+      schema:
+        type: string
+      example: currency:EUR
+    EntityId:
+      name: id
+      in: path
+      description: The ID of the entity.
+      required: true
+      style: simple
+      schema:
+        type: string
+      example: ent_w4jelhppmfiufdnatam37wrfc4
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

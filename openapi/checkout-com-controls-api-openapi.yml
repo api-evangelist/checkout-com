@@ -1,0 +1,1509 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Controls API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Controls
+  description: Set spending controls to limit how much can be spent over a given period of time.
+paths:
+  /issuing/controls:
+    post:
+      tags:
+      - Controls
+      summary: Create a control
+      description: Creates a control and applies it to the specified target.
+      operationId: createControl
+      parameters:
+      - $ref: '#/components/parameters/IssuingCkoIdempotencyKey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add-control-request'
+        required: true
+      responses:
+        '201':
+          description: Control created successfully
+          headers:
+            cko-request-id:
+              schema:
+                $ref: '#/components/schemas/cko-request-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/add-control-response'
+              examples:
+                velocity_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    description: Maximum spend of 500€ per week for restaurants
+                    control_type: velocity_limit
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    velocity_limit:
+                      amount_limit: 50000
+                      velocity_window:
+                        type: weekly
+                      mcc_list:
+                      - 4121
+                      - 4582
+                    _links:
+                      self:
+                        href: https://{prefix}.api.checkout.com/issuing/controls/ctr_gp7vkmxayztufjz6top5bjcdra
+                        actions:
+                        - GET
+                        types:
+                        - application/json
+                mcc_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    description: Allow the card to be used only in restaurants and supermarkets
+                    control_type: mcc_limit
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    mcc_limit:
+                      type: allow
+                      mcc_list:
+                      - 5932
+                      - 5411
+                    _links:
+                      self:
+                        href: https://{prefix}.api.checkout.com/issuing/controls/ctr_gp7vkmxayztufjz6top5bjcdra
+                        actions:
+                        - GET
+                        types:
+                        - application/json
+                mid_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    description: Allow the card to be used only in AZ Pizza
+                    control_type: mid_limit
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    mid_limit:
+                      type: allow
+                      mid_list:
+                      - 593278
+                      - 541114
+                    _links:
+                      self:
+                        href: https://{prefix}.api.checkout.com/issuing/controls/ctr_gp7vkmxayztufjz6top5bjcdra
+                        actions:
+                        - GET
+                        types:
+                        - application/json
+        '401':
+          description: Unauthorized
+        '404':
+          description: Target not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      security:
+      - OAuth:
+        - issuing:controls-write
+    get:
+      tags:
+      - Controls
+      summary: Get controls by target
+      description: Retrieves a list of spending controls applied to the specified target.
+      operationId: getControlByTarget
+      parameters:
+      - name: target_id
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingTargetId'
+      responses:
+        '200':
+          description: Target's controls retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-controls-array-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Target not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:controls-read
+  /issuing/controls/{controlId}:
+    get:
+      tags:
+      - Controls
+      summary: Get control details
+      description: Retrieves the details of an existing control.
+      operationId: getControl
+      parameters:
+      - name: controlId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingControlId'
+      - name: cardId
+        in: query
+        description: The unique identifier for the card you want to get the remaining cascading velocity control for.
+        schema:
+          $ref: '#/components/schemas/IssuingCardId'
+      responses:
+        '200':
+          description: Control retrieved successfully
+          headers:
+            cko-request-id:
+              schema:
+                $ref: '#/components/schemas/cko-request-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-control-response'
+              examples:
+                velocity_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    description: Maximum spend of 500€ per week for restaurants
+                    control_type: velocity_limit
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    velocity_limit:
+                      amount_remaining: 45000
+                      amount_limit: 50000
+                      velocity_window:
+                        type: weekly
+                      mcc_list:
+                      - 4121
+                      - 4582
+                mcc_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    description: Allow the card to be used only in restaurants and supermarkets
+                    control_type: mcc_limit
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    mcc_limit:
+                      type: allow
+                      mcc_list:
+                      - 5932
+                      - 5411
+                mid_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    description: Allow the card to be used only in AZ Pizza
+                    control_type: mid_limit
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    mid_limit:
+                      type: allow
+                      mid_list:
+                      - 593278
+                      - 541114
+        '401':
+          description: Unauthorized
+        '404':
+          description: Control not found
+        '500':
+          description: Internal Server Error
+      security:
+      - OAuth:
+        - issuing:controls-read
+    put:
+      tags:
+      - Controls
+      summary: Update a control
+      description: Updates an existing control.
+      operationId: updateControl
+      parameters:
+      - name: controlId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingControlId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: '#/components/schemas/update-control-request-mcc-limit'
+              - $ref: '#/components/schemas/update-control-request-mid-limit'
+              - $ref: '#/components/schemas/update-control-request-velocity-limit'
+        required: true
+      responses:
+        '200':
+          description: Control updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/update-control-response'
+              examples:
+                velocity_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    description: Maximum spend of 500€ per week for restaurants
+                    control_type: velocity_limit
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    velocity_limit:
+                      amount_remaining: 45000
+                      amount_limit: 50000
+                      velocity_window:
+                        type: weekly
+                      mcc_list:
+                      - 4121
+                      - 4582
+                mcc_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    description: Allow the card to be used only in restaurants and supermarkets
+                    control_type: mcc_limit
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    mcc_limit:
+                      type: allow
+                      mcc_list:
+                      - 5932
+                      - 5411
+                mid_limit:
+                  value:
+                    id: ctr_gp7vkmxayztufjz6top5bjcdra
+                    target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+                    description: Allow the card to be used only in AZ Pizza
+                    control_type: mid_limit
+                    is_editable: true
+                    created_date: '2023-03-12T18:20:12.0000000+00:00'
+                    last_modified_date: '2023-03-12T18:20:12.0000000+00:00'
+                    mid_limit:
+                      type: allow
+                      mid_list:
+                      - 593278
+                      - 541114
+        '401':
+          description: Unauthorized
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '404':
+          description: Control not found
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      security:
+      - OAuth:
+        - issuing:controls-write
+    delete:
+      tags:
+      - Controls
+      summary: Remove a control
+      description: 'Removes an existing control from the target it was applied to.
+
+
+        If you want to reapply an equivalent control to the target, you must create a new control.'
+      operationId: deleteControl
+      parameters:
+      - name: controlId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingControlId'
+      responses:
+        '200':
+          description: Control deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/remove-control-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Control not found
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuingValidationError'
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      security:
+      - OAuth:
+        - issuing:controls-write
+components:
+  schemas:
+    IssuingTargetIdForAdd:
+      maxLength: 30
+      minLength: 30
+      pattern: ^(crd|cpr)_[a-z0-9]{26}$
+      type: string
+      description: The ID of the card or control profile to apply the control to. Note that control profiles cannot be a target for `velocity_limit` controls.
+      example: crd_fa6psq42dcdd6fdn5gifcq1491
+    update-control-response:
+      required:
+      - id
+      - control_type
+      - target_id
+      - is_editable
+      - created_date
+      - last_modified_date
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        description:
+          maxLength: 256
+          type: string
+          description: The description of the control.
+          example: Max spend of 500€ per week for restaurants
+        control_type:
+          $ref: '#/components/schemas/IssuingControlType'
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          $ref: '#/components/schemas/Datetime'
+        last_modified_date:
+          $ref: '#/components/schemas/Datetime'
+      description: The control's details.
+      discriminator:
+        propertyName: control_type
+        mapping:
+          velocity_limit: '#/components/schemas/update-control-velocity-limit-response'
+          mcc_limit: '#/components/schemas/update-control-mcc-limit-response'
+          mid_limit: '#/components/schemas/update-control-mid-limit-response'
+    add-control-response:
+      required:
+      - id
+      - control_type
+      - target_id
+      - is_editable
+      - created_date
+      - last_modified_date
+      - _links
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/velocity-limit-response'
+      - $ref: '#/components/schemas/mcc-limit-response'
+      - $ref: '#/components/schemas/mid-limit-response'
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+        control_type:
+          $ref: '#/components/schemas/IssuingControlType'
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          type: string
+          format: date-time
+          example: '2023-03-12T18:20:12.0000000+00:00'
+        last_modified_date:
+          type: string
+          format: date-time
+          example: '2023-03-12T18:20:12.0000000+00:00'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/ControlLinks'
+      description: The control's details.
+      discriminator:
+        propertyName: control_type
+        mapping:
+          velocity_limit: '#/components/schemas/velocity-limit-response'
+          mcc_limit: '#/components/schemas/mcc-limit-response'
+          mid_limit: '#/components/schemas/mid-limit-response'
+    update-control-request-mcc-limit:
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Allow the card to be used only in restaurants and supermarkets
+        mcc_limit:
+          $ref: '#/components/schemas/MccLimit'
+      description: 'The control you want to update.
+
+
+        You can update only one control per request.
+
+        '
+    IssuingControlType:
+      enum:
+      - velocity_limit
+      - mcc_limit
+      - mid_limit
+      type: string
+      description: 'The control''s type.
+
+
+        A `velocity_limit` determines how much can be spent over a given period of time. An `mcc_limit` determines the types of businesses from which transactions can be processed. A `mid_limit` specifies the merchants from whom transactions can be processed.
+
+        '
+      example: velocity_limit
+    MidLimit:
+      required:
+      - mid_list
+      - type
+      type: object
+      properties:
+        type:
+          enum:
+          - allow
+          - block
+          type: string
+          description: Sets whether to allow or block the list of MIDs supplied.
+          example: allow
+        mid_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/MidCode'
+          description: The list of merchant identification (MID) codes to allow or block transactions from.
+          example:
+          - 593278
+          - 541114
+      description: The merchant identification (MID) code rule, which determines the merchants from whom transactions can be processed.
+    get-control-response:
+      required:
+      - id
+      - target_id
+      - description
+      - control_type
+      - is_editable
+      - created_date
+      - last_modified_date
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/get-control-velocity-limit-response'
+      - $ref: '#/components/schemas/get-control-mcc-limit-response'
+      - $ref: '#/components/schemas/get-control-mid-limit-response'
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Max spend of 500€ per week for restaurants
+        control_type:
+          $ref: '#/components/schemas/IssuingControlType'
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          $ref: '#/components/schemas/Datetime'
+        last_modified_date:
+          $ref: '#/components/schemas/Datetime'
+      description: The control's details.
+      discriminator:
+        propertyName: control_type
+        mapping:
+          velocity_limit: '#/components/schemas/get-control-velocity-limit-response'
+          mcc_limit: '#/components/schemas/get-control-mcc-limit-response'
+          mid_limit: '#/components/schemas/get-control-mid-limit-response'
+    IssuingCardId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^crd_[a-z0-9]{26}$
+      type: string
+      description: The card's unique identifier.
+      example: crd_fa6psq242dcd6fdn5gifcq1491
+    MccLimit:
+      required:
+      - mcc_list
+      - type
+      type: object
+      properties:
+        type:
+          enum:
+          - allow
+          - block
+          type: string
+          description: Sets whether to allow or block the list of MCCs supplied.
+          example: allow
+        mcc_list:
+          type: array
+          items:
+            type: string
+          description: The list of <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">MCCs</a> to allow or block transactions from, as 4-digit ISO 18245 codes.
+          example:
+          - '5932'
+          - '5411'
+      description: The <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">merchant category code (MCC)</a> rule, which determines the types of businesses transactions can be processed from.
+    get-control-velocity-limit-response:
+      title: velocity_limit
+      required:
+      - id
+      - target_id
+      - description
+      - control_type
+      - is_editable
+      - created_date
+      - last_modified_date
+      - velocity_limit
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Maximum spend of 500€ per week for restaurants
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: velocity_limit
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          $ref: '#/components/schemas/Datetime'
+        last_modified_date:
+          $ref: '#/components/schemas/Datetime'
+        velocity_limit:
+          $ref: '#/components/schemas/VelocityLimitWithRemainingAmount'
+    add-control-request:
+      required:
+      - control_type
+      - target_id
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/velocity-limit-request'
+      - $ref: '#/components/schemas/mcc-limit-request'
+      - $ref: '#/components/schemas/mid-limit-request'
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+        control_type:
+          $ref: '#/components/schemas/IssuingControlType'
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetIdForAdd'
+      description: The control to create.
+      discriminator:
+        propertyName: control_type
+        mapping:
+          velocity_limit: '#/components/schemas/velocity-limit-request'
+          mcc_limit: '#/components/schemas/mcc-limit-request'
+          mid_limit: '#/components/schemas/mid-limit-request'
+    VelocityLimit:
+      required:
+      - velocity_window
+      - amount_limit
+      type: object
+      properties:
+        amount_limit:
+          minimum: 0
+          type: integer
+          description: The amount the target can spend, in minor units.
+          format: int64
+          example: 50000
+        velocity_window:
+          $ref: '#/components/schemas/VelocityWindow'
+        mcc_list:
+          type: array
+          items:
+            type: string
+          description: The list of <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">merchant category codes</a> (MCCs) that the velocity limit applies to, as four-digit ISO 18245 codes.
+        mid_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/MidCode'
+          description: The list of merchant identification (MID) codes to allow or block transactions from. <br/> You can provide either `mcc_list` or `mid_list`, but not both.
+          example:
+          - 1234567890
+      description: The velocity limit, which determines how much a target card can spend over a given timeframe.
+    VelocityLimitWithRemainingAmount:
+      required:
+      - velocity_window
+      - amount_remaining
+      - amount_limit
+      type: object
+      properties:
+        amount_remaining:
+          minimum: 0
+          type: integer
+          description: The remaining amount that can be spent, in minor units.
+          format: int64
+          example: 45000
+        amount_limit:
+          minimum: 0
+          type: integer
+          description: The amount that can be spent, in minor units.
+          format: int64
+          example: 50000
+        velocity_window:
+          $ref: '#/components/schemas/VelocityWindow'
+        mcc_list:
+          type: array
+          items:
+            type: string
+          description: The list of <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">merchant category codes</a> (MCCs) that the velocity limit applies to, as four-digit ISO 18245 codes.
+          example:
+          - '4121'
+          - '4582'
+        mid_list:
+          type: array
+          items:
+            type: string
+          description: The list of merchant identification (MID) codes to allow or block transactions from. <br/> You can provide either `mcc_list` or `mid_list`, but not both.
+          example:
+          - '1234567890'
+      description: The velocity limit, which determines how much a target card can spend over a given timeframe.
+    velocity-limit-response:
+      title: velocity_limit
+      required:
+      - id
+      - control_type
+      - target_id
+      - is_editable
+      - created_date
+      - last_modified_date
+      - _links
+      - velocity_limit
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Maximum spend of 500€ per week for restaurants
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          - enum:
+            - velocity_limit
+          example: velocity_limit
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          type: string
+          format: date-time
+          example: '2023-03-12T18:20:12.0000000+00:00'
+        last_modified_date:
+          type: string
+          format: date-time
+          example: '2023-03-12T18:20:12.0000000+00:00'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/ControlLinks'
+        velocity_limit:
+          $ref: '#/components/schemas/VelocityLimit'
+    MidCode:
+      maxLength: 15
+      minLength: 1
+      pattern: ^[A-Za-z0-9{}\[\] ,+\-=.();'\/&@*]{1,15}$
+      type: string
+    update-control-request-mid-limit:
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Allow the card to be used only in AZ Pizza
+        mid_limit:
+          $ref: '#/components/schemas/MidLimit'
+      description: 'The control you want to update.
+
+
+        You can only update one control per request.
+
+        '
+    IssuingValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HLHPN8802NUF:00000003
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          maxItems: 20
+          type: array
+          items:
+            type: string
+            example: request_body_malformed
+      additionalProperties: false
+    ControlLinks:
+      minItems: 1
+      required:
+      - self
+      type: object
+      properties:
+        self:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/IssuingLink'
+          description: The URI to retrieve the control's details.
+      description: The links related to the control.
+      example:
+        self:
+          href: https://{prefix}.api.checkout.com/issuing/controls/ctr_mbvprn5bm27ubh4c5rq5tha2wy
+          actions:
+          - GET
+          types:
+          - application/json
+    IssuingLink:
+      required:
+      - href
+      - actions
+      - types
+      type: object
+      properties:
+        href:
+          maxLength: 100
+          pattern: ^https:\/.*$
+          type: string
+          description: The link URL.
+        actions:
+          maxItems: 20
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^(GET|POST|PUT|DELETE|PATCH)$
+            enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            type: string
+          additionalProperties: false
+          description: The HTTP Methods that can be performed on the link.
+        types:
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^application\/.*$
+            type: string
+          additionalProperties: false
+          description: The Content Types for the link to the resource
+      additionalProperties: false
+    update-control-request-velocity-limit:
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Max spend of 500€ per week for restaurants
+        velocity_limit:
+          type: object
+          properties:
+            amount_limit:
+              minimum: 0
+              type: integer
+              description: The amount that can be spent using the card, in minor units.
+              format: int64
+              example: 50000
+            mcc_list:
+              type: array
+              items:
+                type: string
+              description: The list of <a href= "https://www.checkout.com/docs/resources/codes/merchant-category-codes">merchant category codes (MCCs)</a> that the velocity limit applies to, as 4-digit ISO 18245 codes.
+              example:
+              - '4121'
+              - '4582'
+            mid_list:
+              type: array
+              items:
+                type: string
+              description: The list of merchant identification (MID) codes to allow or block transactions from. Note that `mcc_list` and `mid_list` cannot be set together.
+              example:
+              - '1234567890'
+          description: The velocity limit, which determines how much a card can spend over a given period of time.
+      description: 'The control you want to update.
+
+
+        You can only update one control per request.
+
+        '
+    cko-request-id:
+      type: string
+      description: ID to correlate requests.
+      example: 3729b06b-5a63-4425-bc34-23dfc158ddfe
+    get-control-mcc-limit-response:
+      title: mcc_limit
+      required:
+      - id
+      - target_id
+      - description
+      - control_type
+      - is_editable
+      - created_date
+      - last_modified_date
+      - mcc_limit
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Allow the card to be used only in restaurants and supermarkets
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: mcc_limit
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          $ref: '#/components/schemas/Datetime'
+        last_modified_date:
+          $ref: '#/components/schemas/Datetime'
+        mcc_limit:
+          $ref: '#/components/schemas/MccLimit'
+    IssuingTargetId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^(crd|cpr)_[a-z0-9]{26}$
+      type: string
+      description: The ID of the card or control profile.
+      example: crd_fa6psq42dcdd6fdn5gifcq1491
+    remove-control-response:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+      description: The control's details.
+    velocity-limit-request:
+      title: velocity_limit
+      required:
+      - control_type
+      - target_id
+      - velocity_limit
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Maximum spend of 500€ per week for restaurants
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: velocity_limit
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetIdForAdd'
+        velocity_limit:
+          $ref: '#/components/schemas/VelocityLimit'
+    get-controls-array-response:
+      required:
+      - controls
+      type: object
+      properties:
+        controls:
+          type: array
+          items:
+            $ref: '#/components/schemas/get-control-response'
+          description: The list of controls applied to the specified target.
+          example:
+          - id: ctr_gp7vkmxayztufjz6top5bjcdra
+            target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+            description: Maximum spend of 500€ per week for restaurants
+            control_type: velocity_limit
+            is_editable: true
+            created_date: '2021-09-09T19:41:39.0000000+00:00'
+            last_modified_date: '2021-09-09T19:41:39.0000000+00:00'
+            velocity_limit:
+              amount_remaining: 45000
+              amount_limit: 50000
+              velocity_window:
+                type: weekly
+              mcc_list:
+              - 4121
+              - 4582
+          - id: ctr_gp7vkmxayztufjz6top5bjcdra
+            target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+            description: Allow the card to be used only in restaurants and supermarkets
+            control_type: mcc_limit
+            is_editable: true
+            created_date: '2021-09-09T19:41:39.0000000+00:00'
+            last_modified_date: '2021-09-09T19:41:39.0000000+00:00'
+            mcc_limit:
+              type: allow
+              mcc_list:
+              - 5932
+              - 5411
+          - id: ctr_gp7vkmxayztufjz6top5bjcdra
+            target_id: crd_fa6psq42dcdd6fdn5gifcq1491
+            description: Allow the card to be used only in AZ Pizza
+            control_type: mid_limit
+            is_editable: true
+            created_date: '2021-09-09T19:41:39.0000000+00:00'
+            last_modified_date: '2021-09-09T19:41:39.0000000+00:00'
+            mid_limit:
+              type: allow
+              mid_list:
+              - 593278
+              - 541114
+      description: The list of controls applied to the specified target.
+    mcc-limit-request:
+      title: mcc_limit
+      required:
+      - control_type
+      - target_id
+      - mcc_limit
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Allow the card to be used only in restaurants and supermarkets
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: mcc_limit
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetIdForAdd'
+        mcc_limit:
+          $ref: '#/components/schemas/MccLimit'
+    ControlIsEditable:
+      type: boolean
+      description: Indicates whether you can change this control. <br> `false` This is an immutable control applied by Checkout.com and you cannot change it. <br> `true` You applied this control and can change it.
+      example: true
+    Datetime:
+      type: string
+      format: UTC
+      example: '2021-09-09T19:41:39Z'
+    get-control-mid-limit-response:
+      title: mid_limit
+      required:
+      - id
+      - target_id
+      - description
+      - control_type
+      - is_editable
+      - created_date
+      - last_modified_date
+      - mid_limit
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Allow the card to be used only in AZ Pizza
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: mid_limit
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          $ref: '#/components/schemas/Datetime'
+        last_modified_date:
+          $ref: '#/components/schemas/Datetime'
+        mid_limit:
+          $ref: '#/components/schemas/MidLimit'
+    mcc-limit-response:
+      title: mcc_limit
+      required:
+      - id
+      - control_type
+      - target_id
+      - is_editable
+      - created_date
+      - last_modified_date
+      - _links
+      - mcc_limit
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Allow the card to be used only in restaurants and supermarkets
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          - enum:
+            - mcc_limit
+          example: mcc_limit
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          type: string
+          format: date-time
+          example: '2023-03-12T18:20:12.0000000+00:00'
+        last_modified_date:
+          type: string
+          format: date-time
+          example: '2023-03-12T18:20:12.0000000+00:00'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/ControlLinks'
+        mcc_limit:
+          $ref: '#/components/schemas/MccLimit'
+    mid-limit-response:
+      title: mid_limit
+      required:
+      - id
+      - control_type
+      - target_id
+      - is_editable
+      - created_date
+      - last_modified_date
+      - _links
+      - mid_limit
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingControlId'
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Allow the card to be used only in AZ Pizza
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          - enum:
+            - mid_limit
+          example: mid_limit
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetId'
+        is_editable:
+          $ref: '#/components/schemas/ControlIsEditable'
+        created_date:
+          type: string
+          format: date-time
+          example: '2023-03-12T18:20:12.0000000+00:00'
+        last_modified_date:
+          type: string
+          format: date-time
+          example: '2023-03-12T18:20:12.0000000+00:00'
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/ControlLinks'
+        mid_limit:
+          $ref: '#/components/schemas/MidLimit'
+    mid-limit-request:
+      title: mid_limit
+      required:
+      - control_type
+      - target_id
+      - mid_limit
+      type: object
+      properties:
+        description:
+          maxLength: 256
+          type: string
+          description: A description for the control.
+          example: Allow the card to be used only in AZ Pizza
+        control_type:
+          allOf:
+          - $ref: '#/components/schemas/IssuingControlType'
+          example: mid_limit
+        target_id:
+          $ref: '#/components/schemas/IssuingTargetIdForAdd'
+        mid_limit:
+          $ref: '#/components/schemas/MidLimit'
+    IssuingControlId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^ctr_[a-z0-9]{26}$
+      type: string
+      description: The control's unique identifier.
+      example: ctr_gp7vkmxayztufjz6top5bjcdra
+    VelocityWindow:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          enum:
+          - daily
+          - weekly
+          - monthly
+          - all_time
+          type: string
+          description: The velocity window's unit of time.
+          example: weekly
+      description: The period of time over which the specified `amount_limit` can be spent.
+  parameters:
+    IssuingCkoIdempotencyKey:
+      name: Cko-Idempotency-Key
+      in: header
+      description: An optional idempotency key for safely retrying Issuing requests.
+      schema:
+        maxLength: 256
+        minLength: 1
+        pattern: ^[A-Za-z0-9._-]+$
+        type: string
+      example: 7c1b9f96-4f2e-4b1a-bc2b-3d0f1a2e9f3a
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

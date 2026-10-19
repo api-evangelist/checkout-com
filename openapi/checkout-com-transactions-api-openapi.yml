@@ -1,0 +1,914 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Transactions API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Transactions
+paths:
+  /issuing/transactions:
+    get:
+      tags:
+      - Transactions
+      summary: Get a list of transactions
+      description: 'Beta
+
+
+        Returns a list of transactions based on the matching input parameters in reverse chronological order, with the most recent transactions shown first.'
+      operationId: getTransactions
+      parameters:
+      - name: limit
+        in: query
+        description: The maximum number of transactions returned (between 10-100). The default is 10.
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          format: int32
+      - name: skip
+        in: query
+        description: The number of transactions to skip. The default is 0.
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+      - name: cardholder_id
+        in: query
+        schema:
+          $ref: '#/components/schemas/IssuingCardholderId'
+      - name: card_id
+        in: query
+        schema:
+          $ref: '#/components/schemas/IssuingCardId'
+      - name: entity_id
+        in: query
+        schema:
+          $ref: '#/components/schemas/IssuingEntityId'
+      - name: status
+        in: query
+        description: An optional filter for the transaction lifecycle status.
+        schema:
+          enum:
+          - authorized
+          - declined
+          - canceled
+          - cleared
+          - refunded
+          - disputed
+          type: string
+        example: disputed
+      - name: from
+        in: query
+        description: An optional start date filter for transactions, in ISO 8601 format.
+        schema:
+          type: string
+          format: date-time
+        example: '2023-08-15T17:30:09.0000000+00:00'
+      - name: to
+        in: query
+        description: An optional end date filter for transactions, in ISO 8601 format.
+        schema:
+          type: string
+          format: date-time
+        example: '2023-09-15T17:30:09.0000000+00:00'
+      responses:
+        '200':
+          description: Transactions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-transactions-response'
+        '404':
+          description: Not Found
+        '401':
+          description: Unauthorized
+        '429':
+          description: Too Many Requests
+        '422':
+          description: Matching parameters not valid.
+      security:
+      - OAuth:
+        - issuing:transactions-read
+  /issuing/transactions/{transactionId}:
+    get:
+      tags:
+      - Transactions
+      summary: Get a single transaction
+      description: 'Beta
+
+
+        Get the details of a transaction using its ID.'
+      operationId: getTransactionById
+      parameters:
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/IssuingTransactionId'
+      responses:
+        '200':
+          description: Issuing transaction retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-transaction-response'
+        default:
+          description: Issuing transaction response retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get-transaction-response'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Transaction Not Found
+        '406':
+          description: Not Acceptable
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+      security:
+      - OAuth:
+        - issuing:transactions-read
+components:
+  schemas:
+    IssuingTransactionMessage:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingMessageId'
+        initiator:
+          enum:
+          - cardholder
+          - merchant
+          - acquirer
+          - card_network
+          - issuer
+          type: string
+          description: Specifies who initiated the message
+        type:
+          enum:
+          - authorization
+          - reversal
+          - authorization_advice
+          - reversal_advice
+          - presentment
+          - authorization_refund
+          - presentment_refund
+          - presentment_reversed
+          - presentment_reversed_refund
+          type: string
+          description: The message type.
+        result:
+          enum:
+          - approved
+          - declined
+          - processed
+          type: string
+          description: The outcome after processing this message.
+          example: declined
+        is_relayed:
+          type: boolean
+          description: Indicates if this message was relayed through the Auth Relay to the client.
+          example: true
+        indicator:
+          enum:
+          - incremental_preauthorization
+          - deferred_authorization
+          - preauthorization
+          - normal_authorization
+          - final_authorization
+          - partial_reversal
+          - full_reversal
+          - partial_presentment
+          - final_presentment
+          - unknown
+          type: string
+          description: 'Indicates the type of the authorization, reversal, or presentment.<br/>
+
+            For authorization, it can be incremental_preauthorization, deferred_authorization, preauthorization, normal_authorization, final_authorization, or unknown.<br/>
+
+            For reversals, it can be partial_reversal or full_reversal.<br/>
+
+            For presentments, it can be partial_presentment or final_presentment.<br/>
+
+            For other message type, it may be null.
+
+            '
+        decline_reason:
+          type: string
+          description: "The reason explaining why the message was declined. \nRefer to our documentation for a list of possible <a href=\"https://www.checkout.com/docs/developer-resources/testing/codes/issuing-decline-reasons\" target=\"blank\">decline reasons</a>.<br/>\nIf the message was approved, this will return `Null`. \n"
+          example: expiry_date_invalid
+        authorization_code:
+          type: string
+          description: Your issuer authorization code for when the transaction was approved.
+          example: 03C0C0
+        billing_amount:
+          type: integer
+          description: 'The transaction billing amount.<br/>
+
+            The amount is provided in the <a href="https://www.checkout.com/docs/resources/calculating-the-amount" target="blank">minor currency unit</a>.
+
+            '
+          format: int64
+          example: 100
+        billing_currency:
+          allOf:
+          - $ref: '#/components/schemas/IssuingCurrency'
+        transaction_amount:
+          type: integer
+          description: 'The amount of the message in the currency the card was used in, before any currency conversion.<br/>
+
+            The amount is provided in the <a href="https://www.checkout.com/docs/resources/calculating-the-amount" target="blank">minor currency unit</a>.<br/>
+
+            This is only returned when the card scheme provided the transaction amount and currency for this message.<br/>
+
+            This field is only available for messages created on or after October 1, 2026. Messages created before that date have no value.
+
+            '
+          format: int64
+          example: 100
+        transaction_currency:
+          allOf:
+          - $ref: '#/components/schemas/IssuingCurrency'
+          description: 'The currency the card was used in, before any currency conversion.<br/>
+
+            This is only returned when the card scheme provided the transaction amount and currency for this message.<br/>
+
+            This field is only available for messages created on or after October 1, 2026. Messages created before that date have no value.
+
+            '
+        created_on:
+          type: string
+          description: The message's creation date/time (UTC).
+          format: date-time
+          example: '2019-09-10T10:11:12.0000000+00:00'
+    get-transaction-response:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/IssuingTransaction'
+    IssuingTransactionAmount:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: The amount is provided in the <a href="https://www.checkout.com/docs/resources/calculating-the-amount" target="blank">minor currency unit</a>.
+          example: 100
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/IssuingCurrency'
+    IssuingTransactionMerchant:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The merchant's identifier. The identifier varies from one acquirer to another.
+          example: (*)123456789
+        name:
+          type: string
+          description: The merchant's name.
+          example: My Merchant
+        city:
+          type: string
+          description: The city where the merchant is located.
+          example: Paris
+        state:
+          type: string
+          description: The state in which the merchant is located (only for US-based merchants).
+          example: ''
+        country_code:
+          type: string
+          description: The country code where the merchant is located.
+          example: FR
+        category_code:
+          type: string
+          description: 'The merchant''s category codes.
+
+            All category codes are documented <a href="https://www.checkout.com/docs/developer-resources/testing/codes/merchant-category-codes" target="blank">here</a>.
+
+            '
+          example: '5331'
+    IssuingTransactionEntity:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingEntityId'
+    IssuingCardholderId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^crh_[a-z0-9]{26}$
+      type: string
+      description: The cardholder's unique identifier.
+      example: crh_d3ozhf43pcq2xbldn2g45qnb44
+    IssuingTransactionCardholder:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingCardholderId'
+    IssuingTransactionId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^trx_[a-z0-9]{26}$
+      type: string
+      description: The transaction's unique identifier.
+      example: trx_aayhhfwbdyxwcaeyhhfwbd4xga
+    IssuingTransactionCard:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingCardId'
+        network:
+          enum:
+          - mastercard
+          type: string
+          description: The card network.
+          example: mastercard
+    IssuingTransactionDigitalCard:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingDigitalCardId'
+        wallet_type:
+          enum:
+          - googlepay
+          - applepay
+          - remote_commerce_programs
+          type: string
+          description: The wallet type.
+    IssuingCardId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^crd_[a-z0-9]{26}$
+      type: string
+      description: The card's unique identifier.
+      example: crd_fa6psq242dcd6fdn5gifcq1491
+    IssuingReferenceTransaction:
+      type: object
+      properties:
+        transaction_id:
+          $ref: '#/components/schemas/IssuingTransactionId'
+        reference_type:
+          enum:
+          - original_mit
+          - original_recurring
+          type: string
+    IssuingTransactionAmounts:
+      type: object
+      properties:
+        total_held:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: "The amount held internally to cover the transaction, but not yet debited. \nThis value is equal to the Total Authorized - Total Reversed - Total Cleared.<br />\nThe amount is represented in the <a href=\"https://www.checkout.com/docs/resources/calculating-the-amount\" target=\"blank\">minor currency units</a> of the cardholder's billing currency.\n"
+        total_authorized:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: "The total amount which has been authorized. \nThis sums the billing amounts from all approved authorizations associated to this transaction.<br />\nThe amount is represented in the <a href=\"https://www.checkout.com/docs/resources/calculating-the-amount\" target=\"blank\">minor currency units</a> of the cardholder's billing currency.\n"
+        total_reversed:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: "The total amount which has been reversed by the merchant or by the issuer. \nThis sums the billing amounts from all approved reversals and issuer initiated reversals associated to this transaction.<br />\nThe amount is represented in the <a href=\"https://www.checkout.com/docs/resources/calculating-the-amount\" target=\"blank\">minor currency units</a> of the cardholder's billing currency.\n"
+        total_cleared:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: 'The total amount which has been cleared by the scheme.
+
+            This sums the billing amounts from all presentments associated to this transaction.<br />
+
+            The amount is represented in the <a href="https://www.checkout.com/docs/resources/calculating-the-amount" target="blank">minor currency units</a> of the cardholder''s billing currency.
+
+            '
+        total_refunded:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmount'
+          description: 'The total amount which has been refunded to the cardholder.
+
+            This sums the billing amounts from all presentments of type "refund" associated to this transaction.<br />
+
+            The amount is represented in the <a href="https://www.checkout.com/docs/resources/calculating-the-amount" target="blank">minor currency units</a> of the cardholder''s billing currency.
+
+            '
+    IssuingMessageId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^msg_[a-z0-9]{26}$
+      type: string
+      description: The message's unique Checkout.com identifier.
+      example: msg_fa6psq242dcd6fdn5gifcq1491
+    IssuingLink:
+      required:
+      - href
+      - actions
+      - types
+      type: object
+      properties:
+        href:
+          maxLength: 100
+          pattern: ^https:\/.*$
+          type: string
+          description: The link URL.
+        actions:
+          maxItems: 20
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^(GET|POST|PUT|DELETE|PATCH)$
+            enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            type: string
+          additionalProperties: false
+          description: The HTTP Methods that can be performed on the link.
+        types:
+          type: array
+          items:
+            maxLength: 100
+            pattern: ^application\/.*$
+            type: string
+          additionalProperties: false
+          description: The Content Types for the link to the resource
+      additionalProperties: false
+    IssuingDigitalCardId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^dcr_[a-z0-9]{26}$
+      type: string
+      description: The digital card's unique identifier.
+      example: dcr_5ngxzsynm2me3oxf73esbhda6q
+    IssuingTransactionClient:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/IssuingClientId'
+    IssuingCurrency:
+      maxLength: 3
+      minLength: 3
+      pattern: ^[a-zA-Z]{3}$
+      type: string
+      description: The issuing currency, as a three-letter <a href="https://docs.checkout.com/docs/currency-codes" target="blank">ISO currency code</a>.
+      format: ISO4217
+      example: USD
+    get-transactions-response:
+      type: object
+      properties:
+        limit:
+          type: integer
+          description: The requested maximum number of transactions returned.
+          example: 5
+        skip:
+          type: integer
+          description: The requested number of transactions to skip.
+          example: 10
+        total_count:
+          type: integer
+          description: The total count of available transactions.
+          example: 100
+        data:
+          type: array
+          items:
+            allOf:
+            - $ref: '#/components/schemas/IssuingTransaction'
+          description: A list of transactions.
+    IssuingEntityId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^ent_[a-z0-9]{26}$
+      type: string
+      description: The entity's unique identifier.
+      example: ent_fa6psq242dcd6fdn5gifcq1491
+    IssuingTransaction:
+      type: object
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionId'
+          description: The transaction's unique Checkout.com identifier.
+        created_on:
+          type: string
+          description: The date/time the transaction was created.
+          format: date-time
+        status:
+          enum:
+          - authorized
+          - declined
+          - canceled
+          - cleared
+          - refunded
+          - disputed
+          type: string
+          description: The high-level status indicating the stage of the transaction lifecycle.
+          example: authorized
+        transaction_type:
+          enum:
+          - account_funding
+          - account_transfer
+          - atm_installment
+          - balance_inquiry
+          - bill_payment
+          - cash_advance
+          - cashback
+          - credit_adjustment
+          - debit_adjustment
+          - original_credit
+          - payment_account_inquiry
+          - payment
+          - pin_change
+          - pin_unblock
+          - purchase_account_inquiry
+          - purchase
+          - quasi_cash
+          - remittance_funding
+          - remittance_payment
+          - unknown
+          - withdrawal
+          - refund
+          type: string
+          description: The high-level nature of the transaction.
+          example: purchase
+        client:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionClient'
+          description: Information about Client to which this transaction belongs.
+        entity:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionEntity'
+          description: Information about Entity to which this transaction belongs.
+        card:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionCard'
+          description: Basic card information used in this transaction.
+        digital_card:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionDigitalCard'
+          description: Basic digital card information used in this transaction.
+        cardholder:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionCardholder'
+          description: Information about Cardholder to which this transaction belongs.
+        amounts:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionAmounts'
+          description: The list of aggregated amounts related to the current transaction.
+        merchant:
+          allOf:
+          - $ref: '#/components/schemas/IssuingTransactionMerchant'
+          description: 'The merchant details received in the first applicable message.
+
+            For example, if a transaction starts at the Authorization stage, then it will be the merchant received in the first Authorization.
+
+            '
+        reference_transaction:
+          allOf:
+          - $ref: '#/components/schemas/IssuingReferenceTransaction'
+          description: The basic details of a referenced transaction when applicable.
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssuingTransactionMessage'
+          description: 'A summarized list of messages associated to this transaction.
+
+            A message can be initiated by the cardholder, merchant, acquirer, or issuer.
+
+            '
+        _links:
+          type: object
+          properties:
+            self:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI of the current transaction.
+            card:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI of the associated card.
+            cardholder:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: The URI of the associated cardholder.
+            reference_transaction:
+              allOf:
+              - $ref: '#/components/schemas/IssuingLink'
+              description: "The URI of the reference transaction. \nFor example, the original authorization in case of a refund, the original authenticated MIT or the first authorization in a series of recurring transactions.\n"
+          description: The links related to the transaction.
+    IssuingClientId:
+      maxLength: 30
+      minLength: 30
+      pattern: ^cli_[a-z0-9]{26}$
+      type: string
+      description: The client's unique identifier.
+      example: cli_vkuhvk4vjn2edkps7dfsq6emqm
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

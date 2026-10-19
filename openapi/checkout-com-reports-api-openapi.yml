@@ -1,0 +1,705 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Reports API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Reports
+  description: Retrieve your reconciliation reports programmatically with the Reports API.
+paths:
+  /reports:
+    get:
+      tags:
+      - Reports
+      summary: Get all reports
+      description: Returns the list of reports and their details.
+      operationId: getReports
+      parameters:
+      - name: created_after
+        in: query
+        description: Filters reports to those created on or after the specified timestamp, in UTC. <br/>Format – ISO 8601 code
+        schema:
+          type: string
+          format: date-time
+          example: '2025-02-17T00:00:00.0000000+00:00'
+      - name: created_before
+        in: query
+        description: Filters reports to those created before the specified timestamp, in UTC. <br/>Format – ISO 8601 code
+        schema:
+          type: string
+          format: date-time
+          example: '2025-02-19T00:00:00.0000000+00:00'
+      - name: entity_id
+        in: query
+        description: Filters reports to those created for the specified entity. <br/>Sub-entity IDs are not supported.
+        schema:
+          pattern: ^(ent)_(\w{26})$
+          type: string
+          example: ent_znj4ih5kn4fuxiaquoudv5mvwy
+      - name: limit
+        in: query
+        description: The number of results you want to include per page. </br> For example, if there are 50 results and you set limit=10, you receive 5 pages each containing 10 results.
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          format: int32
+          default: 100
+          example: 5
+      - name: pagination_token
+        in: query
+        description: A token used to paginate multiple pages of results.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Reports retrieved successfully
+          headers:
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportListResponse'
+        '401':
+          description: Unauthorized – Access token may be invalid or missing
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportErrorResponse'
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ReportErrorResponse'
+      security:
+      - OAuth:
+        - reports
+        - reports:view
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/reports\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Reports}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nquery := reports.QueryFilter{\n\tCreatedAfter:  time.Parse(\"2006-01-02\", time.Now().AddDate(0, 0, -10).Format(\"2006-01-02\")),\n\tCreatedBefore: time.Parse(\"2006-01-02\", time.Now().Format(\"2006-01-02\")),\n\tEntityId:      \"entity_id\",\n\tLimit:         20,\n}\n\nresponse, err := api.Reports.GetAllReports(query)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+  /reports/{id}:
+    get:
+      tags:
+      - Reports
+      summary: Get report details
+      description: Use this endpoint to retrieve a specific report using its ID.
+      operationId: getReportDetails
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the report to retrieve.
+        required: true
+        schema:
+          pattern: ^(rpt)_(\w{26})$
+          type: string
+          example: rpt_lmmldzousk7etoqijqundqexa4
+      responses:
+        '200':
+          description: Report details retrieved successfully
+          headers:
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '401':
+          description: Unauthorized. Likely causes include an invalid or unspecified access token.
+        '404':
+          description: No report with the specified ID was found.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ReportErrorResponse'
+      security:
+      - OAuth:
+        - reports
+        - reports:view
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Reports}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Reports.GetReportDetails(\"report_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+  /reports/{id}/files/{fileId}:
+    get:
+      tags:
+      - Reports
+      summary: Get report file
+      description: Use this endpoint to retrieve a specific file from a given report using their respective IDs.
+      operationId: getReportFile
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the report that the file belongs to.
+        required: true
+        schema:
+          pattern: ^(rpt)_(\w{26})$
+          type: string
+          example: rpt_lmmldzousk7etoqijqundqexa4
+      - name: fileId
+        in: path
+        description: The ID of the file to retrieve.
+        required: true
+        schema:
+          pattern: ^(file)_(\w{26})$
+          type: string
+          example: file_7ysmgfkj4ipunduud22uf73iey
+      responses:
+        '302':
+          description: Redirect to the report file download location.
+          headers:
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Location:
+              description: Link to download the file. Expires after 30 seconds.
+              schema:
+                type: string
+        '401':
+          description: Unauthorized. Likely causes include an invalid or unspecified access token.
+        '404':
+          description: No report with the specified ID was found.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ReportErrorResponse'
+      security:
+      - OAuth:
+        - reports
+        - reports:view
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Reports}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Reports.GetReportFile(\"report_id\", \"file_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+components:
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
+  schemas:
+    ReportResponse:
+      type: object
+      properties:
+        id:
+          pattern: ^(rpt)_(\w{26})$
+          type: string
+          description: The report ID.
+          example: rpt_lmmldzousk7etoqijqundqexa4
+        created_on:
+          type: string
+          description: The date and time the report was created.
+          format: date-time
+          example: '2022-02-18T13:00:12.3570000+00:00'
+        last_modified_on:
+          type: string
+          description: The date the report was last modified.
+          format: date-time
+          example: '2022-02-18T13:16:12.3570000+00:00'
+        type:
+          enum:
+          - Authentication
+          - Balance
+          - BalanceBreakdown
+          - BankPayouts
+          - CardPayouts
+          - Disputes
+          - FinancialActions
+          - FinancialActionsByPayout
+          - FraudDetection
+          - IssuingAuthorizations
+          - IssuingCards
+          - IssuingChargebacks
+          - IssuingPresentments
+          - IssuingSettlementActivity
+          - IssuingSettlementSummary
+          - Manifest
+          - Payments
+          - PayoutSummary
+          - RealTimeAccountUpdater
+          - ReportedFraudulentTransactions
+          - Retrievals
+          - SettlementBreakdown
+          - SettlementStatement
+          type: string
+          description: The report type.
+        description:
+          type: string
+          description: The report description.
+          example: Reconciliation Report for X.
+        account:
+          $ref: '#/components/schemas/AccountResponse'
+        tags:
+          type: array
+          items:
+            type: string
+          description: The list of tags for filtering.
+          example:
+          - payout_id:pay_123456789
+        from:
+          type: string
+          description: The reporting period's start date and time.
+          format: date-time
+          example: '2022-02-17T12:00:00.0000000+00:00'
+        to:
+          type: string
+          description: The reporting period's end date and time.
+          format: date-time
+          example: '2022-02-18T12:00:00.0000000+00:00'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileResponse'
+          description: The list of files included in the report.
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              allOf:
+              - $ref: '#/components/schemas/Link'
+              description: The self object.
+              example:
+                href: https://{prefix}.api.checkout.com/reports/rpt_lmmldzousk7etoqijqundqexa4
+          description: The links object.
+      additionalProperties: false
+      description: Report response details.
+    ReportErrorResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: Request Id
+          example: 0HMJGFVAQ35TL:00000117
+        error_type:
+          type: string
+          description: 'The type of error. <br/> • invalid_request = Usually with an http status code 422. The request payload failed validation. <br/> • not_found = Usually with an http status code 404. The requested resource was not found. <br/>
+
+            '
+        error_codes:
+          type: array
+          items:
+            type: string
+          description: 'Error response code. Full list of error codes below: <br/> • invalid_some_field = Usually with an error type `invalid_request` and http status code 422 Unprocessable entity. The field `some_field` failed validation. Please consult the API spec. <br/> • some_resource_not_found = Usually with an error type `not_found`. The resource you are trying to get does not exist. <br/>
+
+            '
+      additionalProperties: false
+      description: Error Response
+    Link:
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          description: The link URL
+      additionalProperties: false
+    ReportListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: The total number of reports on the current page.
+          format: int32
+          example: 1
+        limit:
+          maximum: 100
+          minimum: 1
+          type: integer
+          description: The maximum number of results included per page.
+          format: int32
+          default: 100
+          example: 5
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportResponse'
+          description: The list of reports from the current page.
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              allOf:
+              - $ref: '#/components/schemas/Link'
+              description: The self object.
+              example:
+                href: https://{prefix}.api.checkout.com/reports?entity_id=ent_znj4ih5kn4fuxiaquoudv5mvwy&created_after=2022-02-17T00:00:00.000Z&limit=5
+            next:
+              type: object
+              allOf:
+              - $ref: '#/components/schemas/Link'
+              description: The next object.
+              example:
+                href: https://{prefix}.api.checkout.com/reports?pagination_token=NaZMwq3KbreYcXg0dg752Dg8ps4orkwVK9pj9WFzkXk8rPoR32Wf74QWX0EkZ&entity_id=ent_znj4ih5kn4fuxiaquoudv5mvwy&created_after=2022-02-17T00:00:00.000Z&limit=5
+          description: The links object.
+      additionalProperties: false
+      description: The list of reports in the response.
+    AccountResponse:
+      type: object
+      properties:
+        client_id:
+          pattern: ^(cli)_(\w{26})$
+          type: string
+          description: The client ID.
+          example: cli_bvaelhppmfiufdnatam37wrfc4
+        entity_id:
+          pattern: ^(ent)_(\w{26})$
+          type: string
+          description: The entity ID.
+          example: ent_znj4ih5kn4fuxiaquoudv5mvwy
+      additionalProperties: false
+      description: The client and entity details.
+    FileResponse:
+      type: object
+      properties:
+        id:
+          pattern: ^(file)_(\w{26})$
+          type: string
+          description: The file ID.
+          example: file_7ysmgfkj4ipunduud22uf73iey
+        filename:
+          type: string
+          description: The file name.
+          example: financial-actions_ent_znj4ih5kn4fuxiaquoudv5mvwy_20220218_000000001drl_1.csv
+        format:
+          type: string
+          description: The file format.
+          example: CSV
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              allOf:
+              - $ref: '#/components/schemas/Link'
+              description: The self object.
+              example:
+                href: https://{prefix}.api.checkout.com/reports/rpt_lmmldzousk7etoqijqundqexa4/files/file_lmmldzousk7etoqijqundqexa4
+          description: The link to retrieve the file from.
+      additionalProperties: false
+      description: Details of a file from the response.
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

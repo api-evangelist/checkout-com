@@ -1,0 +1,784 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Payment instruments API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Payment instruments
+  description: Manage bank account payment instruments for your sub-entities.
+paths:
+  /accounts/entities/{entityId}/payment-instruments/{id}:
+    parameters:
+    - name: entityId
+      in: path
+      description: The sub-entity's ID.
+      required: true
+      style: simple
+      schema:
+        type: string
+      example: ent_w4jelhppmfiufdnatam37wrfc4
+    - name: id
+      in: path
+      description: The payment instrument's ID.
+      required: true
+      style: simple
+      schema:
+        type: string
+      example: ppi_qn4nis4k3ykpzzu7cvtuvhqqga
+    get:
+      tags:
+      - Payment instruments
+      summary: Get payment instrument details
+      description: Retrieve the details of a specific payment instrument used for sub-entity payouts.
+      operationId: getPlatformsPaymentInstrument
+      responses:
+        '200':
+          description: Payment instrument details
+          headers:
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformsPaymentInstrumentRead'
+              examples:
+                BankAccount:
+                  value:
+                    id: ppi_qn4nis4k3ykpzzu7cvtuvhqqga
+                    label: Bob's Bank Account
+                    type: bank_account
+                    currency: GBP
+                    country: GB
+                    document:
+                      type: bank_statement
+                      file_id: file_wxglze3wwywujg4nna5fb7ldli
+                    status: verified
+                    instrument_id: src_pdasnoaxrtoevpyh3opgaxcrti
+                CardToken:
+                  value:
+                    id: ppi_cwfekfw2d7mmcto5ql4lpjgrxq
+                    instrument_id: src_jpu3ev6prk7utb5jonqgvvsshm
+                    label: Carol's Card
+                    country: GB
+                    currency: GBP
+                    status: verified
+                    type: card_token
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+      security:
+      - OAuth:
+        - accounts
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Accounts}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nresponse, err := api.Accounts.RetrievePaymentInstrumentDetails(\"entity_id\", \"payment_instrument_id\")\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+    patch:
+      tags:
+      - Payment instruments
+      summary: Update payment instrument details
+      description: Set an existing payment instrument as default. This will make it the destination instrument when a scheduled payout is made. You can also update the label of a payment instrument.
+      operationId: updatePlatformsPaymentInstrument
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformsPaymentInstrumentUpdate'
+        required: true
+      responses:
+        '200':
+          description: Payment instrument updated successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/EntityLinks'
+                - type: object
+                  properties:
+                    id:
+                      type: string
+                      example: ppi_qn4nis4k3ykpzzu7cvtuvhqqga
+        '401':
+          description: Unauthorized
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '428':
+          description: Precondition required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreconditionRequiredError'
+      security:
+      - OAuth:
+        - accounts
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/accounts\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Accounts}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nrequest := accounts.UpdatePaymentInstrumentRequest{\n\tLabel:   \"Peter's Personal Account\",\n\tDefault: true,\n}\n\nresponse, err := api.Accounts.UpdatePaymentInstrumentDetails(\"entity_id\", \"payment_instrument_id\", request)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+  /accounts/entities/{id}/payment-instruments:
+    parameters:
+    - name: id
+      in: path
+      description: The sub-entity's ID.
+      required: true
+      style: simple
+      schema:
+        type: string
+      example: ent_w4jelhppmfiufdnatam37wrfc4
+    post:
+      tags:
+      - Payment instruments
+      summary: Add a payment instrument
+      description: Create a bank account payment instrument for your sub-entity. You can use this payment instrument as a payout destination.
+      operationId: addPlatformsPaymentInstrument
+      requestBody:
+        description: A JSON payload containing the payment instrument details.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformsPaymentInstrumentCreate'
+            examples:
+              FasterPaymentsBankAccount:
+                value:
+                  label: Bob's Bank Account
+                  type: bank_account
+                  currency: GBP
+                  country: GB
+                  instrument_details:
+                    account_number: 12345678
+                    bank_code: 50389
+                  document:
+                    type: bank_statement
+                    file_id: file_wxglze3wwywujg4nna5fb7ldli
+              SepaBankAccount:
+                value:
+                  label: Bruno's Bank Account
+                  type: bank_account
+                  currency: EUR
+                  country: FR
+                  instrument_details:
+                    iban: FR1420041010050500013M02606,
+                    swift_bic: LZSKFR2E98I
+                  document:
+                    type: bank_statement
+                    file_id: file_wxglze3wwywujg4nna5fb7ldli
+              AchBankAccount:
+                value:
+                  label: Alex's Bank Account
+                  type: bank_account
+                  currency: USD
+                  country: US
+                  instrument_details:
+                    account_number: 12345100
+                    routing_number: 26009593
+                    account_type: savings
+                  document:
+                    type: bank_statement
+                    file_id: file_wxglze3wwywujg4nna5fb7ldli
+              CardToken:
+                value:
+                  label: Carol's Card
+                  type: card_token
+                  currency: GBP
+                  instrument_details:
+                    token: tok_ru6xnh53uovethkr2gy3gwpl2a
+        required: true
+      responses:
+        '201':
+          description: Created
+          headers:
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: ppi_qn4nis4k3ykpzzu7cvtuvhqqga
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '422':
+          description: Invalid data was sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ValidationError'
+      security:
+      - OAuth:
+        - accounts
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/accounts\"\n\t\"github.com/checkout/checkout-sdk-go/common\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n\t\"github.com/checkout/checkout-sdk-go/instruments\"\n)\n\n// API Keys\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tStaticKeys().\n\t\t\tWithSecretKey(\"secret_key\").\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\t\t\tBuilder().\n\t\t\tOAuth().\n\t\t\tWithClientCredentials(\"client_id\", \"client_secret\").\n\t\t\tWithScopes([]string{configuration.Accounts}).\n\t\t\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\t\t\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nrequest := accounts.PaymentInstrumentRequest{\n\tLabel:              \"Bob's Bank Account\",\n\tType:               instruments.BankAccount,\n\tCurrency:           common.GBP,\n\tCountry:            common.GB,\n\tDefaultDestination: true,\n\tDocument: &accounts.InstrumentDocument{\n\t\tType:   \"document\",\n\t\tFileId: \"file\",\n\t},\n\tInstrumentDetails: &accounts.InstrumentDetailsFasterPayments{\n\t\tAccountNumber: \"123456789\",\n\t\tBankCode:      \"bank_code\",\n\t},\n}\n\nresponse, err := api.Accounts.CreatePaymentInstrument(\"entity_id\", request)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+    get:
+      tags:
+      - Payment instruments
+      summary: Query payment instruments
+      description: Fetch all of the payment instruments for a sub-entity. You can filter by `status` to identify `verified` instruments that are ready to be used for Payouts.
+      operationId: queryPlatformsPaymentInstruments
+      parameters:
+      - name: status
+        in: query
+        schema:
+          $ref: '#/components/schemas/PlatformsPaymentInstrumentStatus'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformsPaymentInstrumentQuery'
+              examples:
+                BankAccounts:
+                  value:
+                    data:
+                    - id: ppi_qn4nis4k3ykpzzu7cvtuvhqqga
+                      label: Bob's Bank Account
+                      type: bank_account
+                      currency: GBP
+                      country: GB
+                      status: verified
+                      instrument_id: src_pdasnoaxrtoevpyh3opgaxcrti
+                    - id: ppi_yk7nmh5jypmqzw5kb6kshj2iiy
+                      label: Bruno's Bank Account
+                      type: bank_account
+                      currency: EUR
+                      country: FR
+                      status: pending
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+      security:
+      - OAuth:
+        - accounts
+      - ApiSecretKey: []
+      x-code-samples:
+      - lang: Go
+        source: "// For more information please refer to https://github.com/checkout/checkout-sdk-go\nimport (\n\t\"github.com/checkout/checkout-sdk-go\"\n\t\"github.com/checkout/checkout-sdk-go/accounts\"\n\t\"github.com/checkout/checkout-sdk-go/configuration\"\n)\n\n// API Keys\napi, err := checkout.\n\tBuilder().\n\tStaticKeys().\n\tWithSecretKey(\"secret_key\").\n\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\n// OAuth\napi, err := checkout.\n\tBuilder().\n\tOAuth().\n\tWithClientCredentials(\"client_id\", \"client_secret\").\n\tWithScopes([]string{configuration.Accounts}).\n\tWithEnvironment(configuration.Sandbox()). // or Environment.PRODUCTION\n                        WithEnvironmentSubdomain(\"{prefix}\"). // Your base URL's {prefix} value is unique to your account and environment. To learn how to retrieve your base URLs for the sandbox and production environments, see https://www.checkout.com/docs/developer-resources/api/api-endpoints.\n\tBuild()\nif err != nil {\n\treturn nil, err\n}\n\nquery := accounts.PaymentInstrumentsQuery{Status: \"pending\"}\n\nresponse, err := api.Accounts.QueryPaymentInstruments(\"entity_id\", query)\nif err != nil {\n\treturn nil, err\n}\n\nreturn response, nil"
+components:
+  schemas:
+    EntityLinks:
+      title: Links
+      type: object
+      properties:
+        _links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          example:
+            self:
+              href: https://{prefix}.api.checkout.com/accounts/entities/ent_wxglze3wwywujg4nna5fb7ldli
+    PlatformsPaymentInstrumentStatus:
+      title: Status
+      enum:
+      - pending
+      - verified
+      - unverified
+      type: string
+      description: The status of your sub-entity's payment instrument. The status indicates the instrument's stage of verification, and whether it can be used for payouts.
+      example: verified
+    Link:
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          description: The link URL
+      additionalProperties: false
+    PlatformsPaymentInstrumentCreate:
+      title: PaymentInstrumentCreateRequest
+      required:
+      - label
+      - type
+      - currency
+      - instrument_details
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of instrument
+          example: bank_account
+        label:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: A reference that you can use to identify the payment instrument
+          example: Peter's Personal Account
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The three-letter <a href="https://www.checkout.com/docs/resources/codes/currency-codes" target="blank">ISO currency code</a> of the account's currency.
+          example: GBP
+        instrument_details:
+          type: object
+          description: Details of the payment instrument being created
+      discriminator:
+        propertyName: type
+        mapping:
+          card_token: '#/components/schemas/PlatformsInstrumentDetailsCardToken'
+          bank_account: '#/components/schemas/PlatformsPaymentInstrumentBankAccount'
+    PlatformsPaymentInstrumentUpdate:
+      title: PaymentInstrumentUpdateRequest
+      type: object
+      properties:
+        label:
+          title: Label
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: A reference that you can use to identify the payment instrument.
+          example: Peter's Personal Account
+        default:
+          title: Default
+          type: boolean
+          description: 'For ad-hoc payouts, the payment instrument is explicitly specified in the payout request.
+
+            For scheduled payouts, the first payment instrument created for a given currency will be used for that currency''s payout schedule.
+
+            To change the payment instrument associated with a payout schedule, update the payout schedule.
+
+            (Deprecated) Specifies whether the payment instrument should be set as the default payout destination.
+
+            '
+          deprecated: true
+        headers:
+          required:
+          - if-match
+          type: object
+          properties:
+            if-match:
+              type: string
+              description: The payment instrument ETag value
+              example: Y3Y9MCZydj0w
+    PlatformsPaymentInstrument:
+      title: PaymentInstrumentBase
+      required:
+      - label
+      - type
+      - currency
+      type: object
+      properties:
+        label:
+          title: Label
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: A reference that you can use to identify the payment instrument
+          example: Peter's Personal Account
+        type:
+          title: Type
+          enum:
+          - bank_account
+          - card_token
+          type: string
+          description: The instrument type
+        currency:
+          title: Currency
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The account's currency, as a 3-letter ISO currency code
+          format: ISO 4217
+          example: GBP
+    PlatformsPaymentInstrumentRead:
+      title: PaymentInstrumentReadResponse
+      type: object
+      allOf:
+      - type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the sub-entity's payment instrument.
+            example: ppi_qn4nis4k3ykpzzu7cvtuvhqqga
+          status:
+            $ref: '#/components/schemas/PlatformsPaymentInstrumentStatus'
+          instrument_id:
+            title: Status
+            type: string
+            description: The payment instrument's ID. Only available once the instrument status is `verified`.
+            example: src_wmlfc3zyhqzehihu7giusaaawu
+      - $ref: '#/components/schemas/PlatformsPaymentInstrument'
+      - type: object
+        properties:
+          _links:
+            type: object
+            additionalProperties:
+              $ref: '#/components/schemas/Link'
+    ValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HL80RJLS76I7
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: payment_source_required
+    PlatformsPaymentInstrumentQuery:
+      title: PaymentInstrumentQueryResponse
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformsPaymentInstrumentRead'
+        _links:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+    PreconditionRequiredError:
+      type: object
+      properties:
+        status:
+          type: string
+          example: '428'
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory

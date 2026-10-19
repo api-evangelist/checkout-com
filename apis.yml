@@ -226,6 +226,542 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/checkout-com-workflows-api-openapi.yml
+- aid: checkout-com:checkout-com-access-api
+  name: Checkout.com Access API
+  description: Create an access token to begin using our APIs.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Access
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-access-api-openapi.yml
+- aid: checkout-com:checkout-com-address-document-verification-api
+  name: Checkout.com Address Document Verification API
+  description: Verify your users' addresses by checking their address documents.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Address Document Verification
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-address-document-verification-api-openapi.yml
+- aid: checkout-com:checkout-com-agentic-commerce-protocol-api
+  name: Checkout.com Agentic Commerce Protocol API
+  description: >-
+    <span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176,
+    97); border-radius: 4px; padding: 2px 6px">Beta</span>
+
+
+    Enable AI platforms to create scoped, single-use payment tokens to securely process agentic commerce
+    transactions. This implementation follows the [Agentic Commerce Protocol (ACP)](https://developers.openai.com/commerce/specs/payment)
+    delegated payment specification.
+
+
+    To onboard your AI platform, [contact us](https://www.checkout.com/contact-sales).
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Agentic Commerce Protocol
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-agentic-commerce-protocol-api-openapi.yml
+- aid: checkout-com:checkout-com-aml-screening-api
+  name: Checkout.com AML Screening API
+  description: The AML Screening API from Checkout.com — 2 operation(s) for aml screening.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - AML Screening
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-aml-screening-api-openapi.yml
+- aid: checkout-com:checkout-com-apple-pay-api
+  name: Checkout.com Apple Pay API
+  description: Manage your Apple Pay certificates in order to process payments via Apple Pay.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Apple Pay
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-apple-pay-api-openapi.yml
+- aid: checkout-com:checkout-com-applicants-api
+  name: Checkout.com Applicants API
+  description: The Applicants API from Checkout.com — 3 operation(s) for applicants.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Applicants
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-applicants-api-openapi.yml
+- aid: checkout-com:checkout-com-bacs-direct-debit-api
+  name: Checkout.com Bacs Direct Debit API
+  description: Send Bacs Direct Debit pre-notifications to payers ahead of collecting funds.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Bacs Direct Debit
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-bacs-direct-debit-api-openapi.yml
+- aid: checkout-com:checkout-com-balances-api
+  name: Checkout.com Balances API
+  description: >-
+    View the balances for sub-accounts in an entity, and retrieve the bank details used to top them up.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Balances
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-balances-api-openapi.yml
+- aid: checkout-com:checkout-com-business-details-api
+  name: Checkout.com Business details API
+  description: View and manage the business details of your SaaS seller sub-entities.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Business details
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-business-details-api-openapi.yml
+- aid: checkout-com:checkout-com-card-metadata-api
+  name: Checkout.com Card metadata API
+  description: The Card metadata API from Checkout.com — 1 operation(s) for card metadata.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Card metadata
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-card-metadata-api-openapi.yml
+- aid: checkout-com:checkout-com-card-testing-api
+  name: Checkout.com Card testing API
+  description: Simulate transactions using a card on the sandbox environment.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Card testing
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-card-testing-api-openapi.yml
+- aid: checkout-com:checkout-com-cardholder-access-tokens-api
+  name: Checkout.com Cardholder access tokens API
+  description: >-
+    Create a cardholder-specific access token for secure data access with our Card Issuing SDK for [Android](https://www.checkout.com/docs/developer-resources/sdks/card-issuing-android-sdk)
+    or [iOS](https://www.checkout.com/docs/developer-resources/sdks/card-issuing-ios-sdk), by exchanging
+    your access key ID and access key secret.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Cardholder access tokens
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-cardholder-access-tokens-api-openapi.yml
+- aid: checkout-com:checkout-com-cardholders-api
+  name: Checkout.com Cardholders API
+  description: Create new cardholders to issue cards to, and manage your existing cardholders.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Cardholders
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-cardholders-api-openapi.yml
+- aid: checkout-com:checkout-com-cards-api
+  name: Checkout.com Cards API
+  description: Issue new cards to your cardholders, and manage cards you've already issued.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Cards
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-cards-api-openapi.yml
+- aid: checkout-com:checkout-com-compliance-requests-api
+  name: Checkout.com Compliance requests API
+  description: The Compliance requests API from Checkout.com — 1 operation(s) for compliance requests.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Compliance requests
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-compliance-requests-api-openapi.yml
+- aid: checkout-com:checkout-com-control-groups-api
+  name: Checkout.com Control groups API
+  description: Group multiple spending controls together and specify how to apply the combined outcome.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Control groups
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-control-groups-api-openapi.yml
+- aid: checkout-com:checkout-com-control-profiles-api
+  name: Checkout.com Control profiles API
+  description: Creates a control profile and applies it to the specified target.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Control profiles
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-control-profiles-api-openapi.yml
+- aid: checkout-com:checkout-com-controls-api
+  name: Checkout.com Controls API
+  description: Set spending controls to limit how much can be spent over a given period of time.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Controls
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-controls-api-openapi.yml
+- aid: checkout-com:checkout-com-digital-cards-api
+  name: Checkout.com Digital cards API
+  description: The Digital cards API from Checkout.com — 1 operation(s) for digital cards.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Digital cards
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-digital-cards-api-openapi.yml
+- aid: checkout-com:checkout-com-disputes-api
+  name: Checkout.com Disputes API
+  description: >-
+    Keep track of and act on your open disputes (also known as chargebacks) to submit the best possible
+    response.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Disputes
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-disputes-api-openapi.yml
+- aid: checkout-com:checkout-com-face-authentication-api
+  name: Checkout.com Face Authentication API
+  description: The Face Authentication API from Checkout.com — 6 operation(s) for face authentication.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Face Authentication
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-face-authentication-api-openapi.yml
+- aid: checkout-com:checkout-com-financial-actions-api
+  name: Checkout.com Financial actions API
+  description: >-
+    Returns all the processed financial actions associated with your given filter. The results are ordered
+    by processing date in descending order (latest first).
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Financial actions
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-financial-actions-api-openapi.yml
+- aid: checkout-com:checkout-com-flow-api
+  name: Checkout.com Flow API
+  description: >-
+    A [Flow](https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website)
+    payment session contains the information required to display relevant payment methods and handle the
+    payment flow.
+
+
+    To enable access to Flow, contact your solutions engineer or [request support](https://dashboard.checkout.com/support/new?topic=case_account_management_and_access&issue=issue_account_changes).
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Flow
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-flow-api-openapi.yml
+- aid: checkout-com:checkout-com-forex-api
+  name: Checkout.com Forex API
+  description: Use the Forex API to access Checkout.com's foreign exchange (FX) services.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Forex
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-forex-api-openapi.yml
+- aid: checkout-com:checkout-com-forward-api
+  name: Checkout.com Forward API
+  description: The Forward API from Checkout.com — 4 operation(s) for forward.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Forward
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-forward-api-openapi.yml
+- aid: checkout-com:checkout-com-google-pay-api
+  name: Checkout.com Google Pay API
+  description: Manage your domain enrollments to process payments via Google Pay.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Google Pay
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-google-pay-api-openapi.yml
+- aid: checkout-com:checkout-com-hosted-payments-page-api
+  name: Checkout.com Hosted Payments Page API
+  description: Create a Hosted Payments Page to accept and process payment details.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Hosted Payments Page
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-hosted-payments-page-api-openapi.yml
+- aid: checkout-com:checkout-com-id-document-verification-api
+  name: Checkout.com ID Document Verification API
+  description: >-
+    The ID Document Verification API from Checkout.com — 7 operation(s) for id document verification.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - ID Document Verification
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-id-document-verification-api-openapi.yml
+- aid: checkout-com:checkout-com-identity-verification-api
+  name: Checkout.com Identity Verification API
+  description: >-
+    The Identity Verification API from Checkout.com — 8 operation(s) for identity verification.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Identity Verification
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-identity-verification-api-openapi.yml
+- aid: checkout-com:checkout-com-inventory-api
+  name: Checkout.com Inventory API
+  description: >-
+    <span style="font-size: 12px; font-weight: 500; color: rgb(0, 0, 0); background-color: rgb(255, 176,
+    97); border-radius: 4px; padding: 2px 6px">Beta</span>
+
+
+    Manage stock levels for each product variant (e.g. size or color) and temporarily hold stock while
+    an AI agent completes a checkout. Each hold can later be confirmed or cancelled, and automatically
+    expires on its own if left unresolved. This prevents overselling, even when multiple agents are buying
+    at the same time.
+
+    Holds work the same way regardless of which agentic commerce protocol is used.
+
+
+    Requires the `agentic:inventory` scope. To onboard your AI platform, <a href="https://www.checkout.com/contact-sales"
+    target="_blank">contact us</a>.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Inventory
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-inventory-api-openapi.yml
+- aid: checkout-com:checkout-com-issuing-disputes-api
+  name: Checkout.com Issuing disputes API
+  description: The Issuing disputes API from Checkout.com — 6 operation(s) for issuing disputes.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Issuing disputes
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-issuing-disputes-api-openapi.yml
+- aid: checkout-com:checkout-com-network-tokens-api
+  name: Checkout.com Network Tokens API
+  description: Provision network tokens and cryptograms.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Network Tokens
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-network-tokens-api-openapi.yml
+- aid: checkout-com:checkout-com-onboarding-api
+  name: Checkout.com Onboarding API
+  description: The Onboarding API from Checkout.com — 4 operation(s) for onboarding.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Onboarding
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-onboarding-api-openapi.yml
+- aid: checkout-com:checkout-com-onboarding-simulator-api
+  name: Checkout.com Onboarding Simulator API
+  description: >-
+    Endpoints for driving entity state in sandbox environments. These endpoints are sandbox-only and return
+    404 in production. Use them to simulate status transitions and requirements-due scenarios when testing
+    your integration.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Onboarding Simulator
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-onboarding-simulator-api-openapi.yml
+- aid: checkout-com:checkout-com-out-of-band-authentication-simulator-api
+  name: Checkout.com Out-of-band authentication simulator API
+  description: >-
+    The Out-of-band authentication simulator API from Checkout.com — 1 operation(s) for out-of-band authentication
+    simulator.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Out-of-band authentication simulator
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-out-of-band-authentication-simulator-api-openapi.yml
+- aid: checkout-com:checkout-com-payment-context-api
+  name: Checkout.com Payment Context API
+  description: The Payment Context API from Checkout.com — 2 operation(s) for payment context.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payment Context
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-payment-context-api-openapi.yml
+- aid: checkout-com:checkout-com-payment-instruments-api
+  name: Checkout.com Payment instruments API
+  description: Manage bank account payment instruments for your sub-entities.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payment instruments
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-payment-instruments-api-openapi.yml
+- aid: checkout-com:checkout-com-payment-links-api
+  name: Checkout.com Payment Links API
+  description: Create a Payment Link to accept and process payment details.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payment Links
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-payment-links-api-openapi.yml
+- aid: checkout-com:checkout-com-payment-methods-api
+  name: Checkout.com Payment Methods API
+  description: The Payment Methods API from Checkout.com — 1 operation(s) for payment methods.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payment Methods
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-payment-methods-api-openapi.yml
+- aid: checkout-com:checkout-com-payment-setups-api
+  name: Checkout.com Payment Setups API
+  description: >-
+    The Payment Setup API enables you to simplify the management of complex payment flows that cover multiple
+    payment methods.
+
+
+    For more information, see [Accept a payment using the Payment Setup API](https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-using-the-payment-setup-api).
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payment Setups
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-payment-setups-api-openapi.yml
+- aid: checkout-com:checkout-com-payout-schedules-api
+  name: Checkout.com Payout schedules API
+  description: View and manage payout schedules for your sub-entities.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Payout schedules
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-payout-schedules-api-openapi.yml
+- aid: checkout-com:checkout-com-platforms-api
+  name: Checkout.com Platforms API
+  description: >-
+    Manage all your sub-entities (also known as sub-merchants) through one integration, globally.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Platforms
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-platforms-api-openapi.yml
+- aid: checkout-com:checkout-com-reports-api
+  name: Checkout.com Reports API
+  description: >-
+    Retrieve your reconciliation reports programmatically with the [Reports API](https://www.checkout.com/docs/reporting/reports-api).
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Reports
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-reports-api-openapi.yml
+- aid: checkout-com:checkout-com-reserve-rules-api
+  name: Checkout.com Reserve rules API
+  description: View and manage reserve rules for your sub-entities.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Reserve rules
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-reserve-rules-api-openapi.yml
+- aid: checkout-com:checkout-com-standalone-account-updater-api
+  name: Checkout.com Standalone Account Updater API
+  description: Retrieve updated card details
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Standalone Account Updater
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-standalone-account-updater-api-openapi.yml
+- aid: checkout-com:checkout-com-standalone-api
+  name: Checkout.com Standalone API
+  description: >-
+    Use Standalone Sessions to authenticate transactions with 3D Secure (3DS) and comply with Strong Customer
+    Authentication (SCA) requirements.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Standalone
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-standalone-api-openapi.yml
+- aid: checkout-com:checkout-com-transactions-api
+  name: Checkout.com Transactions API
+  description: The Transactions API from Checkout.com — 2 operation(s) for transactions.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Transactions
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-transactions-api-openapi.yml
+- aid: checkout-com:checkout-com-transfers-api
+  name: Checkout.com Transfers API
+  description: >-
+    Transfer funds while managing the entities to transfer money to recoup funds from a seller, return
+    money from a refund or to make up the difference when running a promotion.
+  humanURL: https://api-reference.checkout.com/
+  baseURL: https://api.checkout.com
+  tags:
+  - Transfers
+  properties:
+  - type: OpenAPI
+    url: openapi/checkout-com-transfers-api-openapi.yml
 common:
 - type: AgenticAccess
   url: agentic-access/checkout-com-agentic-access.yml

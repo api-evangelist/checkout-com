@@ -1,0 +1,1089 @@
+openapi: 3.2.0
+info:
+  title: Checkout.com API Reference Business details API
+  description: '## Get started
+
+    Checkout.com provides a collection of APIs that enable you to integrate with our various products and services.
+
+    Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes. You can consume the APIs directly using any HTTP or REST library.
+
+    Sign up for a test account to gain access to the sandbox environment, where you can test API calls without affecting live data.
+
+    For more information, see:
+
+
+    - API endpoints
+
+    - API rate limits
+
+    - API changes
+
+    - Idempotency
+
+    - Private connections
+
+
+    ## Base URLs
+
+    The base URLs you must use for your API calls to the sandbox and production environments are unique to you.
+
+
+    - `https://{prefix}.api.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.api.checkout.com/{path}`
+
+    - `https://{prefix}.access.sandbox.checkout.com/{path}`
+
+    - `https://{prefix}.access.checkout.com/{path}`
+
+
+    The unique API endpoint host names resolve to Checkout.com''s IP addresses. Do not allowlist these IP addresses.
+
+    The `{prefix}` value in each base URL is a string containing the first eight characters of each of your environments'' unique `client_id`, excluding the `cli_` prefix.
+
+    To find your unique base URL:
+
+    1. Sign in to the Dashboard environment you want to retrieve the base URL for:
+
+
+    - Sandbox
+
+    - Production
+
+
+    2. Go to _Developers_ > _Overview_.
+
+    Your unique base URL is displayed on the _Developer overview_ page. For example, `https://vkuhvk4v.api.checkout.com`.
+
+
+    3. Alternatively, go to _Settings_ > _Account details_.
+
+    Your unique base URL is displayed under _Connection settings_.
+
+
+    If you are unsure of your client ID or base URL for either environment, contact your account manager or request support.
+
+    For more information, see API endpoints.
+
+    ## Authentication
+
+    When you sign up for an account, you can authenticate with either Access keys (OAuth 2.0), or Secret API keys.
+
+    Unless explicitly stated, all endpoints require authentication using either your Access or Secret API Keys. Public keys should only be used in JavaScript or native applications.
+
+
+    - **Client-side authentication**. Use your public key for client-side authentication. It only has access to a limited set of our APIs – mostly those called as part of your payment environment.
+
+
+    - **Server-to-server authentication**. Use your secret key or OAuth for server-to-server communication. Support for API keys depends on the endpoint.
+
+
+    Never share your OAuth credentials, API keys, or access tokens. Keep them guarded and secure.'
+  termsOfService: https://www.checkout.com/legal/terms-and-policies
+  contact:
+    name: Checkout.com Support
+    url: https://dashboard.checkout.com/support
+  version: v1.0.0
+servers:
+- url: https://{prefix}.api.sandbox.checkout.com
+  description: Sandbox environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+- url: https://{prefix}.api.checkout.com
+  description: Production environment
+  variables:
+    prefix:
+      default: '{prefix}'
+      description: Your unique <a href="https://www.checkout.com/docs/developer-resources/api/api-endpoints" target="_blank">base URL</a>. There is no default value.
+tags:
+- name: Business details
+  description: View and manage the business details of your SaaS seller sub-entities.
+paths:
+  /accounts/entities/{id}/business-details:
+    get:
+      tags:
+      - Business details
+      summary: Get a sub-entity's business details
+      description: 'Retrieve the business details of one of your sub-entities, onboarded through our Platforms solution.
+
+
+        Business details are the parts of a sub-entity''s company information that can change after onboarding. If a change to them is under review, this endpoint returns the submitted values with a `pending` status by default, so you can retrieve a change you''ve already submitted.
+
+
+        To retrieve the values currently in effect while a change is under review, send `GET /accounts/entities/{id}/business-details?status=active`. To retrieve only a change under review, send `GET /accounts/entities/{id}/business-details?status=pending`. The `pending` values include the documents submitted with the change.'
+      operationId: getSubEntitysBusinessDetails
+      parameters:
+      - name: id
+        in: path
+        description: The sub-entity's ID.
+        required: true
+        style: simple
+        schema:
+          type: string
+        example: ent_w4jelhppmfiufdnatam37wrfc4
+      - name: status
+        in: query
+        description: 'The version of the sub-entity''s business details to return. `status` selects which values are returned, but does not filter them.
+
+
+          Use `active` to retrieve the values currently in effect. This shows you the values a pending change would replace once approved.
+
+
+          Use `pending` to retrieve the values submitted in a change that is still under review. The request returns `404` if no change is under review.
+
+
+          If you omit this parameter and a change is under review, the endpoint returns the `pending` values. Otherwise, it returns the `active` values.'
+        allowEmptyValue: true
+        style: form
+        explode: false
+        schema:
+          enum:
+          - active
+          - pending
+          type: string
+        example: active
+      responses:
+        '200':
+          description: Business details retrieved successfully
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - title: Company
+                  allOf:
+                  - $ref: '#/components/schemas/BusinessDetailsCompany'
+                - title: Sole trader
+                  allOf:
+                  - $ref: '#/components/schemas/BusinessDetailsSoleTrader'
+              examples:
+                Active:
+                  summary: Active business details
+                  value:
+                    legal_name: The Online Retailer
+                    trading_name: Online Retail Co
+                    registered_address:
+                      address_line1: 444 Test Avenue
+                      city: Anytown
+                      zip: 67890-1234
+                      country: US
+                      state: FL
+                    principal_address:
+                      address_line1: 123 Anywhere St.
+                      city: Anytown
+                      zip: 12345-6789
+                      country: US
+                      address_line2: Apt. 456
+                      state: AL
+                    status: active
+                    additional_trading_names:
+                    - Online Retail
+                Pending:
+                  summary: Pending business details, with the submitted documents
+                  value:
+                    legal_name: The Online Retailer
+                    trading_name: Online Retail Co
+                    registered_address:
+                      address_line1: 444 Test Avenue
+                      city: Anytown
+                      zip: 67890-1234
+                      country: US
+                      state: FL
+                    principal_address:
+                      address_line1: 123 Anywhere St.
+                      city: Anytown
+                      zip: 12345-6789
+                      country: US
+                      address_line2: Apt. 456
+                      state: AL
+                    status: pending
+                    additional_trading_names:
+                    - Online Retail
+                    documents:
+                      company_verification:
+                        type: incorporation_document
+                        front: file_wxglze3wwywujg4nna5fb7ldli
+                      proof_of_principal_address:
+                        type: proof_of_address
+                        front: file_6lbss42ezvoufcb2beo76rvwly
+                      proof_of_registered_address:
+                        type: proof_of_address
+                        front: file_ovcw6dxu2rjecmb4nqzk3wtgli
+        '401':
+          description: Unauthorized
+        '404':
+          description: Sub-entity not found, or the sub-entity has no business details
+        '422':
+          description: Invalid data sent
+        '429':
+          description: Too many requests
+      security:
+      - OAuth:
+        - accounts
+      - ApiSecretKey: []
+    put:
+      tags:
+      - Business details
+      summary: Update a sub-entity's business details
+      description: 'Submit a change to the business details of one of your sub-entities, onboarded through our Platforms solution.
+
+
+        This endpoint opens a change request for review. The sub-entity keeps its current business details until the review completes, and the response returns the values you submitted with a `pending` status.
+
+
+        You can have only one change under review at a time. Provide the complete set of business details, not only the fields you want to change. You cannot change the sub-entity''s country.
+
+
+        You cannot currently amend a change after you submit it. Until the change has been assessed, a further `PUT` request returns `409`. To retrieve the change in progress, send a `GET` request with `status=pending`. If you submitted incorrect values, wait for the assessment outcome and submit the corrected values as a new change, or resolve any requirements the assessment raises, which you can retrieve from `GET /accounts/entities/{id}/requirements`. Support for amending a change that is under review is planned.
+
+
+        Some changes must include a supporting document. Changing `legal_name`, `trading_name`, or `additional_trading_names` requires `documents.company_verification`. Changing `principal_address` requires `documents.proof_of_principal_address`. Changing `registered_address` requires `documents.proof_of_registered_address`. The registered address and principal address require separate documents.
+
+
+        You do not need to provide a document if you have not changed the fields it supports, or if a valid document is already on file.'
+      operationId: putSubEntitysBusinessDetails
+      parameters:
+      - name: id
+        in: path
+        description: The sub-entity's ID.
+        required: true
+        style: simple
+        schema:
+          type: string
+        example: ent_w4jelhppmfiufdnatam37wrfc4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - title: Company
+                allOf:
+                - $ref: '#/components/schemas/BusinessDetailsCompany'
+              - title: Sole trader
+                allOf:
+                - $ref: '#/components/schemas/BusinessDetailsSoleTrader'
+            examples:
+              Company:
+                summary: Company
+                value:
+                  legal_name: The Online Retailer
+                  trading_name: Online Retail Co
+                  registered_address:
+                    address_line1: 444 Test Avenue
+                    city: Anytown
+                    zip: 67890-1234
+                    country: US
+                    state: FL
+                  principal_address:
+                    address_line1: 123 Anywhere St.
+                    city: Anytown
+                    zip: 12345-6789
+                    country: US
+                    address_line2: Apt. 456
+                    state: AL
+                  additional_trading_names:
+                  - Online Retail
+                  documents:
+                    company_verification:
+                      type: incorporation_document
+                      front: file_wxglze3wwywujg4nna5fb7ldli
+                    proof_of_principal_address:
+                      type: proof_of_address
+                      front: file_6lbss42ezvoufcb2beo76rvwly
+                    proof_of_registered_address:
+                      type: proof_of_address
+                      front: file_ovcw6dxu2rjecmb4nqzk3wtgli
+              SoleTrader:
+                summary: Sole trader
+                value:
+                  trading_name: The Online Retail Shop
+                  principal_address:
+                    address_line1: 123 Anywhere St.
+                    city: Anytown
+                    zip: 12345-6789
+                    country: US
+                    address_line2: Apt. 456
+                    state: AL
+                  additional_trading_names:
+                  - Online Retailer Co
+                  documents:
+                    company_verification:
+                      type: incorporation_document
+                      front: file_wxglze3wwywujg4nna5fb7ldli
+                    proof_of_principal_address:
+                      type: proof_of_address
+                      front: file_6lbss42ezvoufcb2beo76rvwly
+        required: true
+      responses:
+        '200':
+          description: Change submitted successfully and is now under review
+          headers:
+            Cko-Request-Id:
+              $ref: '#/components/headers/Cko-Request-Id'
+            Cko-Version:
+              $ref: '#/components/headers/Cko-Version'
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - title: Company
+                  allOf:
+                  - $ref: '#/components/schemas/BusinessDetailsCompany'
+                - title: Sole trader
+                  allOf:
+                  - $ref: '#/components/schemas/BusinessDetailsSoleTrader'
+              examples:
+                Pending:
+                  summary: Change submitted for review
+                  value:
+                    legal_name: The Online Retailer
+                    trading_name: Online Retail Co
+                    registered_address:
+                      address_line1: 444 Test Avenue
+                      city: Anytown
+                      zip: 67890-1234
+                      country: US
+                      state: FL
+                    principal_address:
+                      address_line1: 123 Anywhere St.
+                      city: Anytown
+                      zip: 12345-6789
+                      country: US
+                      address_line2: Apt. 456
+                      state: AL
+                    status: pending
+                    additional_trading_names:
+                    - Online Retail
+                    documents:
+                      company_verification:
+                        type: incorporation_document
+                        front: file_wxglze3wwywujg4nna5fb7ldli
+                      proof_of_principal_address:
+                        type: proof_of_address
+                        front: file_6lbss42ezvoufcb2beo76rvwly
+                      proof_of_registered_address:
+                        type: proof_of_address
+                        front: file_ovcw6dxu2rjecmb4nqzk3wtgli
+        '401':
+          description: Unauthorized
+        '404':
+          description: Sub-entity not found, or the sub-entity has no business details
+        '409':
+          description: A change to the sub-entity's business details is already under review. You can have only one at a time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                request_id: 0HL80RJLS76I7
+                error_type: conflict
+                error_codes:
+                - Entity already has a pending update.
+        '422':
+          description: Unable to process the request. A field is invalid or missing, is not part of this resource, or was changed without its supporting document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                request_id: 0HL80RJLS76I7
+                error_type: invalid_request
+                error_codes:
+                - '''trading_name'' is invalid.'
+                - '''business_type'' is not part of this resource.'
+        '429':
+          description: Too many requests
+        '502':
+          description: We could not validate the change because an upstream service was unavailable. No change was created, so you can retry the request
+      security:
+      - OAuth:
+        - accounts
+      - ApiSecretKey: []
+components:
+  schemas:
+    BusinessDetailsCompany:
+      title: Company
+      required:
+      - legal_name
+      - trading_name
+      - registered_address
+      - principal_address
+      type: object
+      properties:
+        status:
+          title: Status
+          enum:
+          - active
+          - pending
+          type: string
+          description: 'The status of the business details. This describes the data in this response, not the sub-entity''s own status. A suspended sub-entity can still have `active` business details.
+
+
+            `active` means the values are live. `pending` means a change has been submitted and is still under review, so the values shown are the ones you submitted, not the ones currently in effect.
+
+
+            Read-only on input. You can send a response body back unchanged in a `PUT` request, and this field is ignored.'
+          readOnly: true
+        legal_name:
+          title: Legal name
+          maxLength: 300
+          minLength: 2
+          type: string
+          description: The legal name of the sub-entity.
+        trading_name:
+          title: Trading name
+          maxLength: 300
+          minLength: 2
+          type: string
+          description: The trading name of the sub-entity, also known as the 'Doing Business As' name.
+        additional_trading_names:
+          title: Additional trading names
+          type: array
+          items:
+            title: Trading name
+            maxLength: 300
+            minLength: 2
+            type: string
+            description: An additional trading name of the sub-entity.
+          description: The collection of additional trading names for the sub-entity.
+        registered_address:
+          title: Registered Address
+          required:
+          - address_line1
+          - city
+          - zip
+          - country
+          type: object
+          properties:
+            address_line1:
+              title: Address line 1
+              maxLength: 300
+              minLength: 1
+              pattern: \S
+              type: string
+              description: The first line of the address.
+            address_line2:
+              title: Address line 2
+              maxLength: 300
+              type:
+              - string
+              - 'null'
+              description: The second line of the address.
+            city:
+              title: City
+              maxLength: 300
+              minLength: 2
+              type: string
+              description: The address city.
+            state:
+              title: State
+              maxLength: 300
+              minLength: 1
+              pattern: \S
+              type: string
+              description: The address state. Required for addresses in the US and France, and optional elsewhere. For US addresses, provide the two-letter ISO 3166-2 code. For French addresses, provide the department the address is in.
+            zip:
+              title: Postal code
+              maxLength: 16
+              minLength: 0
+              pattern: ^[a-zA-Z0-9-\s]*$
+              type:
+              - string
+              - 'null'
+              description: The address ZIP code or postal code. Required, but can be `null` for countries that do not use postal codes.
+            country:
+              title: Country
+              maxLength: 2
+              minLength: 2
+              pattern: '[a-zA-Z]{2}'
+              type: string
+              description: 'The two-letter ISO 3166-1 alpha-2 country code. Returned by the `GET` request, and required when you submit an address, but you cannot change the sub-entity''s country.
+
+
+                For more information, see <a href="https://www.checkout.com/docs/developer-resources/codes/country-codes" target="_blank">Country codes</a>.'
+              format: iso-3166-1-alpha-2
+          additionalProperties: false
+          description: The registered address of the company.
+        principal_address:
+          title: Principal Address
+          required:
+          - address_line1
+          - city
+          - zip
+          - country
+          type: object
+          properties:
+            address_line1:
+              title: Address line 1
+              maxLength: 300
+              minLength: 1
+              pattern: \S
+              type: string
+              description: The first line of the address.
+            address_line2:
+              title: Address line 2
+              maxLength: 300
+              type:
+              - string
+              - 'null'
+              description: The second line of the address.
+            city:
+              title: City
+              maxLength: 300
+              minLength: 2
+              type: string
+              description: The address city.
+            state:
+              title: State
+              maxLength: 300
+              minLength: 1
+              pattern: \S
+              type: string
+              description: The address state. Required for addresses in the US and France, and optional elsewhere. For US addresses, provide the two-letter ISO 3166-2 code. For French addresses, provide the department the address is in.
+            zip:
+              title: Postal code
+              maxLength: 16
+              minLength: 0
+              pattern: ^[a-zA-Z0-9-\s]*$
+              type:
+              - string
+              - 'null'
+              description: The address ZIP code or postal code. Required, but can be `null` for countries that do not use postal codes.
+            country:
+              title: Country
+              maxLength: 2
+              minLength: 2
+              pattern: '[a-zA-Z]{2}'
+              type: string
+              description: 'The two-letter ISO 3166-1 alpha-2 country code. Returned by the `GET` request, and required when you submit an address, but you cannot change the sub-entity''s country.
+
+
+                For more information, see <a href="https://www.checkout.com/docs/developer-resources/codes/country-codes" target="_blank">Country codes</a>.'
+              format: iso-3166-1-alpha-2
+          additionalProperties: false
+          description: The primary location of the company where business is performed.
+        documents:
+          title: Documents
+          type: object
+          properties:
+            company_verification:
+              title: Company Verification
+              required:
+              - type
+              - front
+              type: object
+              properties:
+                type:
+                  title: Document type
+                  enum:
+                  - incorporation_document
+                  type: string
+                  description: The type of document used for company verification.
+                front:
+                  title: Front
+                  maxLength: 31
+                  minLength: 31
+                  pattern: ^file_[a-z2-7]{26}$
+                  type: string
+                  description: The ID of the front side of the document.
+                  example: file_wxglze3wwywujg4nna5fb7ldli
+              description: 'A document certified by a power of attorney within the last three months.
+
+
+                Required when you change `legal_name`, `trading_name`, or `additional_trading_names`. If you change any of those fields without providing this document, the request fails with a `422` error that names the missing document.'
+            proof_of_principal_address:
+              title: Principal Address Verification
+              required:
+              - type
+              - front
+              type: object
+              properties:
+                type:
+                  title: Document type
+                  enum:
+                  - proof_of_address
+                  type: string
+                  description: The type of document used for principal address verification.
+                front:
+                  title: Front
+                  maxLength: 31
+                  minLength: 31
+                  pattern: ^file_[a-z2-7]{26}$
+                  type: string
+                  description: The ID of the front side of the document.
+                  example: file_wxglze3wwywujg4nna5fb7ldli
+              description: 'Proof of the principal place of business.
+
+
+                Required when you change `principal_address`. The registered office and the principal place of business are different, so this document does not cover a change to `registered_address`.'
+            proof_of_registered_address:
+              title: Registered Address Verification
+              required:
+              - type
+              - front
+              type: object
+              properties:
+                type:
+                  title: Document type
+                  enum:
+                  - proof_of_address
+                  type: string
+                  description: The type of document used for registered address verification.
+                front:
+                  title: Front
+                  maxLength: 31
+                  minLength: 31
+                  pattern: ^file_[a-z2-7]{26}$
+                  type: string
+                  description: The ID of the front side of the document.
+                  example: file_wxglze3wwywujg4nna5fb7ldli
+              description: 'Proof of the registered address of the company.
+
+
+                Required when you change `registered_address`. If you change both addresses, provide this document and `proof_of_principal_address`.'
+          additionalProperties: false
+          description: 'Supporting documents for the change you submit. Each document is required only when you change the fields it supports, and is not requested otherwise. A document already on file satisfies the requirement, so you do not need to upload a new one.
+
+
+            Documents are not returned for `active` business details. For `pending` business details, the documents submitted with the change are returned.'
+      additionalProperties: false
+      description: 'The mutable business details of a SaaS seller sub-entity that is a registered company.
+
+
+        You can only change the fields below through this endpoint. `business_type`, `business_registration_number`, `date_of_incorporation`, `is_registered_company`, and `regulatory_license_expiration` cannot be changed after onboarding, so they are not part of this resource. If you send them, the request fails.'
+      example:
+        legal_name: The Online Retailer
+        trading_name: Online Retail Co
+        registered_address:
+          address_line1: 444 Test Avenue
+          city: Anytown
+          zip: 67890-1234
+          country: US
+          state: FL
+        principal_address:
+          address_line1: 123 Anywhere St.
+          city: Anytown
+          zip: 12345-6789
+          country: US
+          address_line2: Apt. 456
+          state: AL
+        status: active
+        additional_trading_names:
+        - Online Retail
+    BusinessDetailsSoleTrader:
+      title: Sole trader
+      required:
+      - trading_name
+      - principal_address
+      type: object
+      properties:
+        status:
+          title: Status
+          enum:
+          - active
+          - pending
+          type: string
+          description: 'The status of the business details. This describes the data in this response, not the sub-entity''s own status. A suspended sub-entity can still have `active` business details.
+
+
+            `active` means the values are live. `pending` means a change has been submitted and is still under review, so the values shown are the ones you submitted, not the ones currently in effect.
+
+
+            Read-only on input. You can send a response body back unchanged in a `PUT` request, and this field is ignored.'
+          readOnly: true
+        trading_name:
+          title: Trading name
+          maxLength: 300
+          minLength: 2
+          type: string
+          description: The trading name of the sub-entity, also known as the 'Doing Business As' name.
+        additional_trading_names:
+          title: Additional trading names
+          type: array
+          items:
+            title: Trading name
+            maxLength: 300
+            minLength: 2
+            type: string
+            description: An additional trading name of the sub-entity.
+          description: The collection of additional trading names for the sub-entity.
+        principal_address:
+          title: Principal Address
+          required:
+          - address_line1
+          - city
+          - zip
+          - country
+          type: object
+          properties:
+            address_line1:
+              title: Address line 1
+              maxLength: 300
+              minLength: 1
+              pattern: \S
+              type: string
+              description: The first line of the address.
+            address_line2:
+              title: Address line 2
+              maxLength: 300
+              type:
+              - string
+              - 'null'
+              description: The second line of the address.
+            city:
+              title: City
+              maxLength: 300
+              minLength: 2
+              type: string
+              description: The address city.
+            state:
+              title: State
+              maxLength: 300
+              minLength: 1
+              pattern: \S
+              type: string
+              description: The address state. Required for addresses in the US and France, and optional elsewhere. For US addresses, provide the two-letter ISO 3166-2 code. For French addresses, provide the department the address is in.
+            zip:
+              title: Postal code
+              maxLength: 16
+              minLength: 0
+              pattern: ^[a-zA-Z0-9-\s]*$
+              type:
+              - string
+              - 'null'
+              description: The address ZIP code or postal code. Required, but can be `null` for countries that do not use postal codes.
+            country:
+              title: Country
+              maxLength: 2
+              minLength: 2
+              pattern: '[a-zA-Z]{2}'
+              type: string
+              description: 'The two-letter ISO 3166-1 alpha-2 country code. Returned by the `GET` request, and required when you submit an address, but you cannot change the sub-entity''s country.
+
+
+                For more information, see <a href="https://www.checkout.com/docs/developer-resources/codes/country-codes" target="_blank">Country codes</a>.'
+              format: iso-3166-1-alpha-2
+          additionalProperties: false
+          description: The primary location where the sole trader performs business.
+        documents:
+          title: Documents
+          type: object
+          properties:
+            company_verification:
+              title: Company Verification
+              required:
+              - type
+              - front
+              type: object
+              properties:
+                type:
+                  title: Document type
+                  enum:
+                  - incorporation_document
+                  type: string
+                  description: The type of document used for company verification.
+                front:
+                  title: Front
+                  maxLength: 31
+                  minLength: 31
+                  pattern: ^file_[a-z2-7]{26}$
+                  type: string
+                  description: The ID of the front side of the document.
+                  example: file_wxglze3wwywujg4nna5fb7ldli
+              description: 'A document certified by a power of attorney within the last three months.
+
+
+                Required when you change `trading_name` or `additional_trading_names`. If you change either of those fields without providing this document, the request fails with a `422` error that names the missing document.'
+            proof_of_principal_address:
+              title: Principal Address Verification
+              required:
+              - type
+              - front
+              type: object
+              properties:
+                type:
+                  title: Document type
+                  enum:
+                  - proof_of_address
+                  type: string
+                  description: The type of document used for principal address verification.
+                front:
+                  title: Front
+                  maxLength: 31
+                  minLength: 31
+                  pattern: ^file_[a-z2-7]{26}$
+                  type: string
+                  description: The ID of the front side of the document.
+                  example: file_wxglze3wwywujg4nna5fb7ldli
+              description: 'Proof of the principal place of business.
+
+
+                Required when you change `principal_address`. If you change this field without providing this document, the request fails with a `422` error that names the missing document.'
+          additionalProperties: false
+          description: 'Supporting documents for the change you submit. Each document is required only when you change the fields it supports, and is not requested otherwise. A document already on file satisfies the requirement, so you do not need to upload a new one.
+
+
+            Documents are not returned for `active` business details. For `pending` business details, the documents submitted with the change are returned.'
+      additionalProperties: false
+      description: 'The mutable business details of a SaaS seller sub-entity that is a sole trader.
+
+
+        You can only change the fields below through this endpoint. A sole trader has no legal name and no registered address, so `legal_name` and `registered_address` are not part of this resource. `business_type`, `business_registration_number`, `date_of_incorporation`, `is_registered_company`, and `regulatory_license_expiration` cannot be changed after onboarding, so they are not part of this resource either. If you send any of these fields, the request fails.'
+      example:
+        trading_name: The Online Retailer
+        principal_address:
+          address_line1: 123 Anywhere St.
+          city: Anytown
+          zip: 12345-6789
+          country: US
+          address_line2: Apt. 456
+          state: AL
+        status: active
+        additional_trading_names:
+        - Online Retailer Co
+    ValidationError:
+      type: object
+      properties:
+        request_id:
+          type: string
+          example: 0HL80RJLS76I7
+        error_type:
+          type: string
+          example: request_invalid
+        error_codes:
+          type: array
+          items:
+            type: string
+            example: payment_source_required
+  headers:
+    Cko-Request-Id:
+      description: The unique identifier of the request
+      schema:
+        type: string
+    Cko-Version:
+      description: The version of the API
+      schema:
+        type: string
+  securitySchemes:
+    ApiPublicKey:
+      type: apiKey
+      description: "Public keys are for client-side authentication and supported only in JavaScript or native applications.\n  \n#### Format\n\n- Sandbox – `pk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\n- Production – `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`\n\nWhen specifying your public key, use the format `Bearer {{PublicApiKey}}`.\n"
+      name: Authorization
+      in: header
+      x-cko-type: publicKey
+    ApiSecretKey:
+      type: apiKey
+      description: 'You can pass your secret API key in the `Authorization` header of your requests for supported endpoints.
+
+
+        #### Format
+
+
+        - Sandbox – `sk_sbox_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        - Production – `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+
+        When specifying your secret key, use the format `Bearer {{SecretApiKey}}`.
+
+
+        ```
+
+        curl --location --request POST ''https://{prefix}.api.checkout.com/{{path}}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --header ''Accept: application/json'' \
+
+        --header ''Authorization: Bearer {{SecretApiKey}}'' \
+
+        --data-raw ''{
+
+        "amount": 10000,
+
+        "currency": "USD",
+
+        "reference": "Visa-USD-Test",
+
+        ...
+
+        }''
+
+        ```
+
+        '
+      name: Authorization
+      in: header
+      x-cko-type: secretKey
+    OAuth:
+      type: oauth2
+      description: "Your OAuth credentials include an access key ID and an access key secret. They correspond to an OAuth 2.0 client ID and a client secret respectively. \n\nTo exchange these credentials for an access token, call the [Request an access token](/tag/access/POST/connect/token) endpoint. Authenticate using basic authentication, with your access key ID as the username and your access key secret as the password.\n\n| Environment   |      Authorization server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\n```\ncurl --location 'https://{prefix}.access.checkout.com/connect/token' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'grant_type=client_credentials' \\\n--data-urlencode 'client_id=ack_...' \\\n--data-urlencode 'client_secret=...' \n```\n\nThe token server returns a Bearer `access_token` in JSON Web Token (JWT) format. Use this token in the `Authorization` header of your API requests.\n\n```\ncurl --location --request POST 'https://{prefix}.api.checkout.com/{{path}}' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Bearer {{AccessToken}}' \\\n--data-raw '{\n  \"amount\": 10000,\n  \"currency\": \"USD\",\n  \"reference\": \"Visa-USD-Test\",\n  ...\n}'\n```\n\nThe `expires_in` field in the response indicates the validity period of your access token in seconds. When your token expires, you must request a new one.\n\nDepending on the Environment against which you're making your requests against you'll need to request the token from a different Authorization Server.\n\n| Environment   |      Authorization Server                            |\n|---------------|------------------------------------------------------|\n| Sandbox       |  https://{prefix}.access.sandbox.checkout.com/connect/token   |\n| Production    |  https://{prefix}.access.checkout.com/connect/token           |\n\nYour base URL `{prefix}` is unique. To learn how to retrieve your unique base URLs for the sandbox and production environments, see [API endpoints](https://www.checkout.com/docs/developer-resources/api/api-endpoints).\n"
+      flows:
+        clientCredentials:
+          tokenUrl: string
+          scopes:
+            vault: Access to all Vault resources
+            vault:apme-enrollment: Manage Apple Pay Domain Enrollment
+            vault:customers: Manage customers
+            vault:card-metadata: Read card metadata
+            vault:instruments: Create instruments
+            vault:network-tokens: Manage network tokens
+            vault:tokenization: Tokenize payment instruments
+            vault:real-time-account-updater: Access to real-time account updater
+            gateway: Access to all Gateway resources
+            gateway:payment: Request payments
+            gateway:payment-details: Get payment details
+            gateway:payment-authorizations: Increment authorizations
+            gateway:payment-voids: Void payments
+            gateway:payment-captures: Capture payments
+            gateway:payment-contexts: Manage payment contexts
+            gateway:payment-cancellations: Manage payment cancellations
+            gateway:payment-refunds: Refund payments
+            fx: Foreign exchange services
+            payouts:bank-details: Get bank details
+            sessions:app: App-based authentication
+            sessions:browser: Browser-based authentication
+            disputes: Access to all Disputes resources
+            disputes:view: View disputes
+            disputes:provide-evidence: Provide dispute evidence
+            disputes:accept: Accept disputes
+            disputes:scheme-files: Read dispute scheme files
+            accounts: Manage sub-entities
+            flow: Access to all Flow resources
+            flow:workflows: Manage workflows
+            flow:events: Retrieve events
+            flow:reflow: Manage workflows
+            files: Access to all Files resources
+            files:retrieve: Retrieve files
+            files:upload: Upload files
+            files:download: Download files
+            forward: Access to Forward api
+            forward:secrets: Manage secrets in Forward api
+            balances: Access to all Balances resources
+            balances:view: View balances
+            balances:top-up-instructions: Get top-up instructions
+            transfers: Access to all Transfers resources
+            transfers:view: View transfers
+            transfers:create: Create transfers
+            middleware: Access to all Middleware resources
+            middleware:merchants-secret: Allows merchant identity and Middleware token exchange from a secure execution environment
+            middleware:merchants-public: Allows merchant identity and Middleware token exchange from an insecure execution environment
+            payment-sessions: Access to all Payment Sessions resources
+            payments:search: Search payments
+            reports: Access to all Reports resources
+            reports:view: View reports
+            financial-actions: Access to all Financial actions resources
+            financial-actions:view: View financial actions
+            card-management: Access to all Card management resources
+            issuing:card-management-read: Gives access to card management endpoints with GET operations
+            issuing:card-management-write: Gives access to card management endpoints with POST/ PUT / DELETE operations
+            issuing:controls-read: Gives access to card control endpoints with GET operations
+            issuing:controls-write: Gives access to card control endpoints with POST/ PUT / DELETE operations
+            transactions: Access to all transactions resources
+            issuing:transactions-read: Gives access to get and search transactions
+            issuing:transactions-write: Gives access to simulate transactions for testing purposes
+            issuing-disputes: Access to Issuing disputes resources
+            issuing:disputes-read: Gives access to get disputes
+            issuing:disputes-write: Gives access to create and submit Issuing disputes
+            identity-verification: Access to all Identities endpoints
+            Payment Context: Read payment context
+            agentic:inventory: Manage agentic commerce inventory and reservations
+    SessionSecret:
+      type: apiKey
+      description: 'A base64 encoded value prefixed with `sek_` that gives access to client-side operations for a single authentication within the Sessions API. This value is returned as the `session_secret` when requesting a session.
+
+        '
+      name: Authorization
+      in: header
+x-tagGroups:
+- name: Set up
+  tags:
+  - Access
+- name: Handle payments and payouts
+  tags:
+  - Payments
+  - Flow
+  - Payment Setups
+  - Payment Links
+  - Hosted Payments Page
+  - Forex
+  - Apple Pay
+  - Bacs Direct Debit
+  - Google Pay
+  - Transfers
+  - Balances
+- name: Payment Context
+  tags:
+  - Payment Context
+- name: Payment Methods
+  tags:
+  - Payment Methods
+- name: Store and forward payment credentials
+  tags:
+  - Tokens
+  - Instruments
+  - Customers
+  - Forward
+- name: Authentication
+  tags:
+  - Standalone
+- name: Risk management
+  tags:
+  - Disputes
+- name: Notifications
+  tags:
+  - Workflows
+- name: Platforms
+  tags:
+  - Platforms
+  - Business details
+  - Payment instruments
+  - Payout schedules
+  - Reserve rules
+  - Onboarding Simulator
+- name: Card issuing
+  tags:
+  - Cardholders
+  - Cards
+  - Controls
+  - Control profiles
+  - Control groups
+  - Cardholder access tokens
+  - Transactions
+  - Issuing disputes
+  - Card testing
+- name: Identities
+  tags:
+  - Applicants
+  - Identity Verification
+  - AML Screening
+  - Face Authentication
+  - ID Document Verification
+  - Address Document Verification
+- name: Reporting
+  tags:
+  - Reports
+  - Financial actions
+- name: Metadata
+  tags:
+  - Card metadata
+- name: Network Tokens
+  tags:
+  - Network Tokens
+- name: Standalone Account Updater
+  tags:
+  - Standalone Account Updater
+- name: Compliance requests
+  tags:
+  - Compliance requests
+- name: Agentic Commerce
+  tags:
+  - Agentic Commerce Protocol
+  - Inventory
