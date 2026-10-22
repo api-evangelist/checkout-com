@@ -30,6 +30,31 @@ edges:
   - remote-domain
   detected_by: sweep-agent-tools.py
   first_seen: '2026-10-14'
+- partner_name: Shopware Store
+  partner: null
+  partner_match: null
+  type: marketplace
+  marketplace: shopware-store
+  channel: partner-built
+  relationship: platform-app
+  direction: third-party
+  evidence: https://store.shopware.com/en/extension-partners/checkout-com
+  category: Shopware Store extension partner
+  publisher_name: checkout.com
+  publisher_country: United Kingdom
+  partner_tier:
+  - Extension Partner
+  matched_domain: checkout.com
+  matched_by: domain
+  identity_source: the partner's own Shopware Store profile links (domain, name-checked)
+  partner_null_note: 'there is no all/shopware repo (Shopware is a harvest candidate): the platform side cannot
+    be written, so the publisher side names the store with partner null'
+  signal_note: Shopware Store extension partner (listing alone = participation); Partner Status tier in partner_tier;
+    listing count is context, never counted
+  detected_by: sweep-ecommerce-extension-marketplaces.py
+  detected: '2026-10-22'
+  example_listing: https://store.shopware.com/en/cko3953495735537f/checkout.com-unified-payments-api.html
+  listing_count_prefix: 2
 - partner_name: Salesforce Commerce Cloud (own)
   partner: salesforce-commerce-cloud
   partner_match: mirror
@@ -47,10 +72,32 @@ edges:
   detected: '2026-10-20'
   detected_by: mirror-platform-listings.py
   category: eCommerce, paymentsProcessing
+- partner_name: Adobe Commerce (own)
+  partner: adobe-commerce
+  partner_match: mirror
+  mirror_match: domain
+  type: marketplace
+  relationship: platform-app
+  direction: third-party
+  channel: partner-built
+  marketplace: own
+  evidence: https://commercemarketplace.adobe.com/checkoutcom-magento2.html
+  mirror_of: adobe-commerce/integrations/adobe-commerce-integration-edges.yml
+  apps:
+  - Checkout.com Unified Payments API
+  listing_count: 1
+  detected: '2026-10-22'
+  detected_by: mirror-platform-listings.py
+  category: Adobe Commerce Marketplace extension
 generated: '2026-10-14'
 method: searched
 checked:
 - https://registry.modelcontextprotocol.io/v0/servers
 - salesforce-commerce-cloud/integrations/salesforce-commerce-cloud-integration-edges.yml
+- https://commercemarketplace.adobe.com/partner/
+- https://commercemarketplace.adobe.com/sitemap.xml
+- https://store.shopware.com/en/extension-partners/
+- https://store.shopware.com/en/sitemap.xml
+- adobe-commerce/integrations/adobe-commerce-integration-edges.yml
 source:
 - salesforce-commerce-cloud/integrations/salesforce-commerce-cloud-integration-edges.yml
