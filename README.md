@@ -1,4 +1,4 @@
-# Checkout.com (checkout-com)
+# Checkout.com
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -66,251 +66,157 @@
 
 Checkout.com is a global payment processor offering card acquiring, alternative payments, fraud, and connected accounts via a single API. Direct integrations with Visa, Mastercard, and APMs.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/checkout-com/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/checkout-com/refs/heads/main/apis.yml)
+**Areas:** Fintech · Payments · Cards · Acquiring · Cross-Border · Agentic Commerce · Payment Processing
 
-## Tags
+## Checkout.com on APIs.io
 
-- Fintech
-- Payments
-- Cards
-- Acquiring
-- Cross-Border
+Everything profiled for Checkout.com is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/checkout-com/](https://apis.io/providers/checkout-com/)** — or go straight to one of the APIs or properties below.
 
-## Timestamps
+### APIs (17)
 
-- **Created:** 2026-05-08
-- **Modified:** 2026-05-08
+- [Checkout.com Payments API](https://apis.io/apis/checkout-com/checkoutcom-payments-api/) — Process card and alternative payment methods with full lifecycle support including authorization, capture, void, refund.
+- [Checkout.com Payouts API](https://apis.io/apis/checkout-com/checkoutcom-payouts-api/) — Send payouts to cards, bank accounts and wallets.
+- [Checkout.com Payment Sessions & Flow API](https://apis.io/apis/checkout-com/checkoutcom-payment-sessions-flow-api/) — Hosted Flow component and payment sessions for SCA-ready payment workflows.
+- [Checkout.com Payment Links & Hosted Payments API](https://apis.io/apis/checkout-com/checkoutcom-payment-links-hosted-payments-api/) — Generate shareable payment links and hosted payment pages.
+- [Checkout.com Issuing API](https://apis.io/apis/checkout-com/checkoutcom-issuing-api/) — Issue physical and virtual cards with spending controls.
+- [Checkout.com Tokenization & Instruments API](https://apis.io/apis/checkout-com/checkoutcom-tokenization-instruments-api/) — Tokenize and store payment credentials as instruments.
+- [Checkout.com Disputes & Risk API](https://apis.io/apis/checkout-com/checkoutcom-disputes-risk-api/) — Manage chargebacks, disputes, AML screening and identity verification.
+- [Checkout.com Forex API](https://apis.io/apis/checkout-com/checkoutcom-forex-api/) — Foreign exchange rate services for multi-currency processing.
+- [Checkout.com Apple Pay & Google Pay API](https://apis.io/apis/checkout-com/checkoutcom-apple-pay-google-pay-api/) — Provision and process payments through Apple Pay and Google Pay.
+- [Checkout.com Network Tokens API](https://apis.io/apis/checkout-com/checkoutcom-network-tokens-api/) — Provision and manage network tokens for higher authorization rates.
+- [Checkout.com Transfers & Balances API](https://apis.io/apis/checkout-com/checkoutcom-transfers-balances-api/) — Move funds between balances and entities on the platform.
+- [Checkout.com Reporting & Financial Actions API](https://apis.io/apis/checkout-com/checkoutcom-reporting-financial-actions-api/) — Transaction reporting, reconciliation, and financial action exports.
+- [Checkout.com Customers API](https://apis.io/apis/checkout-com/checkout-com-customers-api/) — The Customers API from Checkout.com — 2 operation(s) for customers.
+- [Checkout.com Instruments API](https://apis.io/apis/checkout-com/checkout-com-instruments-api/) — The Instruments API from Checkout.com — 2 operation(s) for instruments.
+- [Checkout.com Payments API](https://apis.io/apis/checkout-com/checkout-com-payments-api/) — The Payments API from Checkout.com — 5 operation(s) for payments.
+- [Checkout.com Tokens API](https://apis.io/apis/checkout-com/checkout-com-tokens-api/) — The Tokens API from Checkout.com — 2 operation(s) for tokens.
+- [Checkout.com Workflows API](https://apis.io/apis/checkout-com/checkout-com-workflows-api/) — The Workflows API from Checkout.com — 2 operation(s) for workflows.
 
-## APIs
+### Published properties
 
-### Checkout.com Payments API
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-Process card and alternative payment methods with full lifecycle support including authorization, capture, void, refund.
+#### GraphQL (1)
 
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
+GraphQL schemas.
 
-#### Tags
+- [Moved to /providers/checkout-com/](https://apis.io/graphqls/checkout-com/checkout-com-graphql/)
 
-- Payments
-- Cards
+#### MCP servers (1)
 
-#### Properties
+Model Context Protocol servers that expose the API to agents.
 
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+- [checkout-com](https://apis.io/servers/checkout-com/checkout-com/)
 
-### Checkout.com Payouts API
+#### Agentic access (1)
 
-Send payouts to cards, bank accounts and wallets.
+Which operations an agent can call, which act, and which need a human in the loop.
 
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
+- [Checkout Com Agentic Access](https://apis.io/agentic-access/checkout-com/checkout-com-agentic-access/)
 
-#### Tags
+#### Collections (6)
 
-- Payouts
+Postman and Open Collection request collections.
 
-#### Properties
+- [Checkout.com API](https://apis.io/collections/checkout-com/open-checkout-com/)
+- [Checkout.com Customers API](https://apis.io/collections/checkout-com/open-checkout-com-customers-api/)
+- [Checkout.com Customers Instruments API](https://apis.io/collections/checkout-com/open-checkout-com-instruments-api/)
+- [Checkout.com Customers Payments API](https://apis.io/collections/checkout-com/open-checkout-com-payments-api/)
+- [Checkout.com Customers Tokens API](https://apis.io/collections/checkout-com/open-checkout-com-tokens-api/)
+- [Checkout.com Customers Workflows API](https://apis.io/collections/checkout-com/open-checkout-com-workflows-api/)
 
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+#### Security (4)
 
-### Checkout.com Payment Sessions & Flow API
+Authentication, trust centre, and vulnerability disclosure.
 
-Hosted Flow component and payment sessions for SCA-ready payment workflows.
+- [Checkout Com Authentication](https://apis.io/security/checkout-com/checkout-com-authentication/)
+- [Checkout Com Domain Security](https://apis.io/security/checkout-com/checkout-com-domain-security/)
+- [Checkout Com Trust Center](https://apis.io/security/checkout-com/checkout-com-trust-center/)
+- [Checkout Com Vulnerability Disclosure](https://apis.io/security/checkout-com/checkout-com-vulnerability-disclosure/)
 
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
+#### OAuth scopes (1)
 
-#### Tags
+The permissions the API asks for.
 
-- Sessions
-- Flow
-- SCA
+- [Checkout Com Scopes](https://apis.io/scopes/checkout-com/checkout-com-scopes/)
 
-#### Properties
+#### Plans and pricing (1)
 
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+Published plans, tiers and prices.
 
-### Checkout.com Payment Links & Hosted Payments API
+- [Checkout Com Plans Pricing](https://apis.io/plans/checkout-com/checkout-com-plans-pricing/)
 
-Generate shareable payment links and hosted payment pages.
+#### Rate limits (1)
 
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
+Published request limits.
 
-#### Tags
+- [Checkout Com Rate Limits](https://apis.io/rate-limits/checkout-com/checkout-com-rate-limits/)
 
-- Payment Links
-- Hosted
+#### FinOps (1)
 
-#### Properties
+What the API costs to run, by operation.
 
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+- [Checkout Com Finops](https://apis.io/finops/checkout-com/checkout-com-finops/)
 
-### Checkout.com Issuing API
+## Where to find this API
 
-Issue physical and virtual cards with spending controls.
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
-
-#### Tags
-
-- Issuing
-- Cards
-
-#### Properties
-
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Checkout.com Tokenization & Instruments API
-
-Tokenize and store payment credentials as instruments.
-
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
-
-#### Tags
-
-- Tokenization
-- Vault
-
-#### Properties
-
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Checkout.com Disputes & Risk API
-
-Manage chargebacks, disputes, AML screening and identity verification.
-
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
-
-#### Tags
-
-- Disputes
-- Fraud
-- Risk
-
-#### Properties
-
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Checkout.com Forex API
-
-Foreign exchange rate services for multi-currency processing.
-
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
-
-#### Tags
-
-- FX
-- Forex
-
-#### Properties
-
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Checkout.com Apple Pay & Google Pay API
-
-Provision and process payments through Apple Pay and Google Pay.
-
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
-
-#### Tags
-
-- Wallets
-- Apple Pay
-- Google Pay
-
-#### Properties
-
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Checkout.com Network Tokens API
-
-Provision and manage network tokens for higher authorization rates.
-
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
-
-#### Tags
-
-- Network Tokens
-
-#### Properties
-
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Checkout.com Transfers & Balances API
-
-Move funds between balances and entities on the platform.
-
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
-
-#### Tags
-
-- Transfers
-- Balances
-
-#### Properties
-
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Checkout.com Reporting & Financial Actions API
-
-Transaction reporting, reconciliation, and financial action exports.
-
-- **Human URL:** [https://api-reference.checkout.com/](https://api-reference.checkout.com/)
-- **Base URL:** `https://api.checkout.com`
-
-#### Tags
-
-- Reporting
-- Reconciliation
-
-#### Properties
-
-- [Documentation](https://api-reference.checkout.com/)
-- [Postman Collection](collections/checkout-com.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/checkout-com.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-## Common Properties
-
-- [GitHub Organization](https://github.com/checkout)
-- [LinkedIn](https://www.linkedin.com/company/checkout)
 - [Website](https://www.checkout.com/)
-- [Plans](plans/checkout-com-plans-pricing.yml)
-- [Rate Limits](rate-limits/checkout-com-rate-limits.yml)
-- [Fin Ops](finops/checkout-com-finops.yml)
-- [Integrations](https://www.checkout.com/partners)
+- [Blog](https://www.checkout.com/blog/rss.xml)
+- [GitHub](https://github.com/checkout)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
-**Email:** kin@apievangelist.com
+**Kin Score 18.6** — emerging · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 60.0 |
+| Contract quality | 2.1 |
+| Contract governance | 0.0 |
+| Operational transparency | 18.4 |
+| Developer ergonomics | 31.0 |
+| Access clarity | 13.2 |
+
+**Agent readiness 32.6** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | verified |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | derived (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 29.5** — Payments
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/checkout-com/](https://apis.io/providers/checkout-com/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Checkout.com: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/checkout-com/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
